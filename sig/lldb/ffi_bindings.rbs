@@ -1,0 +1,312 @@
+module LLDB
+  module FFIBindings
+    extend FFI::Library
+
+    def self.library_name: () -> String
+    def self.library_path: () -> String
+
+    # Initialization
+    def self.lldb_initialize: () -> void
+    def self.lldb_terminate: () -> void
+
+    # SBDebugger
+    def self.lldb_debugger_create: () -> FFI::Pointer
+    def self.lldb_debugger_destroy: (FFI::Pointer) -> void
+    def self.lldb_debugger_is_valid: (FFI::Pointer) -> Integer
+    def self.lldb_debugger_create_target: (FFI::Pointer, String?, String?, String?, Integer, FFI::Pointer) -> FFI::Pointer
+    def self.lldb_debugger_create_target_simple: (FFI::Pointer, String) -> FFI::Pointer
+    def self.lldb_debugger_get_num_targets: (FFI::Pointer) -> Integer
+    def self.lldb_debugger_get_target_at_index: (FFI::Pointer, Integer) -> FFI::Pointer
+    def self.lldb_debugger_get_selected_target: (FFI::Pointer) -> FFI::Pointer
+    def self.lldb_debugger_set_selected_target: (FFI::Pointer, FFI::Pointer) -> void
+    def self.lldb_debugger_delete_target: (FFI::Pointer, FFI::Pointer) -> Integer
+    def self.lldb_debugger_find_target_with_process_id: (FFI::Pointer, Integer) -> FFI::Pointer
+    def self.lldb_debugger_set_async: (FFI::Pointer, Integer) -> void
+    def self.lldb_debugger_get_async: (FFI::Pointer) -> Integer
+    def self.lldb_debugger_get_version_string: () -> String?
+    def self.lldb_debugger_get_command_interpreter: (FFI::Pointer) -> FFI::Pointer
+    def self.lldb_debugger_handle_command: (FFI::Pointer, String) -> void
+
+    # SBTarget
+    def self.lldb_target_destroy: (FFI::Pointer) -> void
+    def self.lldb_target_is_valid: (FFI::Pointer) -> Integer
+    def self.lldb_target_launch_simple: (FFI::Pointer, FFI::Pointer?, FFI::Pointer?, String?) -> FFI::Pointer
+    def self.lldb_target_launch: (FFI::Pointer, FFI::Pointer, FFI::Pointer) -> FFI::Pointer
+    def self.lldb_target_attach_to_process_with_id: (FFI::Pointer, Integer, FFI::Pointer) -> FFI::Pointer
+    def self.lldb_target_attach_to_process_with_name: (FFI::Pointer, String, Integer, FFI::Pointer) -> FFI::Pointer
+    def self.lldb_target_breakpoint_create_by_name: (FFI::Pointer, String, String?) -> FFI::Pointer
+    def self.lldb_target_breakpoint_create_by_location: (FFI::Pointer, String, Integer) -> FFI::Pointer
+    def self.lldb_target_breakpoint_create_by_address: (FFI::Pointer, Integer) -> FFI::Pointer
+    def self.lldb_target_breakpoint_create_by_regex: (FFI::Pointer, String, String?) -> FFI::Pointer
+    def self.lldb_target_breakpoint_create_by_source_regex: (FFI::Pointer, String, String?) -> FFI::Pointer
+    def self.lldb_target_delete_breakpoint: (FFI::Pointer, Integer) -> Integer
+    def self.lldb_target_delete_all_breakpoints: (FFI::Pointer) -> Integer
+    def self.lldb_target_enable_all_breakpoints: (FFI::Pointer) -> Integer
+    def self.lldb_target_disable_all_breakpoints: (FFI::Pointer) -> Integer
+    def self.lldb_target_find_breakpoint_by_id: (FFI::Pointer, Integer) -> FFI::Pointer
+    def self.lldb_target_get_num_breakpoints: (FFI::Pointer) -> Integer
+    def self.lldb_target_get_breakpoint_at_index: (FFI::Pointer, Integer) -> FFI::Pointer
+    def self.lldb_target_get_process: (FFI::Pointer) -> FFI::Pointer
+    def self.lldb_target_get_executable_path: (FFI::Pointer) -> String?
+    def self.lldb_target_get_num_modules: (FFI::Pointer) -> Integer
+    def self.lldb_target_get_module_at_index: (FFI::Pointer, Integer) -> FFI::Pointer
+    def self.lldb_target_evaluate_expression: (FFI::Pointer, String) -> FFI::Pointer
+    def self.lldb_target_read_memory: (FFI::Pointer, Integer, FFI::Pointer, Integer, FFI::Pointer) -> Integer
+    def self.lldb_target_get_address_byte_size: (FFI::Pointer) -> Integer
+    def self.lldb_target_get_triple: (FFI::Pointer) -> String?
+    def self.lldb_target_watch_address: (FFI::Pointer, Integer, Integer, Integer, Integer, FFI::Pointer) -> FFI::Pointer
+    def self.lldb_target_delete_watchpoint: (FFI::Pointer, Integer) -> Integer
+    def self.lldb_target_delete_all_watchpoints: (FFI::Pointer) -> Integer
+    def self.lldb_target_find_watchpoint_by_id: (FFI::Pointer, Integer) -> FFI::Pointer
+    def self.lldb_target_get_num_watchpoints: (FFI::Pointer) -> Integer
+    def self.lldb_target_get_watchpoint_at_index: (FFI::Pointer, Integer) -> FFI::Pointer
+
+    # SBLaunchInfo
+    def self.lldb_launch_info_create: (FFI::Pointer?) -> FFI::Pointer
+    def self.lldb_launch_info_destroy: (FFI::Pointer) -> void
+    def self.lldb_launch_info_set_working_directory: (FFI::Pointer, String) -> void
+    def self.lldb_launch_info_set_environment_entries: (FFI::Pointer, FFI::Pointer?, Integer) -> void
+    def self.lldb_launch_info_get_launch_flags: (FFI::Pointer) -> Integer
+    def self.lldb_launch_info_set_launch_flags: (FFI::Pointer, Integer) -> void
+
+    # SBProcess
+    def self.lldb_process_destroy: (FFI::Pointer) -> void
+    def self.lldb_process_is_valid: (FFI::Pointer) -> Integer
+    def self.lldb_process_continue: (FFI::Pointer) -> Integer
+    def self.lldb_process_stop: (FFI::Pointer) -> Integer
+    def self.lldb_process_kill: (FFI::Pointer) -> Integer
+    def self.lldb_process_detach: (FFI::Pointer) -> Integer
+    def self.lldb_process_destroy_process: (FFI::Pointer) -> Integer
+    def self.lldb_process_signal: (FFI::Pointer, Integer) -> Integer
+    def self.lldb_process_get_state: (FFI::Pointer) -> Integer
+    def self.lldb_process_get_num_threads: (FFI::Pointer) -> Integer
+    def self.lldb_process_get_thread_at_index: (FFI::Pointer, Integer) -> FFI::Pointer
+    def self.lldb_process_get_thread_by_id: (FFI::Pointer, Integer) -> FFI::Pointer
+    def self.lldb_process_get_thread_by_index_id: (FFI::Pointer, Integer) -> FFI::Pointer
+    def self.lldb_process_get_selected_thread: (FFI::Pointer) -> FFI::Pointer
+    def self.lldb_process_set_selected_thread_by_id: (FFI::Pointer, Integer) -> Integer
+    def self.lldb_process_set_selected_thread_by_index_id: (FFI::Pointer, Integer) -> Integer
+    def self.lldb_process_get_process_id: (FFI::Pointer) -> Integer
+    def self.lldb_process_get_exit_status: (FFI::Pointer) -> Integer
+    def self.lldb_process_get_exit_description: (FFI::Pointer) -> String?
+    def self.lldb_process_read_memory: (FFI::Pointer, Integer, FFI::Pointer, Integer, FFI::Pointer) -> Integer
+    def self.lldb_process_write_memory: (FFI::Pointer, Integer, FFI::Pointer, Integer, FFI::Pointer) -> Integer
+    def self.lldb_process_allocate_memory: (FFI::Pointer, Integer, Integer, FFI::Pointer) -> Integer
+    def self.lldb_process_deallocate_memory: (FFI::Pointer, Integer) -> Integer
+    def self.lldb_process_read_cstring_from_memory: (FFI::Pointer, Integer, FFI::Pointer, Integer, FFI::Pointer) -> Integer
+    def self.lldb_process_get_stdout: (FFI::Pointer, FFI::Pointer, Integer) -> Integer
+    def self.lldb_process_get_stderr: (FFI::Pointer, FFI::Pointer, Integer) -> Integer
+    def self.lldb_process_put_stdin: (FFI::Pointer, String, Integer) -> Integer
+    def self.lldb_process_send_async_interrupt: (FFI::Pointer) -> Integer
+    def self.lldb_process_get_num_supported_hardware_watchpoints: (FFI::Pointer, FFI::Pointer) -> Integer
+    def self.lldb_process_get_unique_id: (FFI::Pointer) -> Integer
+
+    # SBThread
+    def self.lldb_thread_destroy: (FFI::Pointer) -> void
+    def self.lldb_thread_is_valid: (FFI::Pointer) -> Integer
+    def self.lldb_thread_step_over: (FFI::Pointer) -> Integer
+    def self.lldb_thread_step_into: (FFI::Pointer) -> Integer
+    def self.lldb_thread_step_out: (FFI::Pointer) -> Integer
+    def self.lldb_thread_step_instruction: (FFI::Pointer, Integer) -> Integer
+    def self.lldb_thread_run_to_address: (FFI::Pointer, Integer) -> Integer
+    def self.lldb_thread_get_num_frames: (FFI::Pointer) -> Integer
+    def self.lldb_thread_get_frame_at_index: (FFI::Pointer, Integer) -> FFI::Pointer
+    def self.lldb_thread_get_selected_frame: (FFI::Pointer) -> FFI::Pointer
+    def self.lldb_thread_set_selected_frame: (FFI::Pointer, Integer) -> Integer
+    def self.lldb_thread_get_thread_id: (FFI::Pointer) -> Integer
+    def self.lldb_thread_get_index_id: (FFI::Pointer) -> Integer
+    def self.lldb_thread_get_name: (FFI::Pointer) -> String?
+    def self.lldb_thread_get_queue_name: (FFI::Pointer) -> String?
+    def self.lldb_thread_get_stop_reason: (FFI::Pointer) -> Integer
+    def self.lldb_thread_get_stop_description: (FFI::Pointer, Integer) -> String?
+    def self.lldb_thread_get_stop_reason_data_count: (FFI::Pointer) -> Integer
+    def self.lldb_thread_get_stop_reason_data_at_index: (FFI::Pointer, Integer) -> Integer
+    def self.lldb_thread_is_stopped: (FFI::Pointer) -> Integer
+    def self.lldb_thread_is_suspended: (FFI::Pointer) -> Integer
+    def self.lldb_thread_suspend: (FFI::Pointer) -> Integer
+    def self.lldb_thread_resume: (FFI::Pointer) -> Integer
+    def self.lldb_thread_get_process: (FFI::Pointer) -> FFI::Pointer
+
+    # SBFrame
+    def self.lldb_frame_destroy: (FFI::Pointer) -> void
+    def self.lldb_frame_is_valid: (FFI::Pointer) -> Integer
+    def self.lldb_frame_get_function_name: (FFI::Pointer) -> String?
+    def self.lldb_frame_get_display_function_name: (FFI::Pointer) -> String?
+    def self.lldb_frame_get_line: (FFI::Pointer) -> Integer
+    def self.lldb_frame_get_file_path: (FFI::Pointer) -> String?
+    def self.lldb_frame_get_column: (FFI::Pointer) -> Integer
+    def self.lldb_frame_get_pc: (FFI::Pointer) -> Integer
+    def self.lldb_frame_set_pc: (FFI::Pointer, Integer) -> Integer
+    def self.lldb_frame_get_sp: (FFI::Pointer) -> Integer
+    def self.lldb_frame_get_fp: (FFI::Pointer) -> Integer
+    def self.lldb_frame_find_variable: (FFI::Pointer, String) -> FFI::Pointer
+    def self.lldb_frame_evaluate_expression: (FFI::Pointer, String) -> FFI::Pointer
+    def self.lldb_frame_get_value_for_variable_path: (FFI::Pointer, String) -> FFI::Pointer
+    def self.lldb_frame_get_frame_id: (FFI::Pointer) -> Integer
+    def self.lldb_frame_get_thread: (FFI::Pointer) -> FFI::Pointer
+    def self.lldb_frame_get_symbol_context: (FFI::Pointer, Integer) -> FFI::Pointer
+    def self.lldb_frame_get_variables: (FFI::Pointer, Integer, Integer, Integer, Integer) -> FFI::Pointer
+    def self.lldb_frame_get_registers: (FFI::Pointer) -> FFI::Pointer
+    def self.lldb_frame_is_inlined: (FFI::Pointer) -> Integer
+    def self.lldb_frame_disassemble: (FFI::Pointer) -> String?
+    def self.lldb_frame_get_module: (FFI::Pointer) -> FFI::Pointer
+
+    # SBBreakpoint
+    def self.lldb_breakpoint_destroy: (FFI::Pointer) -> void
+    def self.lldb_breakpoint_is_valid: (FFI::Pointer) -> Integer
+    def self.lldb_breakpoint_get_id: (FFI::Pointer) -> Integer
+    def self.lldb_breakpoint_is_enabled: (FFI::Pointer) -> Integer
+    def self.lldb_breakpoint_set_enabled: (FFI::Pointer, Integer) -> void
+    def self.lldb_breakpoint_is_one_shot: (FFI::Pointer) -> Integer
+    def self.lldb_breakpoint_set_one_shot: (FFI::Pointer, Integer) -> void
+    def self.lldb_breakpoint_get_hit_count: (FFI::Pointer) -> Integer
+    def self.lldb_breakpoint_get_ignore_count: (FFI::Pointer) -> Integer
+    def self.lldb_breakpoint_set_ignore_count: (FFI::Pointer, Integer) -> void
+    def self.lldb_breakpoint_get_condition: (FFI::Pointer) -> String?
+    def self.lldb_breakpoint_set_condition: (FFI::Pointer, String?) -> void
+    def self.lldb_breakpoint_get_num_locations: (FFI::Pointer) -> Integer
+    def self.lldb_breakpoint_get_location_at_index: (FFI::Pointer, Integer) -> FFI::Pointer
+    def self.lldb_breakpoint_find_location_by_id: (FFI::Pointer, Integer) -> FFI::Pointer
+    def self.lldb_breakpoint_is_hardware: (FFI::Pointer) -> Integer
+    def self.lldb_breakpoint_get_auto_continue: (FFI::Pointer) -> Integer
+    def self.lldb_breakpoint_set_auto_continue: (FFI::Pointer, Integer) -> void
+    def self.lldb_breakpoint_get_thread_id: (FFI::Pointer) -> Integer
+    def self.lldb_breakpoint_set_thread_id: (FFI::Pointer, Integer) -> void
+    def self.lldb_breakpoint_get_thread_name: (FFI::Pointer) -> String?
+    def self.lldb_breakpoint_set_thread_name: (FFI::Pointer, String?) -> void
+    def self.lldb_breakpoint_get_thread_index: (FFI::Pointer) -> Integer
+    def self.lldb_breakpoint_set_thread_index: (FFI::Pointer, Integer) -> void
+
+    # SBBreakpointLocation
+    def self.lldb_breakpoint_location_destroy: (FFI::Pointer) -> void
+    def self.lldb_breakpoint_location_is_valid: (FFI::Pointer) -> Integer
+    def self.lldb_breakpoint_location_get_id: (FFI::Pointer) -> Integer
+    def self.lldb_breakpoint_location_get_load_address: (FFI::Pointer) -> Integer
+    def self.lldb_breakpoint_location_is_enabled: (FFI::Pointer) -> Integer
+    def self.lldb_breakpoint_location_set_enabled: (FFI::Pointer, Integer) -> void
+    def self.lldb_breakpoint_location_get_hit_count: (FFI::Pointer) -> Integer
+    def self.lldb_breakpoint_location_get_ignore_count: (FFI::Pointer) -> Integer
+    def self.lldb_breakpoint_location_set_ignore_count: (FFI::Pointer, Integer) -> void
+    def self.lldb_breakpoint_location_get_condition: (FFI::Pointer) -> String?
+    def self.lldb_breakpoint_location_set_condition: (FFI::Pointer, String?) -> void
+    def self.lldb_breakpoint_location_get_breakpoint: (FFI::Pointer) -> FFI::Pointer
+
+    # SBValue
+    def self.lldb_value_destroy: (FFI::Pointer) -> void
+    def self.lldb_value_is_valid: (FFI::Pointer) -> Integer
+    def self.lldb_value_get_name: (FFI::Pointer) -> String?
+    def self.lldb_value_get_value: (FFI::Pointer) -> String?
+    def self.lldb_value_get_summary: (FFI::Pointer) -> String?
+    def self.lldb_value_get_type_name: (FFI::Pointer) -> String?
+    def self.lldb_value_get_type: (FFI::Pointer) -> FFI::Pointer
+    def self.lldb_value_get_num_children: (FFI::Pointer) -> Integer
+    def self.lldb_value_get_child_at_index: (FFI::Pointer, Integer) -> FFI::Pointer
+    def self.lldb_value_get_child_member_with_name: (FFI::Pointer, String) -> FFI::Pointer
+    def self.lldb_value_get_value_as_signed: (FFI::Pointer) -> Integer
+    def self.lldb_value_get_value_as_unsigned: (FFI::Pointer) -> Integer
+    def self.lldb_value_get_byte_size: (FFI::Pointer) -> Integer
+    def self.lldb_value_might_have_children: (FFI::Pointer) -> Integer
+    def self.lldb_value_get_error: (FFI::Pointer, FFI::Pointer) -> Integer
+    def self.lldb_value_dereference: (FFI::Pointer) -> FFI::Pointer
+    def self.lldb_value_address_of: (FFI::Pointer) -> FFI::Pointer
+    def self.lldb_value_cast: (FFI::Pointer, FFI::Pointer) -> FFI::Pointer
+    def self.lldb_value_get_load_address: (FFI::Pointer) -> Integer
+    def self.lldb_value_get_value_type: (FFI::Pointer) -> Integer
+    def self.lldb_value_set_value_from_cstring: (FFI::Pointer, String, FFI::Pointer) -> Integer
+    def self.lldb_value_create_child_at_offset: (FFI::Pointer, String, FFI::Pointer, Integer) -> FFI::Pointer
+    def self.lldb_value_create_value_from_address: (FFI::Pointer, String, Integer, FFI::Pointer) -> FFI::Pointer
+    def self.lldb_value_create_value_from_expression: (FFI::Pointer, String, String) -> FFI::Pointer
+    def self.lldb_value_watch: (FFI::Pointer, Integer, Integer, Integer, FFI::Pointer) -> FFI::Pointer
+    def self.lldb_value_get_expression_path: (FFI::Pointer) -> String?
+    def self.lldb_value_is_pointer_type: (FFI::Pointer) -> Integer
+    def self.lldb_value_get_non_synthetic_value: (FFI::Pointer) -> FFI::Pointer
+
+    # SBValueList
+    def self.lldb_value_list_destroy: (FFI::Pointer) -> void
+    def self.lldb_value_list_is_valid: (FFI::Pointer) -> Integer
+    def self.lldb_value_list_get_size: (FFI::Pointer) -> Integer
+    def self.lldb_value_list_get_value_at_index: (FFI::Pointer, Integer) -> FFI::Pointer
+    def self.lldb_value_list_get_first_value_by_name: (FFI::Pointer, String) -> FFI::Pointer
+
+    # SBError
+    def self.lldb_error_create: () -> FFI::Pointer
+    def self.lldb_error_destroy: (FFI::Pointer) -> void
+    def self.lldb_error_success: (FFI::Pointer) -> Integer
+    def self.lldb_error_fail: (FFI::Pointer) -> Integer
+    def self.lldb_error_get_cstring: (FFI::Pointer) -> String?
+    def self.lldb_error_get_error: (FFI::Pointer) -> Integer
+    def self.lldb_error_clear: (FFI::Pointer) -> void
+    def self.lldb_error_set_error_string: (FFI::Pointer, String) -> void
+
+    # SBModule
+    def self.lldb_module_destroy: (FFI::Pointer) -> void
+    def self.lldb_module_is_valid: (FFI::Pointer) -> Integer
+    def self.lldb_module_get_file_path: (FFI::Pointer) -> String?
+    def self.lldb_module_get_platform_file_path: (FFI::Pointer) -> String?
+    def self.lldb_module_get_num_symbols: (FFI::Pointer) -> Integer
+
+    # SBSymbolContext
+    def self.lldb_symbol_context_destroy: (FFI::Pointer) -> void
+    def self.lldb_symbol_context_is_valid: (FFI::Pointer) -> Integer
+    def self.lldb_symbol_context_get_module: (FFI::Pointer) -> FFI::Pointer
+    def self.lldb_symbol_context_get_function_name: (FFI::Pointer) -> String?
+
+    # SBType
+    def self.lldb_type_destroy: (FFI::Pointer) -> void
+    def self.lldb_type_is_valid: (FFI::Pointer) -> Integer
+    def self.lldb_type_get_name: (FFI::Pointer) -> String?
+    def self.lldb_type_get_display_type_name: (FFI::Pointer) -> String?
+    def self.lldb_type_get_byte_size: (FFI::Pointer) -> Integer
+    def self.lldb_type_is_pointer_type: (FFI::Pointer) -> Integer
+    def self.lldb_type_is_reference_type: (FFI::Pointer) -> Integer
+    def self.lldb_type_is_array_type: (FFI::Pointer) -> Integer
+    def self.lldb_type_is_vector_type: (FFI::Pointer) -> Integer
+    def self.lldb_type_is_typedef_type: (FFI::Pointer) -> Integer
+    def self.lldb_type_is_function_type: (FFI::Pointer) -> Integer
+    def self.lldb_type_is_polymorphic_class: (FFI::Pointer) -> Integer
+    def self.lldb_type_get_pointer_type: (FFI::Pointer) -> FFI::Pointer
+    def self.lldb_type_get_pointee_type: (FFI::Pointer) -> FFI::Pointer
+    def self.lldb_type_get_reference_type: (FFI::Pointer) -> FFI::Pointer
+    def self.lldb_type_get_dereferenced_type: (FFI::Pointer) -> FFI::Pointer
+    def self.lldb_type_get_unqualified_type: (FFI::Pointer) -> FFI::Pointer
+    def self.lldb_type_get_canonical_type: (FFI::Pointer) -> FFI::Pointer
+    def self.lldb_type_get_array_element_type: (FFI::Pointer) -> FFI::Pointer
+    def self.lldb_type_get_array_size: (FFI::Pointer) -> Integer
+    def self.lldb_type_get_num_fields: (FFI::Pointer) -> Integer
+    def self.lldb_type_get_num_direct_base_classes: (FFI::Pointer) -> Integer
+    def self.lldb_type_get_num_virtual_base_classes: (FFI::Pointer) -> Integer
+    def self.lldb_type_get_basic_type: (FFI::Pointer) -> Integer
+
+    # SBWatchpoint
+    def self.lldb_watchpoint_destroy: (FFI::Pointer) -> void
+    def self.lldb_watchpoint_is_valid: (FFI::Pointer) -> Integer
+    def self.lldb_watchpoint_get_id: (FFI::Pointer) -> Integer
+    def self.lldb_watchpoint_is_enabled: (FFI::Pointer) -> Integer
+    def self.lldb_watchpoint_set_enabled: (FFI::Pointer, Integer) -> void
+    def self.lldb_watchpoint_get_hit_count: (FFI::Pointer) -> Integer
+    def self.lldb_watchpoint_get_ignore_count: (FFI::Pointer) -> Integer
+    def self.lldb_watchpoint_set_ignore_count: (FFI::Pointer, Integer) -> void
+    def self.lldb_watchpoint_get_condition: (FFI::Pointer) -> String?
+    def self.lldb_watchpoint_set_condition: (FFI::Pointer, String?) -> void
+    def self.lldb_watchpoint_get_watch_address: (FFI::Pointer) -> Integer
+    def self.lldb_watchpoint_get_watch_size: (FFI::Pointer) -> Integer
+    def self.lldb_watchpoint_is_watching_reads: (FFI::Pointer) -> Integer
+    def self.lldb_watchpoint_is_watching_writes: (FFI::Pointer) -> Integer
+
+    # SBCommandInterpreter
+    def self.lldb_command_interpreter_destroy: (FFI::Pointer) -> void
+    def self.lldb_command_interpreter_is_valid: (FFI::Pointer) -> Integer
+    def self.lldb_command_interpreter_handle_command: (FFI::Pointer, String, FFI::Pointer, Integer) -> Integer
+    def self.lldb_command_interpreter_command_exists: (FFI::Pointer, String) -> Integer
+    def self.lldb_command_interpreter_alias_exists: (FFI::Pointer, String) -> Integer
+
+    # SBCommandReturnObject
+    def self.lldb_command_return_object_create: () -> FFI::Pointer
+    def self.lldb_command_return_object_destroy: (FFI::Pointer) -> void
+    def self.lldb_command_return_object_is_valid: (FFI::Pointer) -> Integer
+    def self.lldb_command_return_object_get_output: (FFI::Pointer) -> String?
+    def self.lldb_command_return_object_get_error: (FFI::Pointer) -> String?
+    def self.lldb_command_return_object_succeeded: (FFI::Pointer) -> Integer
+    def self.lldb_command_return_object_clear: (FFI::Pointer) -> void
+  end
+end

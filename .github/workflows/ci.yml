@@ -1,0 +1,55 @@
+name: CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        ruby: ['3.1', '3.2', '3.3', '3.4']
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install LLDB (Ubuntu)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y lldb liblldb-dev
+          # Allow ptrace for debugging (required for LLDB tests)
+          echo 0 | sudo tee /proc/sys/kernel/yama/ptrace_scope
+          # Find and set up lldb-server path
+          LLDB_SERVER=$(find /usr/bin -name 'lldb-server*' | head -1)
+          if [ -n "$LLDB_SERVER" ]; then
+            echo "LLDB_DEBUGSERVER_PATH=$LLDB_SERVER" >> $GITHUB_ENV
+          fi
+      - name: Install LLDB (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          # Use Homebrew LLVM for proper development headers
+          brew install llvm
+          echo "$(brew --prefix llvm)/bin" >> $GITHUB_PATH
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ matrix.ruby }}
+          bundler-cache: true
+      - name: Compile C extension
+        run: bundle exec rake compile
+      - name: Run tests
+        run: bundle exec rspec
+        timeout-minutes: 10
+  typecheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.3'
+          bundler-cache: true
+      - name: Run steep check
+        run: bundle exec rake steep

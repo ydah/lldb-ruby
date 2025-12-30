@@ -1,0 +1,52 @@
+# Bundler
+/.bundle/
+/vendor/bundle
+
+# Gem build artifacts
+*.gem
+/pkg/
+
+# C extension build artifacts
+/ext/lldb/*.o
+/ext/lldb/*.so
+/ext/lldb/*.dylib
+/ext/lldb/*.dll
+/ext/lldb/Makefile
+/ext/lldb/mkmf.log
+/lib/lldb/*.so
+/lib/lldb/*.dylib
+/lib/lldb/*.dll
+/tmp/
+
+# Compiled test fixtures
+/spec/fixtures/simple
+/spec/fixtures/loop
+/examples/test_program
+
+# RBS generated files
+/sig/generated/
+/.rbs_collection/
+/.gem_rbs_collection/
+
+# RSpec
+/.rspec_status
+
+# Coverage
+/coverage/
+
+# Documentation
+/doc/
+/.yardoc/
+
+# IDE
+/.idea/
+/.vscode/
+*.swp
+*.swo
+*~
+
+# macOS
+.DS_Store
+
+# Gemfile.lock (for gems)
+Gemfile.lock
