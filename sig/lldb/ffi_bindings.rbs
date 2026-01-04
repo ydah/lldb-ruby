@@ -100,6 +100,17 @@ module LLDB
     def self.lldb_process_send_async_interrupt: (FFI::Pointer) -> Integer
     def self.lldb_process_get_num_supported_hardware_watchpoints: (FFI::Pointer, FFI::Pointer) -> Integer
     def self.lldb_process_get_unique_id: (FFI::Pointer) -> Integer
+    def self.lldb_process_get_memory_region_info: (FFI::Pointer, Integer, FFI::Pointer) -> FFI::Pointer
+
+    # SBMemoryRegionInfo
+    def self.lldb_memory_region_info_destroy: (FFI::Pointer) -> void
+    def self.lldb_memory_region_info_get_region_base: (FFI::Pointer) -> Integer
+    def self.lldb_memory_region_info_get_region_end: (FFI::Pointer) -> Integer
+    def self.lldb_memory_region_info_is_readable: (FFI::Pointer) -> Integer
+    def self.lldb_memory_region_info_is_writable: (FFI::Pointer) -> Integer
+    def self.lldb_memory_region_info_is_executable: (FFI::Pointer) -> Integer
+    def self.lldb_memory_region_info_is_mapped: (FFI::Pointer) -> Integer
+    def self.lldb_memory_region_info_get_name: (FFI::Pointer) -> String?
 
     # SBThread
     def self.lldb_thread_destroy: (FFI::Pointer) -> void

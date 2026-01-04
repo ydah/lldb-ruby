@@ -759,6 +759,70 @@ uint32_t lldb_process_get_unique_id(lldb_process_t process) {
     return static_cast<lldb::SBProcess*>(process)->GetUniqueID();
 }
 
+lldb_memory_region_info_t lldb_process_get_memory_region_info(lldb_process_t process, uint64_t addr, lldb_error_t error) {
+    if (!process) return nullptr;
+
+    lldb::SBProcess* p = static_cast<lldb::SBProcess*>(process);
+    lldb::SBError* err = error ? static_cast<lldb::SBError*>(error) : nullptr;
+    lldb::SBError local_error;
+
+    lldb::SBMemoryRegionInfo* info = new lldb::SBMemoryRegionInfo();
+    lldb::SBError result = p->GetMemoryRegionInfo(addr, *info);
+
+    if (result.Fail()) {
+        if (err) *err = result;
+        delete info;
+        return nullptr;
+    }
+
+    return static_cast<lldb_memory_region_info_t>(info);
+}
+
+// ============================================================================
+// SBMemoryRegionInfo
+// ============================================================================
+
+void lldb_memory_region_info_destroy(lldb_memory_region_info_t info) {
+    if (info) {
+        delete static_cast<lldb::SBMemoryRegionInfo*>(info);
+    }
+}
+
+uint64_t lldb_memory_region_info_get_region_base(lldb_memory_region_info_t info) {
+    if (!info) return 0;
+    return static_cast<lldb::SBMemoryRegionInfo*>(info)->GetRegionBase();
+}
+
+uint64_t lldb_memory_region_info_get_region_end(lldb_memory_region_info_t info) {
+    if (!info) return 0;
+    return static_cast<lldb::SBMemoryRegionInfo*>(info)->GetRegionEnd();
+}
+
+int lldb_memory_region_info_is_readable(lldb_memory_region_info_t info) {
+    if (!info) return 0;
+    return static_cast<lldb::SBMemoryRegionInfo*>(info)->IsReadable() ? 1 : 0;
+}
+
+int lldb_memory_region_info_is_writable(lldb_memory_region_info_t info) {
+    if (!info) return 0;
+    return static_cast<lldb::SBMemoryRegionInfo*>(info)->IsWritable() ? 1 : 0;
+}
+
+int lldb_memory_region_info_is_executable(lldb_memory_region_info_t info) {
+    if (!info) return 0;
+    return static_cast<lldb::SBMemoryRegionInfo*>(info)->IsExecutable() ? 1 : 0;
+}
+
+int lldb_memory_region_info_is_mapped(lldb_memory_region_info_t info) {
+    if (!info) return 0;
+    return static_cast<lldb::SBMemoryRegionInfo*>(info)->IsMapped() ? 1 : 0;
+}
+
+const char* lldb_memory_region_info_get_name(lldb_memory_region_info_t info) {
+    if (!info) return nullptr;
+    return static_cast<lldb::SBMemoryRegionInfo*>(info)->GetName();
+}
+
 // ============================================================================
 // SBThread
 // ============================================================================

@@ -96,6 +96,7 @@ module LLDB
     # @rbs return: Value?
     def find_variable(name)
       raise InvalidObjectError, 'Frame is not valid' unless valid?
+      APISupport.require_method!(:lldb_frame_find_variable, 'find_variable')
 
       value_ptr = FFIBindings.lldb_frame_find_variable(@ptr, name)
       return nil if value_ptr.nil? || value_ptr.null?
@@ -107,6 +108,7 @@ module LLDB
     # @rbs return: Value?
     def evaluate_expression(expression)
       raise InvalidObjectError, 'Frame is not valid' unless valid?
+      APISupport.require_method!(:lldb_frame_evaluate_expression, 'evaluate_expression')
 
       value_ptr = FFIBindings.lldb_frame_evaluate_expression(@ptr, expression)
       return nil if value_ptr.nil? || value_ptr.null?
@@ -177,6 +179,7 @@ module LLDB
     # @rbs return: ValueList
     def get_registers
       raise InvalidObjectError, 'Frame is not valid' unless valid?
+      APISupport.require_method!(:lldb_frame_get_registers, 'get_registers')
 
       list_ptr = FFIBindings.lldb_frame_get_registers(@ptr)
       raise LLDBError, 'Failed to get registers' if list_ptr.nil? || list_ptr.null?

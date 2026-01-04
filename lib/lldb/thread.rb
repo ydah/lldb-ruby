@@ -30,6 +30,7 @@ module LLDB
     # @rbs return: bool
     def step_over
       raise InvalidObjectError, 'Thread is not valid' unless valid?
+      APISupport.require_method!(:lldb_thread_step_over, 'step_over')
 
       FFIBindings.lldb_thread_step_over(@ptr) != 0
     end
@@ -37,6 +38,7 @@ module LLDB
     # @rbs return: bool
     def step_into
       raise InvalidObjectError, 'Thread is not valid' unless valid?
+      APISupport.require_method!(:lldb_thread_step_into, 'step_into')
 
       FFIBindings.lldb_thread_step_into(@ptr) != 0
     end
@@ -44,6 +46,7 @@ module LLDB
     # @rbs return: bool
     def step_out
       raise InvalidObjectError, 'Thread is not valid' unless valid?
+      APISupport.require_method!(:lldb_thread_step_out, 'step_out')
 
       FFIBindings.lldb_thread_step_out(@ptr) != 0
     end
@@ -52,6 +55,7 @@ module LLDB
     # @rbs return: bool
     def step_instruction(step_over: false)
       raise InvalidObjectError, 'Thread is not valid' unless valid?
+      APISupport.require_method!(:lldb_thread_step_instruction, 'step_instruction')
 
       FFIBindings.lldb_thread_step_instruction(@ptr, step_over ? 1 : 0) != 0
     end

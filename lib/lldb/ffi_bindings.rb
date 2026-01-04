@@ -156,6 +156,19 @@ module LLDB
     attach_function :lldb_process_send_async_interrupt, [:pointer], :int
     attach_function :lldb_process_get_num_supported_hardware_watchpoints, %i[pointer pointer], :uint32
     attach_function :lldb_process_get_unique_id, [:pointer], :uint32
+    attach_function :lldb_process_get_memory_region_info, %i[pointer uint64 pointer], :pointer
+
+    # =========================================================================
+    # SBMemoryRegionInfo
+    # =========================================================================
+    attach_function :lldb_memory_region_info_destroy, [:pointer], :void
+    attach_function :lldb_memory_region_info_get_region_base, [:pointer], :uint64
+    attach_function :lldb_memory_region_info_get_region_end, [:pointer], :uint64
+    attach_function :lldb_memory_region_info_is_readable, [:pointer], :int
+    attach_function :lldb_memory_region_info_is_writable, [:pointer], :int
+    attach_function :lldb_memory_region_info_is_executable, [:pointer], :int
+    attach_function :lldb_memory_region_info_is_mapped, [:pointer], :int
+    attach_function :lldb_memory_region_info_get_name, [:pointer], :string
 
     # =========================================================================
     # SBThread

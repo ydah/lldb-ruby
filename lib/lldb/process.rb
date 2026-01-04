@@ -170,6 +170,7 @@ module LLDB
     # @rbs return: Thread?
     def thread_by_id(thread_id)
       raise InvalidObjectError, 'Process is not valid' unless valid?
+      APISupport.require_method!(:lldb_process_get_thread_by_id, 'thread_by_id')
 
       thread_ptr = FFIBindings.lldb_process_get_thread_by_id(@ptr, thread_id)
       return nil if thread_ptr.nil? || thread_ptr.null?
@@ -201,6 +202,7 @@ module LLDB
     # @rbs return: String
     def read_memory(address, size)
       raise InvalidObjectError, 'Process is not valid' unless valid?
+      APISupport.require_method!(:lldb_process_read_memory, 'read_memory')
 
       buffer = FFI::MemoryPointer.new(:uint8, size)
       error = Error.new
@@ -215,6 +217,7 @@ module LLDB
     # @rbs return: Integer
     def write_memory(address, data)
       raise InvalidObjectError, 'Process is not valid' unless valid?
+      APISupport.require_method!(:lldb_process_write_memory, 'write_memory')
 
       buffer = FFI::MemoryPointer.from_string(data)
       error = Error.new
@@ -307,6 +310,24 @@ module LLDB
       return 0 unless valid?
 
       FFIBindings.lldb_process_get_unique_id(@ptr)
+    end
+
+    # Get information about the memory region at the specified address
+    #
+    # @rbs address: Integer
+    # @rbs return: MemoryRegionInfo?
+    def get_memory_region_info(address)
+      raise InvalidObjectError, 'Process is not valid' unless valid?
+      APISupport.require_method!(:lldb_process_get_memory_region_info,
+                                 'get_memory_region_info')
+
+      error = Error.new
+      info_ptr = FFIBindings.lldb_process_get_memory_region_info(@ptr, address, error.to_ptr)
+
+      error.raise_if_error!
+      return nil if info_ptr.nil? || info_ptr.null?
+
+      MemoryRegionInfo.new(info_ptr)
     end
 
     # @rbs return: FFI::Pointer

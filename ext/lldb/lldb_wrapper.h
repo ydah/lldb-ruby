@@ -26,6 +26,7 @@ typedef void* lldb_type_t;
 typedef void* lldb_watchpoint_t;
 typedef void* lldb_command_interpreter_t;
 typedef void* lldb_command_return_object_t;
+typedef void* lldb_memory_region_info_t;
 
 // Initialization
 void lldb_initialize(void);
@@ -149,6 +150,17 @@ size_t lldb_process_put_stdin(lldb_process_t process, const char* buf, size_t si
 int lldb_process_send_async_interrupt(lldb_process_t process);
 uint32_t lldb_process_get_num_supported_hardware_watchpoints(lldb_process_t process, lldb_error_t error);
 uint32_t lldb_process_get_unique_id(lldb_process_t process);
+lldb_memory_region_info_t lldb_process_get_memory_region_info(lldb_process_t process, uint64_t addr, lldb_error_t error);
+
+// SBMemoryRegionInfo
+void lldb_memory_region_info_destroy(lldb_memory_region_info_t info);
+uint64_t lldb_memory_region_info_get_region_base(lldb_memory_region_info_t info);
+uint64_t lldb_memory_region_info_get_region_end(lldb_memory_region_info_t info);
+int lldb_memory_region_info_is_readable(lldb_memory_region_info_t info);
+int lldb_memory_region_info_is_writable(lldb_memory_region_info_t info);
+int lldb_memory_region_info_is_executable(lldb_memory_region_info_t info);
+int lldb_memory_region_info_is_mapped(lldb_memory_region_info_t info);
+const char* lldb_memory_region_info_get_name(lldb_memory_region_info_t info);
 
 // SBThread
 void lldb_thread_destroy(lldb_thread_t thread);

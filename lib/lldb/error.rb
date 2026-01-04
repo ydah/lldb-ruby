@@ -9,6 +9,7 @@ module LLDB
   class AttachError < LLDBError; end
   class BreakpointError < LLDBError; end
   class EvaluationError < LLDBError; end
+  class UnsupportedAPIError < LLDBError; end
 
   class Error
     # @rbs ptr: FFI::Pointer?

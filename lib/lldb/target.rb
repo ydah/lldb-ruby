@@ -128,6 +128,8 @@ module LLDB
     # @rbs return: Breakpoint
     def breakpoint_create_by_address(address)
       raise InvalidObjectError, 'Target is not valid' unless valid?
+      APISupport.require_method!(:lldb_target_breakpoint_create_by_address,
+                                 'breakpoint_create_by_address')
 
       bp_ptr = FFIBindings.lldb_target_breakpoint_create_by_address(@ptr, address)
       if bp_ptr.nil? || bp_ptr.null?
@@ -244,6 +246,8 @@ module LLDB
     # @rbs return: Breakpoint
     def breakpoint_create_by_regex(regex, module_name: nil)
       raise InvalidObjectError, 'Target is not valid' unless valid?
+      APISupport.require_method!(:lldb_target_breakpoint_create_by_regex,
+                                 'breakpoint_create_by_regex')
 
       bp_ptr = FFIBindings.lldb_target_breakpoint_create_by_regex(@ptr, regex, module_name)
       raise BreakpointError, "Failed to create breakpoint for regex '#{regex}'" if bp_ptr.nil? || bp_ptr.null?
