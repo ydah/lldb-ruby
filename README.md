@@ -1,4 +1,4 @@
-# LLDB Ruby
+# LLDB Ruby [![Gem Version](https://badge.fury.io/rb/lldb.svg)](https://badge.fury.io/rb/lldb) [![CI](https://github.com/ydah/lldb-ruby/actions/workflows/ci.yml/badge.svg)](https://github.com/ydah/lldb-ruby/actions/workflows/ci.yml)
 
 Ruby bindings for the LLDB debugger.
 
