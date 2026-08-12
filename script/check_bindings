@@ -46,7 +46,7 @@ end
 
 def header_functions(source)
   source = source.gsub(%r{/\*.*?\*/|//[^\n]*}, '')
-  source.scan(/(?:^|\n)\s*(?:[A-Za-z_][A-Za-z0-9_:<>*&\s]*?)\s+(lldb_[A-Za-z0-9_]+)\s*\([^;]*\)\s*;/m).flatten.uniq.sort
+  source.scan(/(?:^|\n)\s*(?:[A-Za-z_][A-Za-z0-9_:<>*&\s]*?)\s+(lldb_[A-Za-z0-9_]+)\s*\([^;]*\)\s*(?:LLDB_WRAPPER_NOEXCEPT\s*)?;/m).flatten.uniq.sort
 end
 
 def ffi_functions(source)
@@ -85,11 +85,31 @@ def report_difference(label, left_name, left, right_name, right)
   messages
 end
 
-def function_body(source, name)
-  start = source.index("#{name}(")
-  return nil unless start
+def matching_parenthesis(source, opening)
+  depth = 0
+  source.byteslice(opening..).each_byte.with_index do |byte, offset|
+    depth += 1 if byte == 40
+    depth -= 1 if byte == 41
+    return opening + offset if depth.zero?
+  end
+  nil
+end
 
-  opening = source.index('{', start)
+def function_body(source, name)
+  opening = nil
+  source.to_enum(:scan, /\b#{Regexp.escape(name)}\s*\(/m).each do
+    match = Regexp.last_match
+    opening_parenthesis = match.begin(0) + match[0].index('(')
+    closing_parenthesis = matching_parenthesis(source, opening_parenthesis)
+    next unless closing_parenthesis
+
+    suffix = source.byteslice((closing_parenthesis + 1)..).to_s
+    opening_offset = suffix.index(/\A\s*(?:LLDB_WRAPPER_NOEXCEPT\s*)?\{/m)
+    next unless opening_offset
+
+    opening = closing_parenthesis + 1 + opening_offset + suffix[opening_offset..].index('{')
+    break
+  end
   return nil unless opening
 
   depth = 0
@@ -133,7 +153,10 @@ def check_surface(path, functions, source)
       unless body&.include?('try') && body.include?('catch')
         errors << "#{name} is marked error_boundary but has no try/catch body"
       end
-    elsif !%w[reviewed_no_throw noexcept].include?(kind)
+      unless source.match?(/\b#{Regexp.escape(name)}\s*\([^;]*\)\s*LLDB_WRAPPER_NOEXCEPT\s*\{/m)
+        errors << "#{name} is marked error_boundary but is not declared noexcept"
+      end
+    elsif kind != 'noexcept'
       errors << "surface ledger entry #{name} has invalid exception guard #{kind.inspect}"
     end
   end

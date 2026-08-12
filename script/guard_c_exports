@@ -1,0 +1,139 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require 'optparse'
+
+ROOT = File.expand_path('..', __dir__)
+HEADER = File.join(ROOT, 'ext/lldb/lldb_wrapper.h')
+SOURCE = File.join(ROOT, 'ext/lldb/lldb_wrapper.cpp')
+SURFACE = File.join(ROOT, 'bindings/surface.yml')
+
+options = { write: false }
+OptionParser.new do |parser|
+  parser.banner = 'Usage: script/guard_c_exports [--write]'
+  parser.on('--write', 'Rewrite the C ABI exports with exception guards') { options[:write] = true }
+end.parse!
+
+def declarations(source)
+  source = source.gsub(%r{/\*.*?\*/|//[^\n]*}, '')
+  pattern = /(?:^|\n)\s*(?<return_type>[A-Za-z_][A-Za-z0-9_:<>*&\s]*?)\s+(?<name>lldb_[A-Za-z0-9_]+)\s*\((?<arguments>[^;]*)\)\s*(?:LLDB_WRAPPER_NOEXCEPT\s*)?;/m
+  source.to_enum(:scan, pattern).map do
+    Regexp.last_match.named_captures.transform_values(&:strip)
+  end
+end
+
+def matching_parenthesis(source, opening)
+  depth = 0
+  source.byteslice(opening..).each_byte.with_index do |byte, offset|
+    depth += 1 if byte == 40
+    depth -= 1 if byte == 41
+    return opening + offset if depth.zero?
+  end
+  raise "unclosed function parameter list at #{opening}"
+end
+
+def matching_brace(source, opening)
+  depth = 0
+  source.byteslice(opening..).each_byte.with_index do |byte, offset|
+    depth += 1 if byte == 123
+    depth -= 1 if byte == 125
+    return opening + offset if depth.zero?
+  end
+  raise "unclosed function body at #{opening}"
+end
+
+def definition(source, name)
+  pattern = /\b#{Regexp.escape(name)}\s*\(/m
+  source.to_enum(:scan, pattern).each do
+    opening = Regexp.last_match.begin(0) + Regexp.last_match[0].index('(')
+    closing = matching_parenthesis(source, opening)
+    after_parameters = source.byteslice((closing + 1)..).to_s
+    next unless after_parameters =~ /\A\s*(?:LLDB_WRAPPER_NOEXCEPT\s*)?\{/m
+
+    body_opening = closing + 1 + Regexp.last_match[0].index('{')
+    return [body_opening, matching_brace(source, body_opening)]
+  end
+  raise "definition not found for #{name}"
+end
+
+def guarded_body?(source, opening)
+  source.byteslice((opening + 1)..).to_s.match?(/\A\s*try\s*\{/)
+end
+
+def catch_block(return_type)
+  failure_return = if return_type == 'void'
+                     ''
+                   elsif return_type == 'lldb_ruby_status_t'
+                     '        return LLDB_RUBY_STATUS_INTERNAL_ERROR;' + 10.chr
+                   else
+                     '        return {};' + 10.chr
+                   end
+
+  <<~CPP
+
+        } catch (const std::bad_alloc&) {
+          wrapper_set_error_state("native allocation failed across the C ABI");
+  #{failure_return}    } catch (const std::exception& exception) {
+          wrapper_set_error_state(exception.what());
+  #{failure_return}    } catch (...) {
+          wrapper_set_error_state("unknown native exception across the C ABI");
+  #{failure_return}    }
+  CPP
+end
+
+def rewrite_header(header, entries)
+  rewritten = header.dup
+  entries.reverse_each do |entry|
+    pattern = /\b#{Regexp.escape(entry.fetch('name'))}\s*\([^;]*?\)\s*/m
+    match = rewritten.match(pattern)
+    raise "declaration not found for #{entry.fetch('name')}" unless match
+    next if rewritten.byteslice(match.end(0), 40).to_s.match?(/\A\s*LLDB_WRAPPER_NOEXCEPT\b/)
+
+    rewritten.insert(match.end(0), ' LLDB_WRAPPER_NOEXCEPT')
+  end
+  rewritten
+end
+
+def rewrite_source(source, entries)
+  edits = entries.map do |entry|
+    opening, closing = definition(source, entry.fetch('name'))
+    next if guarded_body?(source, opening)
+
+    noexcept = source.byteslice((opening - 80)...opening).to_s.match?(/LLDB_WRAPPER_NOEXCEPT\s*$/)
+    [
+      [opening, (noexcept ? '' : ' LLDB_WRAPPER_NOEXCEPT')],
+      [opening + 1, "\n    try {"],
+      [closing, catch_block(entry.fetch('return_type'))]
+    ]
+  end.compact.flatten(1).sort_by(&:first).reverse
+
+  rewritten = source.dup
+  edits.each { |offset, text| rewritten.insert(offset, text) }
+  rewritten
+end
+
+def rewrite_surface(surface)
+  needle = ['kind: reviewed_no_throw', '      reason: The export is tracked explicitly until its native error boundary is upgraded.'].join(10.chr)
+  replacement = ['kind: error_boundary', '      reason: Every export is noexcept and catches native C++ exceptions before crossing the C ABI.'].join(10.chr)
+
+  surface.gsub(needle, replacement)
+end
+
+entries = declarations(File.read(HEADER))
+abort "expected 482 declarations, found #{entries.length}" unless entries.length == 482
+
+rewritten_header = rewrite_header(File.read(HEADER), entries)
+rewritten_source = rewrite_source(File.read(SOURCE), entries)
+rewritten_surface = rewrite_surface(File.read(SURFACE))
+
+if options[:write]
+  File.write(HEADER, rewritten_header)
+  File.write(SOURCE, rewritten_source)
+  File.write(SURFACE, rewritten_surface)
+  puts "guarded #{entries.length} C ABI exports"
+else
+  abort 'header requires exception-guard updates' unless rewritten_header == File.read(HEADER)
+  abort 'source requires exception-guard updates' unless rewritten_source == File.read(SOURCE)
+  abort 'surface ledger requires exception-guard updates' unless rewritten_surface == File.read(SURFACE)
+  puts "all #{entries.length} C ABI exports are guarded"
+end
