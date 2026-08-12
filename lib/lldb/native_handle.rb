@@ -10,57 +10,47 @@ module LLDB
     # @rbs release: ^(FFI::Pointer) -> void
     # @rbs return: void
     def initialize(ptr, release:)
-      @state = {
-        mutex: Mutex.new,
-        pointer: ptr,
-        release: release,
-        closed: false
-      }
+      # The resource is detached with Array#shift, which is a single Ruby VM
+      # operation. Finalizers cannot safely acquire a Mutex on all supported
+      # Rubies, so the detach itself must not depend on one.
+      @state = [[ptr, release]]
       ObjectSpace.define_finalizer(self, self.class.finalizer(@state))
     end
 
     # @rbs return: FFI::Pointer
     def to_ptr
-      @state[:mutex].synchronize { @state[:pointer] }
+      resource = @state.first
+      resource ? resource.first : NULL_POINTER
     end
 
     # @rbs return: bool
     def closed?
-      @state[:mutex].synchronize { @state[:closed] }
+      @state.empty?
     end
 
     # @rbs return: bool
     def close
-      pointer = @state[:mutex].synchronize do
-        next nil if @state[:closed]
+      resource = @state.shift
+      return false unless resource
 
-        @state[:closed] = true
-        pointer = @state[:pointer]
-        @state[:pointer] = NULL_POINTER
-        pointer
-      end
-      return false unless pointer
+      pointer, release = resource
 
-      @state[:release].call(pointer) unless pointer.null?
+      release.call(pointer) unless pointer.null?
       true
     end
 
-    # @rbs state: Hash[::Symbol, untyped]
+    # @rbs state: Array[Array[untyped]]
     # @rbs return: ^(Integer) -> void
     def self.finalizer(state)
       ->(_object_id) do
-        pointer = state[:mutex].synchronize do
-          next nil if state[:closed]
+        resource = state.shift
+        next unless resource
 
-          state[:closed] = true
-          pointer = state[:pointer]
-          state[:pointer] = NULL_POINTER
-          pointer
-        end
+        pointer, release = resource
         next unless pointer && !pointer.null?
 
         begin
-          state[:release].call(pointer)
+          release.call(pointer)
         rescue StandardError
           # Finalizers must never raise into an unrelated Ruby thread.
         end

@@ -27,17 +27,28 @@ RSpec.describe LLDB::NativeHandle do
 
   it 'releases an unclosed handle during finalization' do
     releases = []
-    state = {
-      mutex: Mutex.new,
-      pointer: pointer,
-      release: ->(released) { releases << released },
-      closed: false
-    }
+    state = [[pointer, ->(released) { releases << released }]]
     finalizer = described_class.finalizer(state)
 
     finalizer.call(0)
     finalizer.call(0)
 
     expect(releases).to eq([pointer])
+  end
+
+  it 'releases an unclosed handle during actual garbage collection' do
+    released = 0
+    previous_stress = GC.stress
+
+    begin
+      GC.stress = true
+      handle = described_class.new(pointer, release: ->(_) { released += 1 })
+      handle = nil
+      GC.start
+    ensure
+      GC.stress = previous_stress
+    end
+
+    expect(released).to eq(1)
   end
 end
