@@ -418,6 +418,7 @@ module LLDB
     attach_function :lldb_frame_get_symbol, [:pointer], :pointer
     attach_function :lldb_frame_get_compile_unit, [:pointer], :pointer
     attach_function :lldb_frame_get_block, [:pointer], :pointer
+    attach_function :lldb_frame_get_instruction_list, %i[pointer pointer], :pointer
     attach_function :lldb_frame_get_symbol_context, %i[pointer uint32], :pointer
     attach_function :lldb_frame_get_variables, %i[pointer int int int int], :pointer
     attach_function :lldb_frame_get_registers, [:pointer], :pointer
@@ -582,6 +583,18 @@ module LLDB
     attach_function :lldb_block_get_num_ranges, [:pointer], :uint32
     attach_function :lldb_block_get_range_start_address, %i[pointer uint32], :pointer
     attach_function :lldb_block_get_range_end_address, %i[pointer uint32], :pointer
+    attach_function :lldb_instruction_list_destroy, [:pointer], :void
+    attach_function :lldb_instruction_list_is_valid, [:pointer], :int
+    attach_function :lldb_instruction_list_get_size, [:pointer], :uint64
+    attach_function :lldb_instruction_list_get_instruction_at_index, %i[pointer uint32], :pointer
+    attach_function :lldb_instruction_destroy, [:pointer], :void
+    attach_function :lldb_instruction_is_valid, [:pointer], :int
+    attach_function :lldb_instruction_get_address, [:pointer], :pointer
+    attach_function :lldb_instruction_get_mnemonic, %i[pointer pointer], :string
+    attach_function :lldb_instruction_get_operands, %i[pointer pointer], :string
+    attach_function :lldb_instruction_get_comment, %i[pointer pointer], :string
+    attach_function :lldb_instruction_get_byte_size, [:pointer], :uint32
+    attach_function :lldb_instruction_get_bytes, %i[pointer pointer pointer uint32], :uint32
 
     # =========================================================================
     # SBSymbolContext

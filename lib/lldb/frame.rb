@@ -278,6 +278,21 @@ module LLDB
       FFIBindings.lldb_frame_disassemble(@ptr)
     end
 
+    # @rbs return: InstructionList?
+    def instruction_list
+      raise InvalidObjectError, 'Frame is not valid' unless valid?
+
+      target = @thread.process.target
+      return nil unless target
+
+      list_ptr = FFIBindings.lldb_frame_get_instruction_list(@ptr, target.to_ptr)
+      return nil if list_ptr.nil? || list_ptr.null?
+
+      InstructionList.new(list_ptr, target: target, context: context)
+    end
+
+    alias instructions instruction_list
+
     # @rbs return: Module?
     def get_module
       raise InvalidObjectError, 'Frame is not valid' unless valid?

@@ -2078,6 +2078,25 @@ lldb_block_t lldb_frame_get_block(lldb_frame_t frame) {
     return static_cast<lldb_block_t>(new lldb::SBBlock(block));
 }
 
+lldb_instruction_list_t lldb_frame_get_instruction_list(lldb_frame_t frame,
+                                                         lldb_target_t target) {
+    if (!frame || !target) return nullptr;
+
+    lldb::SBFrame* f = static_cast<lldb::SBFrame*>(frame);
+    lldb::SBTarget* t = static_cast<lldb::SBTarget*>(target);
+    lldb::SBInstructionList instructions;
+    lldb::SBFunction function = f->GetFunction();
+    if (function.IsValid()) {
+        instructions = function.GetInstructions(*t);
+    } else {
+        lldb::SBSymbol symbol = f->GetSymbol();
+        if (symbol.IsValid()) instructions = symbol.GetInstructions(*t);
+    }
+
+    if (!instructions.IsValid()) return nullptr;
+    return static_cast<lldb_instruction_list_t>(new lldb::SBInstructionList(instructions));
+}
+
 lldb_symbol_context_t lldb_frame_get_symbol_context(lldb_frame_t frame, uint32_t scope) {
     if (!frame) return nullptr;
 
@@ -3006,6 +3025,94 @@ lldb_address_t lldb_block_get_range_end_address(lldb_block_t block, uint32_t ind
     lldb::SBAddress address = static_cast<lldb::SBBlock*>(block)->GetRangeEndAddress(index);
     if (!address.IsValid()) return nullptr;
     return static_cast<lldb_address_t>(new lldb::SBAddress(address));
+}
+
+// ============================================================================
+// SBInstructionList
+// ============================================================================
+
+void lldb_instruction_list_destroy(lldb_instruction_list_t list) {
+    if (list) delete static_cast<lldb::SBInstructionList*>(list);
+}
+
+int lldb_instruction_list_is_valid(lldb_instruction_list_t list) {
+    if (!list) return 0;
+    return static_cast<lldb::SBInstructionList*>(list)->IsValid() ? 1 : 0;
+}
+
+uint64_t lldb_instruction_list_get_size(lldb_instruction_list_t list) {
+    if (!list) return 0;
+    return static_cast<lldb::SBInstructionList*>(list)->GetSize();
+}
+
+lldb_instruction_t lldb_instruction_list_get_instruction_at_index(lldb_instruction_list_t list,
+                                                                   uint32_t index) {
+    if (!list) return nullptr;
+    lldb::SBInstruction instruction =
+        static_cast<lldb::SBInstructionList*>(list)->GetInstructionAtIndex(index);
+    if (!instruction.IsValid()) return nullptr;
+    return static_cast<lldb_instruction_t>(new lldb::SBInstruction(instruction));
+}
+
+// ============================================================================
+// SBInstruction
+// ============================================================================
+
+void lldb_instruction_destroy(lldb_instruction_t instruction) {
+    if (instruction) delete static_cast<lldb::SBInstruction*>(instruction);
+}
+
+int lldb_instruction_is_valid(lldb_instruction_t instruction) {
+    if (!instruction) return 0;
+    return static_cast<lldb::SBInstruction*>(instruction)->IsValid() ? 1 : 0;
+}
+
+lldb_address_t lldb_instruction_get_address(lldb_instruction_t instruction) {
+    if (!instruction) return nullptr;
+    lldb::SBAddress address = static_cast<lldb::SBInstruction*>(instruction)->GetAddress();
+    if (!address.IsValid()) return nullptr;
+    return static_cast<lldb_address_t>(new lldb::SBAddress(address));
+}
+
+const char* lldb_instruction_get_mnemonic(lldb_instruction_t instruction, lldb_target_t target) {
+    if (!instruction || !target) return nullptr;
+    return static_cast<lldb::SBInstruction*>(instruction)->GetMnemonic(
+        *static_cast<lldb::SBTarget*>(target));
+}
+
+const char* lldb_instruction_get_operands(lldb_instruction_t instruction, lldb_target_t target) {
+    if (!instruction || !target) return nullptr;
+    return static_cast<lldb::SBInstruction*>(instruction)->GetOperands(
+        *static_cast<lldb::SBTarget*>(target));
+}
+
+const char* lldb_instruction_get_comment(lldb_instruction_t instruction, lldb_target_t target) {
+    if (!instruction || !target) return nullptr;
+    return static_cast<lldb::SBInstruction*>(instruction)->GetComment(
+        *static_cast<lldb::SBTarget*>(target));
+}
+
+uint32_t lldb_instruction_get_byte_size(lldb_instruction_t instruction) {
+    if (!instruction) return 0;
+    return static_cast<lldb::SBInstruction*>(instruction)->GetByteSize();
+}
+
+uint32_t lldb_instruction_get_bytes(lldb_instruction_t instruction,
+                                    lldb_target_t target,
+                                    uint8_t* buffer,
+                                    uint32_t length) {
+    if (!instruction || !target) return 0;
+
+    lldb::SBData data = static_cast<lldb::SBInstruction*>(instruction)->GetData(
+        *static_cast<lldb::SBTarget*>(target));
+    if (!data.IsValid()) return 0;
+
+    size_t size = data.GetByteSize();
+    if (!buffer || length == 0) return static_cast<uint32_t>(std::min<size_t>(size, UINT32_MAX));
+
+    lldb::SBError error;
+    size_t written = data.ReadRawData(error, 0, buffer, std::min<size_t>(size, length));
+    return static_cast<uint32_t>(std::min<size_t>(written, UINT32_MAX));
 }
 
 // ============================================================================

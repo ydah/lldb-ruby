@@ -16,6 +16,7 @@
 - Expose structured `Address`, `LineEntry`, and `FileSpecList` objects for source and breakpoint locations.
 - Expose `TypeMember` metadata for fields and direct or virtual base classes.
 - Expose structured `Symbol`, `Function`, `CompileUnit`, and `Block` objects from modules and frames.
+- Expose structured instruction lists and instruction bytes from frames.
 - Add LLDB discovery and compile/link validation for Linux and macOS builds.
 - Expose wrapper ABI and LLDB version metadata with capability-based watchpoint access checks.
 

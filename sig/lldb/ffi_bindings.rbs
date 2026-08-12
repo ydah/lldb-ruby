@@ -306,6 +306,7 @@ module LLDB
     def self.lldb_frame_get_symbol: (FFI::Pointer) -> FFI::Pointer
     def self.lldb_frame_get_compile_unit: (FFI::Pointer) -> FFI::Pointer
     def self.lldb_frame_get_block: (FFI::Pointer) -> FFI::Pointer
+    def self.lldb_frame_get_instruction_list: (FFI::Pointer, FFI::Pointer) -> FFI::Pointer
     def self.lldb_frame_get_symbol_context: (FFI::Pointer, Integer) -> FFI::Pointer
     def self.lldb_frame_get_variables: (FFI::Pointer, Integer, Integer, Integer, Integer) -> FFI::Pointer
     def self.lldb_frame_get_registers: (FFI::Pointer) -> FFI::Pointer
@@ -456,6 +457,18 @@ module LLDB
     def self.lldb_block_get_num_ranges: (FFI::Pointer) -> Integer
     def self.lldb_block_get_range_start_address: (FFI::Pointer, Integer) -> FFI::Pointer
     def self.lldb_block_get_range_end_address: (FFI::Pointer, Integer) -> FFI::Pointer
+    def self.lldb_instruction_list_destroy: (FFI::Pointer) -> void
+    def self.lldb_instruction_list_is_valid: (FFI::Pointer) -> Integer
+    def self.lldb_instruction_list_get_size: (FFI::Pointer) -> Integer
+    def self.lldb_instruction_list_get_instruction_at_index: (FFI::Pointer, Integer) -> FFI::Pointer
+    def self.lldb_instruction_destroy: (FFI::Pointer) -> void
+    def self.lldb_instruction_is_valid: (FFI::Pointer) -> Integer
+    def self.lldb_instruction_get_address: (FFI::Pointer) -> FFI::Pointer
+    def self.lldb_instruction_get_mnemonic: (FFI::Pointer, FFI::Pointer) -> String?
+    def self.lldb_instruction_get_operands: (FFI::Pointer, FFI::Pointer) -> String?
+    def self.lldb_instruction_get_comment: (FFI::Pointer, FFI::Pointer) -> String?
+    def self.lldb_instruction_get_byte_size: (FFI::Pointer) -> Integer
+    def self.lldb_instruction_get_bytes: (FFI::Pointer, FFI::Pointer, FFI::Pointer, Integer) -> Integer
 
     # SBSymbolContext
     def self.lldb_symbol_context_destroy: (FFI::Pointer) -> void

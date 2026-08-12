@@ -28,6 +28,8 @@ typedef void* lldb_symbol_t;
 typedef void* lldb_function_t;
 typedef void* lldb_compile_unit_t;
 typedef void* lldb_block_t;
+typedef void* lldb_instruction_list_t;
+typedef void* lldb_instruction_t;
 typedef void* lldb_watchpoint_t;
 typedef void* lldb_command_interpreter_t;
 typedef void* lldb_command_return_object_t;
@@ -423,6 +425,8 @@ lldb_function_t lldb_frame_get_function(lldb_frame_t frame);
 lldb_symbol_t lldb_frame_get_symbol(lldb_frame_t frame);
 lldb_compile_unit_t lldb_frame_get_compile_unit(lldb_frame_t frame);
 lldb_block_t lldb_frame_get_block(lldb_frame_t frame);
+lldb_instruction_list_t lldb_frame_get_instruction_list(lldb_frame_t frame,
+                                                         lldb_target_t target);
 lldb_symbol_context_t lldb_frame_get_symbol_context(lldb_frame_t frame, uint32_t scope);
 lldb_value_list_t lldb_frame_get_variables(lldb_frame_t frame, int arguments, int locals, int statics, int in_scope_only);
 lldb_value_list_t lldb_frame_get_registers(lldb_frame_t frame);
@@ -580,6 +584,26 @@ lldb_block_t lldb_block_get_first_child(lldb_block_t block);
 uint32_t lldb_block_get_num_ranges(lldb_block_t block);
 lldb_address_t lldb_block_get_range_start_address(lldb_block_t block, uint32_t index);
 lldb_address_t lldb_block_get_range_end_address(lldb_block_t block, uint32_t index);
+
+// SBInstructionList
+void lldb_instruction_list_destroy(lldb_instruction_list_t list);
+int lldb_instruction_list_is_valid(lldb_instruction_list_t list);
+uint64_t lldb_instruction_list_get_size(lldb_instruction_list_t list);
+lldb_instruction_t lldb_instruction_list_get_instruction_at_index(lldb_instruction_list_t list,
+                                                                   uint32_t index);
+
+// SBInstruction
+void lldb_instruction_destroy(lldb_instruction_t instruction);
+int lldb_instruction_is_valid(lldb_instruction_t instruction);
+lldb_address_t lldb_instruction_get_address(lldb_instruction_t instruction);
+const char* lldb_instruction_get_mnemonic(lldb_instruction_t instruction, lldb_target_t target);
+const char* lldb_instruction_get_operands(lldb_instruction_t instruction, lldb_target_t target);
+const char* lldb_instruction_get_comment(lldb_instruction_t instruction, lldb_target_t target);
+uint32_t lldb_instruction_get_byte_size(lldb_instruction_t instruction);
+uint32_t lldb_instruction_get_bytes(lldb_instruction_t instruction,
+                                    lldb_target_t target,
+                                    uint8_t* buffer,
+                                    uint32_t length);
 
 // SBSymbolContext
 void lldb_symbol_context_destroy(lldb_symbol_context_t ctx);

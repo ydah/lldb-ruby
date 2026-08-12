@@ -153,6 +153,22 @@ RSpec.describe LLDB::Frame do
       disasm = frame.disassemble
       expect(disasm).to be_nil.or(be_a(String))
     end
+
+    it 'returns a structured instruction list' do
+      list = frame.instruction_list
+
+      expect(list).to be_a(LLDB::InstructionList)
+      expect(list).to be_valid
+      expect(list.size).to be > 0
+
+      instruction = list.first
+      expect(instruction).to be_a(LLDB::Instruction)
+      expect(instruction).to be_valid
+      expect(instruction.address).to be_a(LLDB::Address)
+      expect(instruction.mnemonic).to be_a(String)
+      expect(instruction.byte_size).to be > 0
+      expect(instruction.bytes.bytesize).to eq(instruction.byte_size)
+    end
   end
 
   describe '#get_module' do

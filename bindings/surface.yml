@@ -2822,7 +2822,113 @@ entries:
       kind: reviewed_no_throw
       reason: The export is tracked explicitly until its native error boundary is upgraded.
 
+  lldb_frame_get_instruction_list:
+    classification: public
+    reason: This LLDB C ABI function exposes structured instruction metadata.
+    exception_guard:
+      kind: reviewed_no_throw
+      reason: The export is tracked explicitly until its native error boundary is upgraded.
+  lldb_instruction_destroy:
+    classification: public
+    reason: This LLDB C ABI function exposes structured instruction metadata.
+    exception_guard:
+      kind: reviewed_no_throw
+      reason: The export is tracked explicitly until its native error boundary is upgraded.
+  lldb_instruction_get_address:
+    classification: public
+    reason: This LLDB C ABI function exposes structured instruction metadata.
+    exception_guard:
+      kind: reviewed_no_throw
+      reason: The export is tracked explicitly until its native error boundary is upgraded.
+  lldb_instruction_get_byte_size:
+    classification: public
+    reason: This LLDB C ABI function exposes structured instruction metadata.
+    exception_guard:
+      kind: reviewed_no_throw
+      reason: The export is tracked explicitly until its native error boundary is upgraded.
+  lldb_instruction_get_bytes:
+    classification: public
+    reason: This LLDB C ABI function exposes structured instruction metadata.
+    exception_guard:
+      kind: reviewed_no_throw
+      reason: The export is tracked explicitly until its native error boundary is upgraded.
+  lldb_instruction_get_comment:
+    classification: public
+    reason: This LLDB C ABI function exposes structured instruction metadata.
+    exception_guard:
+      kind: reviewed_no_throw
+      reason: The export is tracked explicitly until its native error boundary is upgraded.
+  lldb_instruction_get_mnemonic:
+    classification: public
+    reason: This LLDB C ABI function exposes structured instruction metadata.
+    exception_guard:
+      kind: reviewed_no_throw
+      reason: The export is tracked explicitly until its native error boundary is upgraded.
+  lldb_instruction_get_operands:
+    classification: public
+    reason: This LLDB C ABI function exposes structured instruction metadata.
+    exception_guard:
+      kind: reviewed_no_throw
+      reason: The export is tracked explicitly until its native error boundary is upgraded.
+  lldb_instruction_is_valid:
+    classification: public
+    reason: This LLDB C ABI function exposes structured instruction metadata.
+    exception_guard:
+      kind: reviewed_no_throw
+      reason: The export is tracked explicitly until its native error boundary is upgraded.
+  lldb_instruction_list_destroy:
+    classification: public
+    reason: This LLDB C ABI function exposes structured instruction metadata.
+    exception_guard:
+      kind: reviewed_no_throw
+      reason: The export is tracked explicitly until its native error boundary is upgraded.
+  lldb_instruction_list_get_instruction_at_index:
+    classification: public
+    reason: This LLDB C ABI function exposes structured instruction metadata.
+    exception_guard:
+      kind: reviewed_no_throw
+      reason: The export is tracked explicitly until its native error boundary is upgraded.
+  lldb_instruction_list_get_size:
+    classification: public
+    reason: This LLDB C ABI function exposes structured instruction metadata.
+    exception_guard:
+      kind: reviewed_no_throw
+      reason: The export is tracked explicitly until its native error boundary is upgraded.
+  lldb_instruction_list_is_valid:
+    classification: public
+    reason: This LLDB C ABI function exposes structured instruction metadata.
+    exception_guard:
+      kind: reviewed_no_throw
+      reason: The export is tracked explicitly until its native error boundary is upgraded.
+
 ruby_methods:
+  - function: lldb_frame_get_instruction_list
+    file: lib/lldb/frame.rb
+    method: instruction_list
+  - function: lldb_instruction_list_get_size
+    file: lib/lldb/instruction_list.rb
+    method: size
+  - function: lldb_instruction_list_get_instruction_at_index
+    file: lib/lldb/instruction_list.rb
+    method: to_a
+  - function: lldb_instruction_get_address
+    file: lib/lldb/instruction.rb
+    method: address
+  - function: lldb_instruction_get_mnemonic
+    file: lib/lldb/instruction.rb
+    method: mnemonic
+  - function: lldb_instruction_get_operands
+    file: lib/lldb/instruction.rb
+    method: operands
+  - function: lldb_instruction_get_comment
+    file: lib/lldb/instruction.rb
+    method: comment
+  - function: lldb_instruction_get_byte_size
+    file: lib/lldb/instruction.rb
+    method: byte_size
+  - function: lldb_instruction_get_bytes
+    file: lib/lldb/instruction.rb
+    method: bytes
   - function: lldb_module_get_symbol_at_index
     file: lib/lldb/module.rb
     method: symbol_at_index

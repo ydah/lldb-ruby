@@ -203,6 +203,10 @@ Modules and frames expose structured debug objects as well: use
 `Frame#compile_unit`, and `Frame#block` to retain symbol, function, source
 unit, and lexical block metadata.
 
+For structured disassembly, use `Frame#instruction_list`. Each
+`Instruction` exposes its address, mnemonic, operands, comment, byte size, and
+raw bytes; the existing `Frame#disassemble` string API remains available.
+
 Debugger and launch choices are explicit option objects. For example,
 `LLDB::Debugger.create(source_init_files: true)` opts into LLDB init files,
 while `LLDB::ExpressionOptions` can be passed to expression evaluation without
