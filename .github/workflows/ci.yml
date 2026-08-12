@@ -156,6 +156,7 @@ jobs:
             sudo ln -s "$LLDB_SERVER" "$VERSIONED_SERVER"
           fi
           echo "LLDB_DEBUGSERVER_PATH=$VERSIONED_SERVER" >> "$GITHUB_ENV"
+          echo "LLVM_CONFIG=$LLVM_CONFIG" >> "$GITHUB_ENV"
 
       - name: Install LLDB (macOS)
         if: runner.os == 'macOS'
