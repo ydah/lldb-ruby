@@ -25,7 +25,10 @@ Gem::Specification.new do |spec|
     end
   end
 
-  spec.files += Dir['lib/**/*.rb', 'ext/**/*']
+  generated_extension_file = %r{\Aext/lldb/(?:Makefile|mkmf\.log|lldb_wrapper_config\.h|.*\.(?:o|so|dylib|dll))\z}
+  spec.files += Dir['lib/**/*.rb', 'ext/**/*'].select do |file|
+    File.file?(file) && !file.match?(generated_extension_file)
+  end
   spec.extensions = ['ext/lldb/extconf.rb']
   spec.require_paths = ['lib']
 
