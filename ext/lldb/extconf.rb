@@ -182,6 +182,12 @@ symbol_get_base_name = api_capability_probe(
 symbol_get_id = api_capability_probe(
   compiler, selected, 'SBSymbol.h', '&lldb::SBSymbol::GetID'
 )
+symbol_get_value = api_capability_probe(
+  compiler, selected, 'SBSymbol.h', '&lldb::SBSymbol::GetValue'
+)
+symbol_get_size = api_capability_probe(
+  compiler, selected, 'SBSymbol.h', '&lldb::SBSymbol::GetSize'
+)
 function_get_base_name = api_capability_probe(
   compiler, selected, 'SBFunction.h', '&lldb::SBFunction::GetBaseName'
 )
@@ -196,6 +202,8 @@ File.write(config_path, <<~HEADER)
   #define LLDB_RUBY_HAVE_WATCHPOINT_ACCESS_KIND #{watchpoint_access_kind ? 1 : 0}
   #define LLDB_RUBY_HAVE_SYMBOL_GET_BASE_NAME #{symbol_get_base_name ? 1 : 0}
   #define LLDB_RUBY_HAVE_SYMBOL_GET_ID #{symbol_get_id ? 1 : 0}
+  #define LLDB_RUBY_HAVE_SYMBOL_GET_VALUE #{symbol_get_value ? 1 : 0}
+  #define LLDB_RUBY_HAVE_SYMBOL_GET_SIZE #{symbol_get_size ? 1 : 0}
   #define LLDB_RUBY_HAVE_FUNCTION_GET_BASE_NAME #{function_get_base_name ? 1 : 0}
 
   #endif
@@ -203,6 +211,8 @@ HEADER
 puts "Watchpoint access capability: #{watchpoint_access_kind ? 'supported' : 'unsupported'}"
 puts "SBSymbol::GetBaseName capability: #{symbol_get_base_name ? 'supported' : 'unsupported'}"
 puts "SBSymbol::GetID capability: #{symbol_get_id ? 'supported' : 'unsupported'}"
+puts "SBSymbol::GetValue capability: #{symbol_get_value ? 'supported' : 'unsupported'}"
+puts "SBSymbol::GetSize capability: #{symbol_get_size ? 'supported' : 'unsupported'}"
 puts "SBFunction::GetBaseName capability: #{function_get_base_name ? 'supported' : 'unsupported'}"
 puts "Build LLDB version: #{build_version}"
 
@@ -238,6 +248,8 @@ File.open('Makefile', 'w') do |f|
     TARGET = #{target}
     SRCS = lldb_wrapper.cpp
     OBJS = lldb_wrapper.o
+    sitelibdir ?= #{RbConfig::CONFIG['sitelibdir']}
+    sitearchdir ?= #{RbConfig::CONFIG['sitearchdir']}
 
     all: $(TARGET)
 
@@ -248,8 +260,8 @@ File.open('Makefile', 'w') do |f|
     \t$(CXX) $(CXXFLAGS) -c -o $@ $<
 
     install: $(TARGET)
-    \tmkdir -p $(DESTDIR)#{RbConfig::CONFIG['sitelibdir']}/lldb
-    \tcp $(TARGET) $(DESTDIR)#{RbConfig::CONFIG['sitelibdir']}/lldb/
+    \tmkdir -p $(DESTDIR)$(sitearchdir)/lldb
+    \tcp $(TARGET) $(DESTDIR)$(sitearchdir)/lldb/
 
     clean:
     \trm -f $(OBJS) $(TARGET)

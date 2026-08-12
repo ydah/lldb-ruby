@@ -41,6 +41,10 @@ module LLDB
         if defined?(Gem) && Gem.loaded_specs['lldb']
           spec = Gem.loaded_specs['lldb']
           search_paths << File.join(spec.full_gem_path, 'lib', 'lldb') if spec.respond_to?(:full_gem_path)
+          if spec.respond_to?(:extension_dir) && spec.extension_dir
+            search_paths << File.join(spec.extension_dir, 'lldb')
+            search_paths << spec.extension_dir
+          end
         end
         # steep:ignore:end
 

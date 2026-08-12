@@ -7040,7 +7040,11 @@ lldb_address_t lldb_symbol_get_end_address(lldb_symbol_t symbol)  LLDB_WRAPPER_N
 uint64_t lldb_symbol_get_value(lldb_symbol_t symbol)  LLDB_WRAPPER_NOEXCEPT {
     try {
     if (!symbol) return LLDB_INVALID_ADDRESS;
+#if LLDB_RUBY_HAVE_SYMBOL_GET_VALUE
     return static_cast<lldb::SBSymbol*>(symbol)->GetValue();
+#else
+    return LLDB_INVALID_ADDRESS;
+#endif
 
       } catch (const std::bad_alloc&) {
         wrapper_set_error_state("native allocation failed across the C ABI");
@@ -7057,7 +7061,18 @@ uint64_t lldb_symbol_get_value(lldb_symbol_t symbol)  LLDB_WRAPPER_NOEXCEPT {
 uint64_t lldb_symbol_get_size(lldb_symbol_t symbol)  LLDB_WRAPPER_NOEXCEPT {
     try {
     if (!symbol) return 0;
+#if LLDB_RUBY_HAVE_SYMBOL_GET_SIZE
     return static_cast<lldb::SBSymbol*>(symbol)->GetSize();
+#else
+    lldb::SBSymbol* native_symbol = static_cast<lldb::SBSymbol*>(symbol);
+    lldb::SBAddress start = native_symbol->GetStartAddress();
+    lldb::SBAddress end = native_symbol->GetEndAddress();
+    if (!start.IsValid() || !end.IsValid()) return 0;
+    lldb::addr_t start_address = start.GetFileAddress();
+    lldb::addr_t end_address = end.GetFileAddress();
+    if (start_address == LLDB_INVALID_ADDRESS || end_address < start_address) return 0;
+    return static_cast<uint64_t>(end_address - start_address);
+#endif
 
       } catch (const std::bad_alloc&) {
         wrapper_set_error_state("native allocation failed across the C ABI");
