@@ -26,6 +26,16 @@ RSpec.describe LLDB::BreakpointLocation do
       skip 'No location found' if location.nil?
       expect(location.load_address).to be >= 0
     end
+
+    it 'exposes the address without losing file/load address distinction' do
+      skip 'No location found' if location.nil?
+
+      address = location.address
+      expect(address).to be_a(LLDB::Address)
+      expect(address).to be_valid
+      expect(address.file_address).to be > 0
+      expect(address.load_address).to eq(location.load_address)
+    end
   end
 
   describe '#enabled?' do

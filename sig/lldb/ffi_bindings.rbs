@@ -186,6 +186,31 @@ module LLDB
     def self.lldb_file_spec_get_path: (FFI::Pointer, FFI::Pointer?, Integer) -> Integer
     def self.lldb_file_spec_set_filename: (FFI::Pointer, String) -> void
     def self.lldb_file_spec_set_directory: (FFI::Pointer, String) -> void
+    def self.lldb_file_spec_list_create: () -> FFI::Pointer
+    def self.lldb_file_spec_list_destroy: (FFI::Pointer) -> void
+    def self.lldb_file_spec_list_is_valid: (FFI::Pointer) -> Integer
+    def self.lldb_file_spec_list_get_size: (FFI::Pointer) -> Integer
+    def self.lldb_file_spec_list_append: (FFI::Pointer, FFI::Pointer) -> void
+    def self.lldb_file_spec_list_append_if_unique: (FFI::Pointer, FFI::Pointer) -> Integer
+    def self.lldb_file_spec_list_clear: (FFI::Pointer) -> void
+    def self.lldb_file_spec_list_get_file_spec_at_index: (FFI::Pointer, Integer) -> FFI::Pointer
+
+    # SBAddress and SBLineEntry
+    def self.lldb_address_create: () -> FFI::Pointer
+    def self.lldb_address_create_from_load_address: (Integer, FFI::Pointer) -> FFI::Pointer
+    def self.lldb_address_destroy: (FFI::Pointer) -> void
+    def self.lldb_address_is_valid: (FFI::Pointer) -> Integer
+    def self.lldb_address_get_file_address: (FFI::Pointer) -> Integer
+    def self.lldb_address_get_load_address: (FFI::Pointer, FFI::Pointer) -> Integer
+    def self.lldb_address_get_offset: (FFI::Pointer) -> Integer
+    def self.lldb_address_get_line_entry: (FFI::Pointer) -> FFI::Pointer
+    def self.lldb_line_entry_destroy: (FFI::Pointer) -> void
+    def self.lldb_line_entry_is_valid: (FFI::Pointer) -> Integer
+    def self.lldb_line_entry_get_start_address: (FFI::Pointer) -> FFI::Pointer
+    def self.lldb_line_entry_get_end_address: (FFI::Pointer) -> FFI::Pointer
+    def self.lldb_line_entry_get_file_spec: (FFI::Pointer) -> FFI::Pointer
+    def self.lldb_line_entry_get_line: (FFI::Pointer) -> Integer
+    def self.lldb_line_entry_get_column: (FFI::Pointer) -> Integer
 
     # SBProcess
     def self.lldb_process_destroy: (FFI::Pointer) -> void
@@ -265,6 +290,7 @@ module LLDB
     def self.lldb_frame_get_line: (FFI::Pointer) -> Integer
     def self.lldb_frame_get_file_path: (FFI::Pointer) -> String?
     def self.lldb_frame_get_file_spec: (FFI::Pointer) -> FFI::Pointer
+    def self.lldb_frame_get_line_entry: (FFI::Pointer) -> FFI::Pointer
     def self.lldb_frame_get_column: (FFI::Pointer) -> Integer
     def self.lldb_frame_get_pc: (FFI::Pointer) -> Integer
     def self.lldb_frame_set_pc: (FFI::Pointer, Integer) -> Integer
@@ -314,6 +340,7 @@ module LLDB
     def self.lldb_breakpoint_location_is_valid: (FFI::Pointer) -> Integer
     def self.lldb_breakpoint_location_get_id: (FFI::Pointer) -> Integer
     def self.lldb_breakpoint_location_get_load_address: (FFI::Pointer) -> Integer
+    def self.lldb_breakpoint_location_get_address: (FFI::Pointer) -> FFI::Pointer
     def self.lldb_breakpoint_location_is_enabled: (FFI::Pointer) -> Integer
     def self.lldb_breakpoint_location_set_enabled: (FFI::Pointer, Integer) -> void
     def self.lldb_breakpoint_location_get_hit_count: (FFI::Pointer) -> Integer

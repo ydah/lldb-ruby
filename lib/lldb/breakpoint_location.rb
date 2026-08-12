@@ -46,6 +46,16 @@ module LLDB
       FFIBindings.lldb_breakpoint_location_get_load_address(@ptr)
     end
 
+    # @rbs return: Address?
+    def address
+      return nil unless valid?
+
+      address_ptr = FFIBindings.lldb_breakpoint_location_get_address(@ptr)
+      return nil if address_ptr.nil? || address_ptr.null?
+
+      Address.from_ptr(address_ptr, target: @breakpoint.target, context: context)
+    end
+
     # @rbs return: bool
     def enabled?
       return false unless valid?

@@ -70,6 +70,17 @@ module LLDB
       FileSpec.from_ptr(file_ptr, context: context)
     end
 
+    # @rbs return: LineEntry?
+    def line_entry
+      raise InvalidObjectError, 'Frame is not valid' unless valid?
+
+      line_ptr = FFIBindings.lldb_frame_get_line_entry(@ptr)
+      return nil if line_ptr.nil? || line_ptr.null?
+
+      target = @thread.process.target
+      LineEntry.new(line_ptr, target: target, context: context)
+    end
+
     # @rbs return: Integer
     def column
       return 0 unless valid?

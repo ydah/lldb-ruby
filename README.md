@@ -188,6 +188,12 @@ end
 `timeout_seconds: 0` performs a non-blocking poll. The library does not start
 background event threads.
 
+Source locations remain structured when needed: `Frame#line_entry` exposes its
+`LineEntry`, including `start_address`, `end_address`, file, line, and column;
+`BreakpointLocation#address` exposes an `Address` with separate
+`file_address` and `load_address` values. `FileSpecList` can collect and return
+`FileSpec` objects without reducing them to path strings.
+
 Debugger and launch choices are explicit option objects. For example,
 `LLDB::Debugger.create(source_init_files: true)` opts into LLDB init files,
 while `LLDB::ExpressionOptions` can be passed to expression evaluation without

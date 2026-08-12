@@ -1192,6 +1192,145 @@ void lldb_file_spec_set_directory(lldb_file_spec_t file_spec, const char* direct
 }
 
 // ============================================================================
+// SBFileSpecList
+// ============================================================================
+
+lldb_file_spec_list_t lldb_file_spec_list_create(void) {
+    return static_cast<lldb_file_spec_list_t>(new lldb::SBFileSpecList());
+}
+
+void lldb_file_spec_list_destroy(lldb_file_spec_list_t list) {
+    if (list) delete static_cast<lldb::SBFileSpecList*>(list);
+}
+
+int lldb_file_spec_list_is_valid(lldb_file_spec_list_t list) {
+    return list ? 1 : 0;
+}
+
+uint32_t lldb_file_spec_list_get_size(lldb_file_spec_list_t list) {
+    if (!list) return 0;
+    return static_cast<lldb::SBFileSpecList*>(list)->GetSize();
+}
+
+void lldb_file_spec_list_append(lldb_file_spec_list_t list, lldb_file_spec_t file_spec) {
+    if (!list || !file_spec) return;
+    static_cast<lldb::SBFileSpecList*>(list)->Append(
+        *static_cast<lldb::SBFileSpec*>(file_spec));
+}
+
+int lldb_file_spec_list_append_if_unique(lldb_file_spec_list_t list,
+                                         lldb_file_spec_t file_spec) {
+    if (!list || !file_spec) return 0;
+    return static_cast<lldb::SBFileSpecList*>(list)->AppendIfUnique(
+               *static_cast<lldb::SBFileSpec*>(file_spec))
+               ? 1
+               : 0;
+}
+
+void lldb_file_spec_list_clear(lldb_file_spec_list_t list) {
+    if (list) static_cast<lldb::SBFileSpecList*>(list)->Clear();
+}
+
+lldb_file_spec_t lldb_file_spec_list_get_file_spec_at_index(lldb_file_spec_list_t list,
+                                                             uint32_t index) {
+    if (!list) return nullptr;
+    lldb::SBFileSpec file_spec =
+        static_cast<lldb::SBFileSpecList*>(list)->GetFileSpecAtIndex(index);
+    if (!file_spec.IsValid()) return nullptr;
+    return static_cast<lldb_file_spec_t>(new lldb::SBFileSpec(file_spec));
+}
+
+// ============================================================================
+// SBAddress
+// ============================================================================
+
+lldb_address_t lldb_address_create(void) {
+    return static_cast<lldb_address_t>(new lldb::SBAddress());
+}
+
+lldb_address_t lldb_address_create_from_load_address(uint64_t address, lldb_target_t target) {
+    if (!target) return nullptr;
+    return static_cast<lldb_address_t>(new lldb::SBAddress(
+        address, *static_cast<lldb::SBTarget*>(target)));
+}
+
+void lldb_address_destroy(lldb_address_t address) {
+    if (address) delete static_cast<lldb::SBAddress*>(address);
+}
+
+int lldb_address_is_valid(lldb_address_t address) {
+    if (!address) return 0;
+    return static_cast<lldb::SBAddress*>(address)->IsValid() ? 1 : 0;
+}
+
+uint64_t lldb_address_get_file_address(lldb_address_t address) {
+    if (!address) return LLDB_INVALID_ADDRESS;
+    return static_cast<lldb::SBAddress*>(address)->GetFileAddress();
+}
+
+uint64_t lldb_address_get_load_address(lldb_address_t address, lldb_target_t target) {
+    if (!address || !target) return LLDB_INVALID_ADDRESS;
+    return static_cast<lldb::SBAddress*>(address)->GetLoadAddress(
+        *static_cast<lldb::SBTarget*>(target));
+}
+
+uint64_t lldb_address_get_offset(lldb_address_t address) {
+    if (!address) return 0;
+    return static_cast<lldb::SBAddress*>(address)->GetOffset();
+}
+
+lldb_line_entry_t lldb_address_get_line_entry(lldb_address_t address) {
+    if (!address) return nullptr;
+    lldb::SBLineEntry entry = static_cast<lldb::SBAddress*>(address)->GetLineEntry();
+    if (!entry.IsValid()) return nullptr;
+    return static_cast<lldb_line_entry_t>(new lldb::SBLineEntry(entry));
+}
+
+// ============================================================================
+// SBLineEntry
+// ============================================================================
+
+void lldb_line_entry_destroy(lldb_line_entry_t entry) {
+    if (entry) delete static_cast<lldb::SBLineEntry*>(entry);
+}
+
+int lldb_line_entry_is_valid(lldb_line_entry_t entry) {
+    if (!entry) return 0;
+    return static_cast<lldb::SBLineEntry*>(entry)->IsValid() ? 1 : 0;
+}
+
+lldb_address_t lldb_line_entry_get_start_address(lldb_line_entry_t entry) {
+    if (!entry) return nullptr;
+    lldb::SBAddress address = static_cast<lldb::SBLineEntry*>(entry)->GetStartAddress();
+    if (!address.IsValid()) return nullptr;
+    return static_cast<lldb_address_t>(new lldb::SBAddress(address));
+}
+
+lldb_address_t lldb_line_entry_get_end_address(lldb_line_entry_t entry) {
+    if (!entry) return nullptr;
+    lldb::SBAddress address = static_cast<lldb::SBLineEntry*>(entry)->GetEndAddress();
+    if (!address.IsValid()) return nullptr;
+    return static_cast<lldb_address_t>(new lldb::SBAddress(address));
+}
+
+lldb_file_spec_t lldb_line_entry_get_file_spec(lldb_line_entry_t entry) {
+    if (!entry) return nullptr;
+    lldb::SBFileSpec file_spec = static_cast<lldb::SBLineEntry*>(entry)->GetFileSpec();
+    if (!file_spec.IsValid()) return nullptr;
+    return static_cast<lldb_file_spec_t>(new lldb::SBFileSpec(file_spec));
+}
+
+uint32_t lldb_line_entry_get_line(lldb_line_entry_t entry) {
+    if (!entry) return LLDB_INVALID_LINE_NUMBER;
+    return static_cast<lldb::SBLineEntry*>(entry)->GetLine();
+}
+
+uint32_t lldb_line_entry_get_column(lldb_line_entry_t entry) {
+    if (!entry) return 0;
+    return static_cast<lldb::SBLineEntry*>(entry)->GetColumn();
+}
+
+// ============================================================================
 // SBProcess
 // ============================================================================
 
@@ -1815,6 +1954,15 @@ lldb_file_spec_t lldb_frame_get_file_spec(lldb_frame_t frame) {
     return static_cast<lldb_file_spec_t>(new lldb::SBFileSpec(file_spec));
 }
 
+lldb_line_entry_t lldb_frame_get_line_entry(lldb_frame_t frame) {
+    if (!frame) return nullptr;
+
+    lldb::SBLineEntry line_entry = static_cast<lldb::SBFrame*>(frame)->GetLineEntry();
+    if (!line_entry.IsValid()) return nullptr;
+
+    return static_cast<lldb_line_entry_t>(new lldb::SBLineEntry(line_entry));
+}
+
 uint32_t lldb_frame_get_column(lldb_frame_t frame) {
     if (!frame) return 0;
     lldb::SBLineEntry line_entry = static_cast<lldb::SBFrame*>(frame)->GetLineEntry();
@@ -2110,6 +2258,15 @@ int32_t lldb_breakpoint_location_get_id(lldb_breakpoint_location_t loc) {
 uint64_t lldb_breakpoint_location_get_load_address(lldb_breakpoint_location_t loc) {
     if (!loc) return LLDB_INVALID_ADDRESS;
     return static_cast<lldb::SBBreakpointLocation*>(loc)->GetLoadAddress();
+}
+
+lldb_address_t lldb_breakpoint_location_get_address(lldb_breakpoint_location_t loc) {
+    if (!loc) return nullptr;
+
+    lldb::SBAddress address = static_cast<lldb::SBBreakpointLocation*>(loc)->GetAddress();
+    if (!address.IsValid()) return nullptr;
+
+    return static_cast<lldb_address_t>(new lldb::SBAddress(address));
 }
 
 int lldb_breakpoint_location_is_enabled(lldb_breakpoint_location_t loc) {

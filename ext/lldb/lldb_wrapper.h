@@ -33,6 +33,9 @@ typedef void* lldb_listener_t;
 typedef void* lldb_event_t;
 typedef void* lldb_attach_info_t;
 typedef void* lldb_expression_options_t;
+typedef void* lldb_address_t;
+typedef void* lldb_line_entry_t;
+typedef void* lldb_file_spec_list_t;
 
 typedef enum {
     LLDB_RUBY_STATUS_OK = 0,
@@ -279,6 +282,36 @@ uint32_t lldb_file_spec_get_path(lldb_file_spec_t file_spec, char* buffer, size_
 void lldb_file_spec_set_filename(lldb_file_spec_t file_spec, const char* filename);
 void lldb_file_spec_set_directory(lldb_file_spec_t file_spec, const char* directory);
 
+// SBFileSpecList
+lldb_file_spec_list_t lldb_file_spec_list_create(void);
+void lldb_file_spec_list_destroy(lldb_file_spec_list_t list);
+int lldb_file_spec_list_is_valid(lldb_file_spec_list_t list);
+uint32_t lldb_file_spec_list_get_size(lldb_file_spec_list_t list);
+void lldb_file_spec_list_append(lldb_file_spec_list_t list, lldb_file_spec_t file_spec);
+int lldb_file_spec_list_append_if_unique(lldb_file_spec_list_t list, lldb_file_spec_t file_spec);
+void lldb_file_spec_list_clear(lldb_file_spec_list_t list);
+lldb_file_spec_t lldb_file_spec_list_get_file_spec_at_index(lldb_file_spec_list_t list,
+                                                             uint32_t index);
+
+// SBAddress
+lldb_address_t lldb_address_create(void);
+lldb_address_t lldb_address_create_from_load_address(uint64_t address, lldb_target_t target);
+void lldb_address_destroy(lldb_address_t address);
+int lldb_address_is_valid(lldb_address_t address);
+uint64_t lldb_address_get_file_address(lldb_address_t address);
+uint64_t lldb_address_get_load_address(lldb_address_t address, lldb_target_t target);
+uint64_t lldb_address_get_offset(lldb_address_t address);
+lldb_line_entry_t lldb_address_get_line_entry(lldb_address_t address);
+
+// SBLineEntry
+void lldb_line_entry_destroy(lldb_line_entry_t entry);
+int lldb_line_entry_is_valid(lldb_line_entry_t entry);
+lldb_address_t lldb_line_entry_get_start_address(lldb_line_entry_t entry);
+lldb_address_t lldb_line_entry_get_end_address(lldb_line_entry_t entry);
+lldb_file_spec_t lldb_line_entry_get_file_spec(lldb_line_entry_t entry);
+uint32_t lldb_line_entry_get_line(lldb_line_entry_t entry);
+uint32_t lldb_line_entry_get_column(lldb_line_entry_t entry);
+
 // SBProcess
 void lldb_process_destroy(lldb_process_t process);
 int lldb_process_is_valid(lldb_process_t process);
@@ -367,6 +400,7 @@ const char* lldb_frame_get_display_function_name(lldb_frame_t frame);
 uint32_t lldb_frame_get_line(lldb_frame_t frame);
 const char* lldb_frame_get_file_path(lldb_frame_t frame);
 lldb_file_spec_t lldb_frame_get_file_spec(lldb_frame_t frame);
+lldb_line_entry_t lldb_frame_get_line_entry(lldb_frame_t frame);
 uint32_t lldb_frame_get_column(lldb_frame_t frame);
 uint64_t lldb_frame_get_pc(lldb_frame_t frame);
 int lldb_frame_set_pc(lldb_frame_t frame, uint64_t new_pc);
@@ -418,6 +452,7 @@ void lldb_breakpoint_location_destroy(lldb_breakpoint_location_t loc);
 int lldb_breakpoint_location_is_valid(lldb_breakpoint_location_t loc);
 int32_t lldb_breakpoint_location_get_id(lldb_breakpoint_location_t loc);
 uint64_t lldb_breakpoint_location_get_load_address(lldb_breakpoint_location_t loc);
+lldb_address_t lldb_breakpoint_location_get_address(lldb_breakpoint_location_t loc);
 int lldb_breakpoint_location_is_enabled(lldb_breakpoint_location_t loc);
 void lldb_breakpoint_location_set_enabled(lldb_breakpoint_location_t loc, int enabled);
 uint32_t lldb_breakpoint_location_get_hit_count(lldb_breakpoint_location_t loc);

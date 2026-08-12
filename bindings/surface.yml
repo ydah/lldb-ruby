@@ -2321,7 +2321,212 @@ entries:
       kind: reviewed_no_throw
       reason: The export is tracked explicitly until its native error boundary is upgraded.
 
+  lldb_address_create:
+    classification: public
+    reason: This LLDB C ABI function exposes the structured file, address, or line API.
+    exception_guard:
+      kind: reviewed_no_throw
+      reason: The export is tracked explicitly until its native error boundary is upgraded.
+  lldb_address_create_from_load_address:
+    classification: public
+    reason: This LLDB C ABI function exposes the structured file, address, or line API.
+    exception_guard:
+      kind: reviewed_no_throw
+      reason: The export is tracked explicitly until its native error boundary is upgraded.
+  lldb_address_destroy:
+    classification: public
+    reason: This LLDB C ABI function exposes the structured file, address, or line API.
+    exception_guard:
+      kind: reviewed_no_throw
+      reason: The export is tracked explicitly until its native error boundary is upgraded.
+  lldb_address_get_file_address:
+    classification: public
+    reason: This LLDB C ABI function exposes the structured file, address, or line API.
+    exception_guard:
+      kind: reviewed_no_throw
+      reason: The export is tracked explicitly until its native error boundary is upgraded.
+  lldb_address_get_line_entry:
+    classification: public
+    reason: This LLDB C ABI function exposes the structured file, address, or line API.
+    exception_guard:
+      kind: reviewed_no_throw
+      reason: The export is tracked explicitly until its native error boundary is upgraded.
+  lldb_address_get_load_address:
+    classification: public
+    reason: This LLDB C ABI function exposes the structured file, address, or line API.
+    exception_guard:
+      kind: reviewed_no_throw
+      reason: The export is tracked explicitly until its native error boundary is upgraded.
+  lldb_address_get_offset:
+    classification: public
+    reason: This LLDB C ABI function exposes the structured file, address, or line API.
+    exception_guard:
+      kind: reviewed_no_throw
+      reason: The export is tracked explicitly until its native error boundary is upgraded.
+  lldb_address_is_valid:
+    classification: public
+    reason: This LLDB C ABI function exposes the structured file, address, or line API.
+    exception_guard:
+      kind: reviewed_no_throw
+      reason: The export is tracked explicitly until its native error boundary is upgraded.
+  lldb_breakpoint_location_get_address:
+    classification: public
+    reason: This LLDB C ABI function exposes the structured file, address, or line API.
+    exception_guard:
+      kind: reviewed_no_throw
+      reason: The export is tracked explicitly until its native error boundary is upgraded.
+  lldb_file_spec_list_append:
+    classification: public
+    reason: This LLDB C ABI function exposes the structured file, address, or line API.
+    exception_guard:
+      kind: reviewed_no_throw
+      reason: The export is tracked explicitly until its native error boundary is upgraded.
+  lldb_file_spec_list_append_if_unique:
+    classification: public
+    reason: This LLDB C ABI function exposes the structured file, address, or line API.
+    exception_guard:
+      kind: reviewed_no_throw
+      reason: The export is tracked explicitly until its native error boundary is upgraded.
+  lldb_file_spec_list_clear:
+    classification: public
+    reason: This LLDB C ABI function exposes the structured file, address, or line API.
+    exception_guard:
+      kind: reviewed_no_throw
+      reason: The export is tracked explicitly until its native error boundary is upgraded.
+  lldb_file_spec_list_create:
+    classification: public
+    reason: This LLDB C ABI function exposes the structured file, address, or line API.
+    exception_guard:
+      kind: reviewed_no_throw
+      reason: The export is tracked explicitly until its native error boundary is upgraded.
+  lldb_file_spec_list_destroy:
+    classification: public
+    reason: This LLDB C ABI function exposes the structured file, address, or line API.
+    exception_guard:
+      kind: reviewed_no_throw
+      reason: The export is tracked explicitly until its native error boundary is upgraded.
+  lldb_file_spec_list_get_file_spec_at_index:
+    classification: public
+    reason: This LLDB C ABI function exposes the structured file, address, or line API.
+    exception_guard:
+      kind: reviewed_no_throw
+      reason: The export is tracked explicitly until its native error boundary is upgraded.
+  lldb_file_spec_list_get_size:
+    classification: public
+    reason: This LLDB C ABI function exposes the structured file, address, or line API.
+    exception_guard:
+      kind: reviewed_no_throw
+      reason: The export is tracked explicitly until its native error boundary is upgraded.
+  lldb_file_spec_list_is_valid:
+    classification: public
+    reason: This LLDB C ABI function exposes the structured file, address, or line API.
+    exception_guard:
+      kind: reviewed_no_throw
+      reason: The export is tracked explicitly until its native error boundary is upgraded.
+  lldb_frame_get_line_entry:
+    classification: public
+    reason: This LLDB C ABI function exposes the structured file, address, or line API.
+    exception_guard:
+      kind: reviewed_no_throw
+      reason: The export is tracked explicitly until its native error boundary is upgraded.
+  lldb_line_entry_destroy:
+    classification: public
+    reason: This LLDB C ABI function exposes the structured file, address, or line API.
+    exception_guard:
+      kind: reviewed_no_throw
+      reason: The export is tracked explicitly until its native error boundary is upgraded.
+  lldb_line_entry_get_column:
+    classification: public
+    reason: This LLDB C ABI function exposes the structured file, address, or line API.
+    exception_guard:
+      kind: reviewed_no_throw
+      reason: The export is tracked explicitly until its native error boundary is upgraded.
+  lldb_line_entry_get_end_address:
+    classification: public
+    reason: This LLDB C ABI function exposes the structured file, address, or line API.
+    exception_guard:
+      kind: reviewed_no_throw
+      reason: The export is tracked explicitly until its native error boundary is upgraded.
+  lldb_line_entry_get_file_spec:
+    classification: public
+    reason: This LLDB C ABI function exposes the structured file, address, or line API.
+    exception_guard:
+      kind: reviewed_no_throw
+      reason: The export is tracked explicitly until its native error boundary is upgraded.
+  lldb_line_entry_get_line:
+    classification: public
+    reason: This LLDB C ABI function exposes the structured file, address, or line API.
+    exception_guard:
+      kind: reviewed_no_throw
+      reason: The export is tracked explicitly until its native error boundary is upgraded.
+  lldb_line_entry_get_start_address:
+    classification: public
+    reason: This LLDB C ABI function exposes the structured file, address, or line API.
+    exception_guard:
+      kind: reviewed_no_throw
+      reason: The export is tracked explicitly until its native error boundary is upgraded.
+  lldb_line_entry_is_valid:
+    classification: public
+    reason: This LLDB C ABI function exposes the structured file, address, or line API.
+    exception_guard:
+      kind: reviewed_no_throw
+      reason: The export is tracked explicitly until its native error boundary is upgraded.
+
 ruby_methods:
+  - function: lldb_address_create
+    file: lib/lldb/address.rb
+    method: initialize
+  - function: lldb_address_get_file_address
+    file: lib/lldb/address.rb
+    method: file_address
+  - function: lldb_address_get_load_address
+    file: lib/lldb/address.rb
+    method: load_address
+  - function: lldb_address_get_offset
+    file: lib/lldb/address.rb
+    method: offset
+  - function: lldb_address_get_line_entry
+    file: lib/lldb/address.rb
+    method: line_entry
+  - function: lldb_file_spec_list_create
+    file: lib/lldb/file_spec_list.rb
+    method: initialize
+  - function: lldb_file_spec_list_get_size
+    file: lib/lldb/file_spec_list.rb
+    method: size
+  - function: lldb_file_spec_list_append
+    file: lib/lldb/file_spec_list.rb
+    method: append
+  - function: lldb_file_spec_list_append_if_unique
+    file: lib/lldb/file_spec_list.rb
+    method: append_if_unique
+  - function: lldb_file_spec_list_clear
+    file: lib/lldb/file_spec_list.rb
+    method: clear
+  - function: lldb_file_spec_list_get_file_spec_at_index
+    file: lib/lldb/file_spec_list.rb
+    method: to_a
+  - function: lldb_frame_get_line_entry
+    file: lib/lldb/frame.rb
+    method: line_entry
+  - function: lldb_breakpoint_location_get_address
+    file: lib/lldb/breakpoint_location.rb
+    method: address
+  - function: lldb_line_entry_get_start_address
+    file: lib/lldb/line_entry.rb
+    method: start_address
+  - function: lldb_line_entry_get_end_address
+    file: lib/lldb/line_entry.rb
+    method: end_address
+  - function: lldb_line_entry_get_file_spec
+    file: lib/lldb/line_entry.rb
+    method: file_spec
+  - function: lldb_line_entry_get_line
+    file: lib/lldb/line_entry.rb
+    method: line
+  - function: lldb_line_entry_get_column
+    file: lib/lldb/line_entry.rb
+    method: column
   - function: lldb_target_get_executable_file
     file: lib/lldb/target.rb
     method: executable_file

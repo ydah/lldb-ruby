@@ -84,6 +84,17 @@ RSpec.describe LLDB::Frame do
       expect(frame.file_spec).to be_a(LLDB::FileSpec)
       expect(frame.file_path).to eq(frame.file_spec.path)
     end
+
+    it 'exposes structured line and address information' do
+      entry = frame.line_entry
+
+      expect(entry).to be_a(LLDB::LineEntry)
+      expect(entry).to be_valid
+      expect(entry.file_spec.path).to eq(frame.file_spec.path)
+      expect(entry.line).to eq(frame.line)
+      expect(entry.start_address).to be_a(LLDB::Address)
+      expect(entry.start_address.file_address).to be > 0
+    end
   end
 
   describe '#to_s' do

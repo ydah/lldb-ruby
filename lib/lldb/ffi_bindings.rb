@@ -288,6 +288,33 @@ module LLDB
     attach_function :lldb_file_spec_get_path, %i[pointer pointer size_t], :uint32
     attach_function :lldb_file_spec_set_filename, %i[pointer string], :void
     attach_function :lldb_file_spec_set_directory, %i[pointer string], :void
+    attach_function :lldb_file_spec_list_create, [], :pointer
+    attach_function :lldb_file_spec_list_destroy, [:pointer], :void
+    attach_function :lldb_file_spec_list_is_valid, [:pointer], :int
+    attach_function :lldb_file_spec_list_get_size, [:pointer], :uint32
+    attach_function :lldb_file_spec_list_append, %i[pointer pointer], :void
+    attach_function :lldb_file_spec_list_append_if_unique, %i[pointer pointer], :int
+    attach_function :lldb_file_spec_list_clear, [:pointer], :void
+    attach_function :lldb_file_spec_list_get_file_spec_at_index, %i[pointer uint32], :pointer
+
+    # =========================================================================
+    # SBAddress and SBLineEntry
+    # =========================================================================
+    attach_function :lldb_address_create, [], :pointer
+    attach_function :lldb_address_create_from_load_address, %i[uint64 pointer], :pointer
+    attach_function :lldb_address_destroy, [:pointer], :void
+    attach_function :lldb_address_is_valid, [:pointer], :int
+    attach_function :lldb_address_get_file_address, [:pointer], :uint64
+    attach_function :lldb_address_get_load_address, %i[pointer pointer], :uint64
+    attach_function :lldb_address_get_offset, [:pointer], :uint64
+    attach_function :lldb_address_get_line_entry, [:pointer], :pointer
+    attach_function :lldb_line_entry_destroy, [:pointer], :void
+    attach_function :lldb_line_entry_is_valid, [:pointer], :int
+    attach_function :lldb_line_entry_get_start_address, [:pointer], :pointer
+    attach_function :lldb_line_entry_get_end_address, [:pointer], :pointer
+    attach_function :lldb_line_entry_get_file_spec, [:pointer], :pointer
+    attach_function :lldb_line_entry_get_line, [:pointer], :uint32
+    attach_function :lldb_line_entry_get_column, [:pointer], :uint32
 
     # =========================================================================
     # SBProcess
@@ -375,6 +402,7 @@ module LLDB
     attach_function :lldb_frame_get_line, [:pointer], :uint32
     attach_function :lldb_frame_get_file_path, [:pointer], :string
     attach_function :lldb_frame_get_file_spec, [:pointer], :pointer
+    attach_function :lldb_frame_get_line_entry, [:pointer], :pointer
     attach_function :lldb_frame_get_column, [:pointer], :uint32
     attach_function :lldb_frame_get_pc, [:pointer], :uint64
     attach_function :lldb_frame_set_pc, %i[pointer uint64], :int
@@ -428,6 +456,7 @@ module LLDB
     attach_function :lldb_breakpoint_location_is_valid, [:pointer], :int
     attach_function :lldb_breakpoint_location_get_id, [:pointer], :int32
     attach_function :lldb_breakpoint_location_get_load_address, [:pointer], :uint64
+    attach_function :lldb_breakpoint_location_get_address, [:pointer], :pointer
     attach_function :lldb_breakpoint_location_is_enabled, [:pointer], :int
     attach_function :lldb_breakpoint_location_set_enabled, %i[pointer int], :void
     attach_function :lldb_breakpoint_location_get_hit_count, [:pointer], :uint32
