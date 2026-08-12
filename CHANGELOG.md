@@ -9,6 +9,7 @@
 - Add idempotent native handles, shared debugger contexts, and deterministic debugger close.
 - Make `Target#launch` preserve LLDB launch semantics without implicit flags or polling.
 - Add `FileSpec` objects, dynamically sized path buffers, and LLDB sentinel constants.
+- Add binding parity, surface-ledger, reproducible RBS, and sanitizer checks.
 - Add LLDB discovery and compile/link validation for Linux and macOS builds.
 - Expose wrapper ABI and LLDB version metadata with capability-based watchpoint access checks.
 

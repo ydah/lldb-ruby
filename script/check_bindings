@@ -1,0 +1,235 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require 'fileutils'
+require 'open3'
+require 'optparse'
+require 'rbconfig'
+require 'tempfile'
+require 'tmpdir'
+require 'yaml'
+
+ROOT = File.expand_path('..', __dir__)
+
+options = {
+  header: File.join(ROOT, 'ext/lldb/lldb_wrapper.h'),
+  source: File.join(ROOT, 'ext/lldb/lldb_wrapper.cpp'),
+  ffi: File.join(ROOT, 'lib/lldb/ffi_bindings.rb'),
+  rbs: File.join(ROOT, 'sig/lldb/ffi_bindings.rbs'),
+  surface: File.join(ROOT, 'bindings/surface.yml'),
+  constants: File.join(ROOT, 'bindings/constants.yml'),
+  library: nil,
+  include: ENV['LLDB_INCLUDE'],
+  skip_library: false,
+  skip_constants: false
+}
+
+OptionParser.new do |parser|
+  parser.banner = 'Usage: script/check_bindings [options]'
+  parser.on('--header PATH') { |value| options[:header] = value }
+  parser.on('--source PATH') { |value| options[:source] = value }
+  parser.on('--ffi PATH') { |value| options[:ffi] = value }
+  parser.on('--rbs PATH') { |value| options[:rbs] = value }
+  parser.on('--surface PATH') { |value| options[:surface] = value }
+  parser.on('--constants PATH') { |value| options[:constants] = value }
+  parser.on('--library PATH') { |value| options[:library] = value }
+  parser.on('--include PATH') { |value| options[:include] = value }
+  parser.on('--skip-library') { options[:skip_library] = true }
+  parser.on('--skip-constants') { options[:skip_constants] = true }
+end.parse!
+
+def read_required(path)
+  abort "missing binding input: #{path}" unless File.file?(path)
+
+  File.read(path)
+end
+
+def header_functions(source)
+  source = source.gsub(%r{/\*.*?\*/|//[^\n]*}, '')
+  source.scan(/(?:^|\n)\s*(?:[A-Za-z_][A-Za-z0-9_:<>*&\s]*?)\s+(lldb_[A-Za-z0-9_]+)\s*\([^;]*\)\s*;/m).flatten.uniq.sort
+end
+
+def ffi_functions(source)
+  source.scan(/\battach_function\s+:([a-z0-9_]+)/).flatten.uniq.sort
+end
+
+def rbs_functions(source)
+  source.scan(/\bdef self\.(lldb_[a-z0-9_]+):/).flatten.uniq.sort
+end
+
+def exported_functions(path)
+  command = if RbConfig::CONFIG['host_os'].match?(/darwin/)
+              ['nm', '-gU', path]
+            else
+              ['nm', '-D', '--defined-only', path]
+            end
+  stdout, stderr, status = Open3.capture3(*command)
+  abort "cannot inspect native library #{path}: #{stderr.strip}" unless status.success?
+
+  stdout.lines.filter_map do |line|
+    name = line.split.last
+    next unless name&.match?(/\A_?lldb_[A-Za-z0-9_]+\z/)
+
+    name.delete_prefix('_').to_sym.to_s
+  end.uniq.sort
+end
+
+def report_difference(label, left_name, left, right_name, right)
+  missing = left - right
+  extra = right - left
+  return [] if missing.empty? && extra.empty?
+
+  messages = []
+  messages << "#{label}: missing from #{right_name}: #{missing.join(', ')}" unless missing.empty?
+  messages << "#{label}: missing from #{left_name}: #{extra.join(', ')}" unless extra.empty?
+  messages
+end
+
+def function_body(source, name)
+  start = source.index("#{name}(")
+  return nil unless start
+
+  opening = source.index('{', start)
+  return nil unless opening
+
+  depth = 0
+  source.byteslice(opening..).each_byte.with_index do |byte, offset|
+    depth += 1 if byte == 123
+    depth -= 1 if byte == 125
+    return source.byteslice(opening, offset + 1) if depth.zero?
+  end
+  nil
+end
+
+def check_surface(path, functions, source)
+  document = YAML.safe_load(File.read(path), permitted_classes: [], aliases: false)
+  entries = document.fetch('entries')
+  errors = []
+
+  errors << "surface ledger has missing entries: #{(functions - entries.keys).sort.join(', ')}" unless
+    (functions - entries.keys).empty?
+  errors << "surface ledger has stale entries: #{(entries.keys - functions).sort.join(', ')}" unless
+    (entries.keys - functions).empty?
+
+  allowed_classifications = %w[public internal metadata optional_stub deprecated]
+  entries.each do |name, entry|
+    next unless functions.include?(name)
+
+    classification = entry.fetch('classification', '')
+    unless allowed_classifications.include?(classification)
+      errors << "surface ledger entry #{name} has invalid classification #{classification.inspect}"
+    end
+    if entry.fetch('reason', '').to_s.strip.empty?
+      errors << "surface ledger entry #{name} has no reason"
+    end
+
+    guard = entry.fetch('exception_guard', {})
+    kind = guard.fetch('kind', '')
+    reason = guard.fetch('reason', '').to_s.strip
+    if reason.empty?
+      errors << "surface ledger entry #{name} has no exception guard reason"
+    elsif kind == 'error_boundary'
+      body = function_body(source, name)
+      unless body&.include?('try') && body.include?('catch')
+        errors << "#{name} is marked error_boundary but has no try/catch body"
+      end
+    elsif !%w[reviewed_no_throw noexcept].include?(kind)
+      errors << "surface ledger entry #{name} has invalid exception guard #{kind.inspect}"
+    end
+  end
+
+  methods = document.fetch('ruby_methods', [])
+  methods.each do |mapping|
+    file = File.join(ROOT, mapping.fetch('file'))
+    method = mapping.fetch('method')
+    unless File.file?(file) && File.read(file).match?(/^\s*def #{Regexp.escape(method)}\b/)
+      errors << "#{mapping.fetch('function')} maps to missing Ruby method #{mapping.fetch('method')} in #{file}"
+    end
+  end
+  errors
+end
+
+def find_include_dir(explicit)
+  return explicit if explicit && File.file?(File.join(explicit, 'lldb/API/LLDB.h'))
+
+  discovery = File.join(ROOT, 'ext/lldb/discovery.rb')
+  require discovery
+  LLDB::BuildDiscovery.candidates.find do |candidate|
+    File.file?(File.join(candidate.include_dir.to_s, 'lldb/API/LLDB.h'))
+  end&.include_dir
+end
+
+def check_constants(path, include_dir)
+  document = YAML.safe_load(File.read(path), permitted_classes: [], aliases: false)
+  constants = document.fetch('constants')
+  return [] if constants.empty?
+
+  unless include_dir
+    return ['cannot check constants: LLDB include directory was not found']
+  end
+
+  source = <<~CPP
+    #include <lldb/API/LLDB.h>
+    #include <iostream>
+    int main() {
+  #{constants.map { |entry| "  std::cout << static_cast<unsigned long long>(#{entry.fetch('native')}) << '\\n';" }.join("\n")}
+      return 0;
+    }
+  CPP
+
+  Dir.mktmpdir('lldb-ruby-constants') do |directory|
+    source_path = File.join(directory, 'probe.cpp')
+    binary_path = File.join(directory, 'probe')
+    File.write(source_path, source)
+    compiler = ENV.fetch('CXX', RbConfig::CONFIG['CXX'] || 'c++')
+    _stdout, stderr, status = Open3.capture3(
+      compiler, '-std=c++17', '-I', include_dir, source_path, '-o', binary_path
+    )
+    return ["constant probe compilation failed: #{stderr.strip}"] unless status.success?
+
+    native_output, native_error, native_status = Open3.capture3(binary_path)
+    return ["constant probe failed: #{native_error.strip}"] unless native_status.success?
+
+    ruby_code = constants.map { |entry| "puts LLDB::#{entry.fetch('ruby')}" }.join('; ')
+    ruby_output, ruby_error, ruby_status = Open3.capture3(
+      RbConfig.ruby, '-I', File.join(ROOT, 'lib'), '-r', 'lldb/types', '-e', ruby_code
+    )
+    return ["Ruby constant probe failed: #{ruby_error.strip}"] unless ruby_status.success?
+
+    native_values = native_output.lines.map(&:strip)
+    ruby_values = ruby_output.lines.map(&:strip)
+    errors = []
+    constants.each_with_index do |entry, index|
+      next if native_values[index] == ruby_values[index]
+
+      errors << "constant #{entry.fetch('ruby')} differs: Ruby=#{ruby_values[index].inspect}, " \
+                "LLDB=#{native_values[index].inspect}"
+    end
+    errors
+  end
+end
+
+header = header_functions(read_required(options[:header]))
+ffi = ffi_functions(read_required(options[:ffi]))
+rbs = rbs_functions(read_required(options[:rbs]))
+source = read_required(options[:source])
+errors = []
+errors.concat(report_difference('header/FFI', 'header', header, 'FFI', ffi))
+errors.concat(report_difference('FFI/RBS', 'FFI', ffi, 'RBS', rbs))
+
+unless options[:skip_library]
+  library = options[:library] || Dir[File.join(ROOT, 'lib/lldb/liblldb_wrapper.{so,dylib,dll}')].first
+  errors << 'native library was not found; pass --library or --skip-library' unless library
+  errors.concat(report_difference('header/native exports', 'header', header, 'native exports', exported_functions(library))) if library
+end
+
+errors.concat(check_surface(options[:surface], header, source))
+errors.concat(check_constants(options[:constants], find_include_dir(options[:include]))) unless options[:skip_constants]
+
+if errors.empty?
+  puts "binding parity OK (#{header.length} functions)"
+  exit 0
+end
+
+warn errors.map { |error| "error: #{error}" }.join("\n")
+exit 1

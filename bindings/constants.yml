@@ -1,0 +1,13 @@
+version: 1
+
+constants:
+  - ruby: INVALID_ADDRESS
+    native: LLDB_INVALID_ADDRESS
+  - ruby: INVALID_PROCESS_ID
+    native: LLDB_INVALID_PROCESS_ID
+  - ruby: INVALID_THREAD_ID
+    native: LLDB_INVALID_THREAD_ID
+  - ruby: INVALID_BREAK_ID
+    native: LLDB_INVALID_BREAK_ID
+  - ruby: INVALID_LINE_NUMBER
+    native: LLDB_INVALID_LINE_NUMBER

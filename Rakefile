@@ -75,6 +75,20 @@ namespace :steep do
   end
 end
 
+namespace :bindings do
+  desc 'Check native, FFI, RBS, and surface-ledger parity'
+  task check: :compile do
+    sh 'ruby script/check_bindings'
+  end
+end
+
+namespace :rbs do
+  desc 'Verify that generated RBS output leaves no tracked changes'
+  task verify: :generate do
+    sh 'git diff --exit-code -- sig'
+  end
+end
+
 desc 'Run steep type check'
 task steep: ['steep:check']
 

@@ -238,6 +238,16 @@ cd ext/lldb && ruby extconf.rb && make && cd ../..
 bundle exec rspec
 ```
 
+Binding and type-surface checks can be run with:
+
+```bash
+bundle exec rake bindings:check
+bundle exec rake rbs:verify
+```
+
+`bindings/surface.yml` records the classification and exception-safety review
+for every native export. Update it together with any new header declaration.
+
 To run tests, you need to compile the test fixtures:
 
 ```bash
