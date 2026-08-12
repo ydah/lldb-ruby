@@ -2930,9 +2930,72 @@ uint32_t lldb_type_get_num_virtual_base_classes(lldb_type_t type) {
     return static_cast<lldb::SBType*>(type)->GetNumberOfVirtualBaseClasses();
 }
 
+lldb_type_member_t lldb_type_get_field_at_index(lldb_type_t type, uint32_t index) {
+    if (!type) return nullptr;
+    lldb::SBTypeMember member = static_cast<lldb::SBType*>(type)->GetFieldAtIndex(index);
+    if (!member.IsValid()) return nullptr;
+    return static_cast<lldb_type_member_t>(new lldb::SBTypeMember(member));
+}
+
+lldb_type_member_t lldb_type_get_direct_base_class_at_index(lldb_type_t type, uint32_t index) {
+    if (!type) return nullptr;
+    lldb::SBTypeMember member =
+        static_cast<lldb::SBType*>(type)->GetDirectBaseClassAtIndex(index);
+    if (!member.IsValid()) return nullptr;
+    return static_cast<lldb_type_member_t>(new lldb::SBTypeMember(member));
+}
+
+lldb_type_member_t lldb_type_get_virtual_base_class_at_index(lldb_type_t type, uint32_t index) {
+    if (!type) return nullptr;
+    lldb::SBTypeMember member =
+        static_cast<lldb::SBType*>(type)->GetVirtualBaseClassAtIndex(index);
+    if (!member.IsValid()) return nullptr;
+    return static_cast<lldb_type_member_t>(new lldb::SBTypeMember(member));
+}
+
 int lldb_type_get_basic_type(lldb_type_t type) {
     if (!type) return static_cast<int>(lldb::eBasicTypeInvalid);
     return static_cast<int>(static_cast<lldb::SBType*>(type)->GetBasicType());
+}
+
+// ============================================================================
+// SBTypeMember
+// ============================================================================
+
+void lldb_type_member_destroy(lldb_type_member_t member) {
+    if (member) delete static_cast<lldb::SBTypeMember*>(member);
+}
+
+int lldb_type_member_is_valid(lldb_type_member_t member) {
+    if (!member) return 0;
+    return static_cast<lldb::SBTypeMember*>(member)->IsValid() ? 1 : 0;
+}
+
+const char* lldb_type_member_get_name(lldb_type_member_t member) {
+    if (!member) return nullptr;
+    return static_cast<lldb::SBTypeMember*>(member)->GetName();
+}
+
+lldb_type_t lldb_type_member_get_type(lldb_type_member_t member) {
+    if (!member) return nullptr;
+    lldb::SBType type = static_cast<lldb::SBTypeMember*>(member)->GetType();
+    if (!type.IsValid()) return nullptr;
+    return static_cast<lldb_type_t>(new lldb::SBType(type));
+}
+
+uint64_t lldb_type_member_get_offset_in_bytes(lldb_type_member_t member) {
+    if (!member) return 0;
+    return static_cast<lldb::SBTypeMember*>(member)->GetOffsetInBytes();
+}
+
+uint64_t lldb_type_member_get_offset_in_bits(lldb_type_member_t member) {
+    if (!member) return 0;
+    return static_cast<lldb::SBTypeMember*>(member)->GetOffsetInBits();
+}
+
+uint32_t lldb_type_member_get_bitfield_size_in_bits(lldb_type_member_t member) {
+    if (!member) return 0;
+    return static_cast<lldb::SBTypeMember*>(member)->GetBitfieldSizeInBits();
 }
 
 // ============================================================================

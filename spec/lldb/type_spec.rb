@@ -2,16 +2,16 @@
 
 RSpec.describe LLDB::Type do
   let(:debugger) { LLDB::Debugger.create }
-  let(:executable) { compile_fixture('simple') }
+  let(:executable) { compile_fixture('type_members') }
   let(:target) { debugger.create_target(executable) }
   let(:process) do
     debugger.async = false
-    target.breakpoint_create_by_name('lldb_test_add')
+    target.breakpoint_create_by_name('lldb_test_type')
     target.launch
   end
   let(:thread) { process.selected_thread }
   let(:frame) { thread.selected_frame }
-  let(:value) { frame.find_variable('a') }
+  let(:value) { frame.find_variable('value') }
   let(:type) { value&.type }
 
   after do
@@ -50,6 +50,39 @@ RSpec.describe LLDB::Type do
     it 'returns a string representation' do
       skip 'Value or type not found' if type.nil?
       expect(type.to_s).to be_a(String)
+    end
+  end
+
+  describe '#field_at_index' do
+    it 'exposes field metadata and nested types' do
+      skip 'Value or type not found' if type.nil?
+
+      expect(type.num_fields).to be >= 3
+      field = type.field_at_index(0)
+      expect(field).to be_a(LLDB::TypeMember)
+      expect(field).to be_valid
+      expect(field.name).to eq('first')
+      expect(field.type).to be_a(LLDB::Type)
+      expect(field.offset_in_bytes).to eq(0)
+
+      bitfield = type.field_at_index(1)
+      expect(bitfield.name).to eq('flags')
+      expect(bitfield.bitfield_size_in_bits).to eq(3)
+    end
+
+    it 'returns nil for an out-of-range field' do
+      skip 'Value or type not found' if type.nil?
+
+      expect(type.field_at_index(type.num_fields)).to be_nil
+    end
+  end
+
+  describe '#base class accessors' do
+    it 'return nil when the type has no base classes' do
+      skip 'Value or type not found' if type.nil?
+
+      expect(type.direct_base_class_at_index(0)).to be_nil
+      expect(type.virtual_base_class_at_index(0)).to be_nil
     end
   end
 end

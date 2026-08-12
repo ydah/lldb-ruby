@@ -565,7 +565,17 @@ module LLDB
     attach_function :lldb_type_get_num_fields, [:pointer], :uint32
     attach_function :lldb_type_get_num_direct_base_classes, [:pointer], :uint32
     attach_function :lldb_type_get_num_virtual_base_classes, [:pointer], :uint32
+    attach_function :lldb_type_get_field_at_index, %i[pointer uint32], :pointer
+    attach_function :lldb_type_get_direct_base_class_at_index, %i[pointer uint32], :pointer
+    attach_function :lldb_type_get_virtual_base_class_at_index, %i[pointer uint32], :pointer
     attach_function :lldb_type_get_basic_type, [:pointer], :int
+    attach_function :lldb_type_member_destroy, [:pointer], :void
+    attach_function :lldb_type_member_is_valid, [:pointer], :int
+    attach_function :lldb_type_member_get_name, [:pointer], :string
+    attach_function :lldb_type_member_get_type, [:pointer], :pointer
+    attach_function :lldb_type_member_get_offset_in_bytes, [:pointer], :uint64
+    attach_function :lldb_type_member_get_offset_in_bits, [:pointer], :uint64
+    attach_function :lldb_type_member_get_bitfield_size_in_bits, [:pointer], :uint32
 
     # =========================================================================
     # SBWatchpoint

@@ -14,6 +14,7 @@
 - Expose explicit broadcaster, listener, and event handles for LLDB state events.
 - Add `source_init_files`, `LaunchInfo`, `AttachInfo`, and `ExpressionOptions` controls.
 - Expose structured `Address`, `LineEntry`, and `FileSpecList` objects for source and breakpoint locations.
+- Expose `TypeMember` metadata for fields and direct or virtual base classes.
 - Add LLDB discovery and compile/link validation for Linux and macOS builds.
 - Expose wrapper ABI and LLDB version metadata with capability-based watchpoint access checks.
 

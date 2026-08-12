@@ -195,6 +195,24 @@ module LLDB
       FFIBindings.lldb_type_get_num_virtual_base_classes(@ptr)
     end
 
+    # @rbs index: Integer
+    # @rbs return: TypeMember?
+    def field_at_index(index)
+      member_at(index, :lldb_type_get_field_at_index)
+    end
+
+    # @rbs index: Integer
+    # @rbs return: TypeMember?
+    def direct_base_class_at_index(index)
+      member_at(index, :lldb_type_get_direct_base_class_at_index)
+    end
+
+    # @rbs index: Integer
+    # @rbs return: TypeMember?
+    def virtual_base_class_at_index(index)
+      member_at(index, :lldb_type_get_virtual_base_class_at_index)
+    end
+
     # @rbs return: Integer
     def basic_type
       return BasicType::INVALID unless valid?
@@ -215,6 +233,20 @@ module LLDB
     # @rbs return: FFI::Pointer
     def to_ptr
       @ptr
+    end
+
+    private
+
+    # @rbs index: Integer
+    # @rbs method_name: Symbol
+    # @rbs return: TypeMember?
+    def member_at(index, method_name)
+      raise InvalidObjectError, 'Type is not valid' unless valid?
+
+      member_ptr = FFIBindings.public_send(method_name, @ptr, index)
+      return nil if member_ptr.nil? || member_ptr.null?
+
+      TypeMember.new(member_ptr, context: context)
     end
   end
 end

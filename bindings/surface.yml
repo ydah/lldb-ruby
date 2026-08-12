@@ -2472,7 +2472,92 @@ entries:
       kind: reviewed_no_throw
       reason: The export is tracked explicitly until its native error boundary is upgraded.
 
+  lldb_type_get_direct_base_class_at_index:
+    classification: public
+    reason: This LLDB C ABI function exposes structured type member metadata.
+    exception_guard:
+      kind: reviewed_no_throw
+      reason: The export is tracked explicitly until its native error boundary is upgraded.
+  lldb_type_get_field_at_index:
+    classification: public
+    reason: This LLDB C ABI function exposes structured type member metadata.
+    exception_guard:
+      kind: reviewed_no_throw
+      reason: The export is tracked explicitly until its native error boundary is upgraded.
+  lldb_type_get_virtual_base_class_at_index:
+    classification: public
+    reason: This LLDB C ABI function exposes structured type member metadata.
+    exception_guard:
+      kind: reviewed_no_throw
+      reason: The export is tracked explicitly until its native error boundary is upgraded.
+  lldb_type_member_destroy:
+    classification: public
+    reason: This LLDB C ABI function exposes structured type member metadata.
+    exception_guard:
+      kind: reviewed_no_throw
+      reason: The export is tracked explicitly until its native error boundary is upgraded.
+  lldb_type_member_get_bitfield_size_in_bits:
+    classification: public
+    reason: This LLDB C ABI function exposes structured type member metadata.
+    exception_guard:
+      kind: reviewed_no_throw
+      reason: The export is tracked explicitly until its native error boundary is upgraded.
+  lldb_type_member_get_name:
+    classification: public
+    reason: This LLDB C ABI function exposes structured type member metadata.
+    exception_guard:
+      kind: reviewed_no_throw
+      reason: The export is tracked explicitly until its native error boundary is upgraded.
+  lldb_type_member_get_offset_in_bits:
+    classification: public
+    reason: This LLDB C ABI function exposes structured type member metadata.
+    exception_guard:
+      kind: reviewed_no_throw
+      reason: The export is tracked explicitly until its native error boundary is upgraded.
+  lldb_type_member_get_offset_in_bytes:
+    classification: public
+    reason: This LLDB C ABI function exposes structured type member metadata.
+    exception_guard:
+      kind: reviewed_no_throw
+      reason: The export is tracked explicitly until its native error boundary is upgraded.
+  lldb_type_member_get_type:
+    classification: public
+    reason: This LLDB C ABI function exposes structured type member metadata.
+    exception_guard:
+      kind: reviewed_no_throw
+      reason: The export is tracked explicitly until its native error boundary is upgraded.
+  lldb_type_member_is_valid:
+    classification: public
+    reason: This LLDB C ABI function exposes structured type member metadata.
+    exception_guard:
+      kind: reviewed_no_throw
+      reason: The export is tracked explicitly until its native error boundary is upgraded.
+
 ruby_methods:
+  - function: lldb_type_get_field_at_index
+    file: lib/lldb/type.rb
+    method: field_at_index
+  - function: lldb_type_get_direct_base_class_at_index
+    file: lib/lldb/type.rb
+    method: direct_base_class_at_index
+  - function: lldb_type_get_virtual_base_class_at_index
+    file: lib/lldb/type.rb
+    method: virtual_base_class_at_index
+  - function: lldb_type_member_get_name
+    file: lib/lldb/type_member.rb
+    method: name
+  - function: lldb_type_member_get_type
+    file: lib/lldb/type_member.rb
+    method: type
+  - function: lldb_type_member_get_offset_in_bytes
+    file: lib/lldb/type_member.rb
+    method: offset_in_bytes
+  - function: lldb_type_member_get_offset_in_bits
+    file: lib/lldb/type_member.rb
+    method: offset_in_bits
+  - function: lldb_type_member_get_bitfield_size_in_bits
+    file: lib/lldb/type_member.rb
+    method: bitfield_size_in_bits
   - function: lldb_address_create
     file: lib/lldb/address.rb
     method: initialize

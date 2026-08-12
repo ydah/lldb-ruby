@@ -437,7 +437,17 @@ module LLDB
     def self.lldb_type_get_num_fields: (FFI::Pointer) -> Integer
     def self.lldb_type_get_num_direct_base_classes: (FFI::Pointer) -> Integer
     def self.lldb_type_get_num_virtual_base_classes: (FFI::Pointer) -> Integer
+    def self.lldb_type_get_field_at_index: (FFI::Pointer, Integer) -> FFI::Pointer
+    def self.lldb_type_get_direct_base_class_at_index: (FFI::Pointer, Integer) -> FFI::Pointer
+    def self.lldb_type_get_virtual_base_class_at_index: (FFI::Pointer, Integer) -> FFI::Pointer
     def self.lldb_type_get_basic_type: (FFI::Pointer) -> Integer
+    def self.lldb_type_member_destroy: (FFI::Pointer) -> void
+    def self.lldb_type_member_is_valid: (FFI::Pointer) -> Integer
+    def self.lldb_type_member_get_name: (FFI::Pointer) -> String?
+    def self.lldb_type_member_get_type: (FFI::Pointer) -> FFI::Pointer
+    def self.lldb_type_member_get_offset_in_bytes: (FFI::Pointer) -> Integer
+    def self.lldb_type_member_get_offset_in_bits: (FFI::Pointer) -> Integer
+    def self.lldb_type_member_get_bitfield_size_in_bits: (FFI::Pointer) -> Integer
 
     # SBWatchpoint
     def self.lldb_watchpoint_destroy: (FFI::Pointer) -> void

@@ -23,6 +23,7 @@ typedef void* lldb_module_t;
 typedef void* lldb_symbol_context_t;
 typedef void* lldb_launch_info_t;
 typedef void* lldb_type_t;
+typedef void* lldb_type_member_t;
 typedef void* lldb_watchpoint_t;
 typedef void* lldb_command_interpreter_t;
 typedef void* lldb_command_return_object_t;
@@ -549,7 +550,19 @@ uint64_t lldb_type_get_array_size(lldb_type_t type);
 uint32_t lldb_type_get_num_fields(lldb_type_t type);
 uint32_t lldb_type_get_num_direct_base_classes(lldb_type_t type);
 uint32_t lldb_type_get_num_virtual_base_classes(lldb_type_t type);
+lldb_type_member_t lldb_type_get_field_at_index(lldb_type_t type, uint32_t index);
+lldb_type_member_t lldb_type_get_direct_base_class_at_index(lldb_type_t type, uint32_t index);
+lldb_type_member_t lldb_type_get_virtual_base_class_at_index(lldb_type_t type, uint32_t index);
 int lldb_type_get_basic_type(lldb_type_t type);
+
+// SBTypeMember
+void lldb_type_member_destroy(lldb_type_member_t member);
+int lldb_type_member_is_valid(lldb_type_member_t member);
+const char* lldb_type_member_get_name(lldb_type_member_t member);
+lldb_type_t lldb_type_member_get_type(lldb_type_member_t member);
+uint64_t lldb_type_member_get_offset_in_bytes(lldb_type_member_t member);
+uint64_t lldb_type_member_get_offset_in_bits(lldb_type_member_t member);
+uint32_t lldb_type_member_get_bitfield_size_in_bits(lldb_type_member_t member);
 
 // SBWatchpoint
 void lldb_watchpoint_destroy(lldb_watchpoint_t wp);
