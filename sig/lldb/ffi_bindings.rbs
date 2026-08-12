@@ -2,8 +2,21 @@ module LLDB
   module FFIBindings
     extend FFI::Library
 
+    EXPECTED_WRAPPER_ABI_VERSION: Integer
+    CAPABILITIES: Hash[Symbol, Integer]
+    LIBRARY_PATH: String
+
     def self.library_name: () -> String
     def self.library_path: () -> String
+    def self.wrapper_abi_version: () -> Integer
+    def self.build_lldb_version: () -> String
+    def self.runtime_lldb_version: () -> String
+    def self.capability_supported?: (Symbol) -> bool
+
+    def self.lldb_wrapper_abi_version: () -> Integer
+    def self.lldb_wrapper_build_lldb_version: () -> String
+    def self.lldb_wrapper_runtime_lldb_version: () -> String
+    def self.lldb_wrapper_has_capability: (Integer) -> Integer
 
     # Initialization
     def self.lldb_initialize: () -> void
@@ -301,8 +314,8 @@ module LLDB
     def self.lldb_watchpoint_set_condition: (FFI::Pointer, String?) -> void
     def self.lldb_watchpoint_get_watch_address: (FFI::Pointer) -> Integer
     def self.lldb_watchpoint_get_watch_size: (FFI::Pointer) -> Integer
-    def self.lldb_watchpoint_is_watching_reads: (FFI::Pointer) -> Integer
-    def self.lldb_watchpoint_is_watching_writes: (FFI::Pointer) -> Integer
+    def self.lldb_watchpoint_is_watching_reads: (FFI::Pointer, FFI::Pointer) -> Integer
+    def self.lldb_watchpoint_is_watching_writes: (FFI::Pointer, FFI::Pointer) -> Integer
 
     # SBCommandInterpreter
     def self.lldb_command_interpreter_destroy: (FFI::Pointer) -> void

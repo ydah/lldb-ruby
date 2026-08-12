@@ -28,6 +28,25 @@ typedef void* lldb_command_interpreter_t;
 typedef void* lldb_command_return_object_t;
 typedef void* lldb_memory_region_info_t;
 
+typedef enum {
+    LLDB_RUBY_STATUS_OK = 0,
+    LLDB_RUBY_STATUS_INVALID_ARGUMENT = 1,
+    LLDB_RUBY_STATUS_INVALID_HANDLE = 2,
+    LLDB_RUBY_STATUS_UNSUPPORTED = 3,
+    LLDB_RUBY_STATUS_LLDB_ERROR = 4,
+    LLDB_RUBY_STATUS_INTERNAL_ERROR = 5
+} lldb_ruby_status_t;
+
+typedef enum {
+    LLDB_RUBY_CAPABILITY_WATCHPOINT_ACCESS_KIND = 1
+} lldb_ruby_capability_t;
+
+// Wrapper metadata and capability discovery
+uint32_t lldb_wrapper_abi_version(void);
+const char* lldb_wrapper_build_lldb_version(void);
+const char* lldb_wrapper_runtime_lldb_version(void);
+int lldb_wrapper_has_capability(uint32_t capability);
+
 // Initialization
 void lldb_initialize(void);
 void lldb_terminate(void);
@@ -351,8 +370,8 @@ const char* lldb_watchpoint_get_condition(lldb_watchpoint_t wp);
 void lldb_watchpoint_set_condition(lldb_watchpoint_t wp, const char* condition);
 uint64_t lldb_watchpoint_get_watch_address(lldb_watchpoint_t wp);
 size_t lldb_watchpoint_get_watch_size(lldb_watchpoint_t wp);
-int lldb_watchpoint_is_watching_reads(lldb_watchpoint_t wp);
-int lldb_watchpoint_is_watching_writes(lldb_watchpoint_t wp);
+lldb_ruby_status_t lldb_watchpoint_is_watching_reads(lldb_watchpoint_t wp, int* result);
+lldb_ruby_status_t lldb_watchpoint_is_watching_writes(lldb_watchpoint_t wp, int* result);
 
 // SBCommandInterpreter
 void lldb_command_interpreter_destroy(lldb_command_interpreter_t interp);

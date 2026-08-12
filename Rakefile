@@ -47,6 +47,7 @@ task :clean do
   Dir.chdir(ext_dir) do
     system('make clean') if File.exist?('Makefile')
     FileUtils.rm_f('Makefile')
+    FileUtils.rm_f('lldb_wrapper_config.h')
   end
 
   FileUtils.rm_f(File.join(lib_dir, 'liblldb_wrapper.dylib'))

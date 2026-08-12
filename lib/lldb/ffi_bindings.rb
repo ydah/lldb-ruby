@@ -7,6 +7,11 @@ module LLDB
   module FFIBindings
     extend FFI::Library
 
+    EXPECTED_WRAPPER_ABI_VERSION = 1
+    CAPABILITIES = {
+      watchpoint_access_kind: 1
+    }.freeze
+
     class << self
       # @rbs return: String
       def library_name
@@ -15,10 +20,9 @@ module LLDB
           'liblldb_wrapper.dylib'
         when /linux/
           'liblldb_wrapper.so'
-        when /mswin|mingw/
-          'lldb_wrapper.dll'
         else
-          raise "Unsupported platform: #{RbConfig::CONFIG['host_os']}"
+          raise UnsupportedPlatformError,
+                "Unsupported platform: #{RbConfig::CONFIG['host_os']} (supported: Linux, macOS)"
         end
       end
 
@@ -47,9 +51,58 @@ module LLDB
 
         library_name
       end
+
+      # @rbs return: Integer
+      def wrapper_abi_version
+        lldb_wrapper_abi_version
+      end
+
+      # @rbs return: String
+      def build_lldb_version
+        lldb_wrapper_build_lldb_version
+      end
+
+      # @rbs return: String
+      def runtime_lldb_version
+        lldb_wrapper_runtime_lldb_version
+      end
+
+      # @rbs feature: Symbol
+      # @rbs return: bool
+      def capability_supported?(feature)
+        capability = CAPABILITIES[feature]
+        return false unless capability
+
+        lldb_wrapper_has_capability(capability) != 0
+      end
     end
 
-    ffi_lib library_path
+    LIBRARY_PATH = library_path
+
+    ffi_lib LIBRARY_PATH
+
+    begin
+      attach_function :lldb_wrapper_abi_version, [], :uint32
+      attach_function :lldb_wrapper_build_lldb_version, [], :string
+      attach_function :lldb_wrapper_runtime_lldb_version, [], :string
+      attach_function :lldb_wrapper_has_capability, [:uint32], :int
+
+      actual_abi_version = lldb_wrapper_abi_version
+      if actual_abi_version != EXPECTED_WRAPPER_ABI_VERSION
+        raise IncompatibleWrapperError,
+              "Incompatible LLDB wrapper at #{LIBRARY_PATH}: " \
+              "expected ABI #{EXPECTED_WRAPPER_ABI_VERSION}, got #{actual_abi_version}"
+      end
+    rescue FFI::NotFoundError, LoadError => e
+      raise IncompatibleWrapperError,
+            "Incompatible LLDB wrapper at #{LIBRARY_PATH}: metadata is unavailable (#{e.message})"
+    end
+
+    # Wrapper metadata and capabilities
+    attach_function :lldb_wrapper_abi_version, [], :uint32
+    attach_function :lldb_wrapper_build_lldb_version, [], :string
+    attach_function :lldb_wrapper_runtime_lldb_version, [], :string
+    attach_function :lldb_wrapper_has_capability, [:uint32], :int
 
     # =========================================================================
     # Initialization
@@ -381,8 +434,8 @@ module LLDB
     attach_function :lldb_watchpoint_set_condition, %i[pointer string], :void
     attach_function :lldb_watchpoint_get_watch_address, [:pointer], :uint64
     attach_function :lldb_watchpoint_get_watch_size, [:pointer], :size_t
-    attach_function :lldb_watchpoint_is_watching_reads, [:pointer], :int
-    attach_function :lldb_watchpoint_is_watching_writes, [:pointer], :int
+    attach_function :lldb_watchpoint_is_watching_reads, %i[pointer pointer], :int
+    attach_function :lldb_watchpoint_is_watching_writes, %i[pointer pointer], :int
 
     # =========================================================================
     # SBCommandInterpreter

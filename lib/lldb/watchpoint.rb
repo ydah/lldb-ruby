@@ -113,16 +113,28 @@ module LLDB
 
     # @rbs return: bool
     def watching_reads?
-      return false unless valid?
+      raise InvalidObjectError, 'Watchpoint is not valid' unless valid?
+      APISupport.require_feature!(:watchpoint_access_kind)
 
-      FFIBindings.lldb_watchpoint_is_watching_reads(@ptr) != 0
+      result = FFI::MemoryPointer.new(:int)
+      status = FFIBindings.lldb_watchpoint_is_watching_reads(@ptr, result)
+      raise UnsupportedAPIError, 'Watchpoint read access is unsupported' if status == NativeStatus::UNSUPPORTED
+      raise LLDBError, "Failed to query watchpoint read access (status=#{status})" unless status == NativeStatus::OK
+
+      result.read_int != 0
     end
 
     # @rbs return: bool
     def watching_writes?
-      return false unless valid?
+      raise InvalidObjectError, 'Watchpoint is not valid' unless valid?
+      APISupport.require_feature!(:watchpoint_access_kind)
 
-      FFIBindings.lldb_watchpoint_is_watching_writes(@ptr) != 0
+      result = FFI::MemoryPointer.new(:int)
+      status = FFIBindings.lldb_watchpoint_is_watching_writes(@ptr, result)
+      raise UnsupportedAPIError, 'Watchpoint write access is unsupported' if status == NativeStatus::UNSUPPORTED
+      raise LLDBError, "Failed to query watchpoint write access (status=#{status})" unless status == NativeStatus::OK
+
+      result.read_int != 0
     end
 
     # @rbs return: bool

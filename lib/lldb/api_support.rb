@@ -6,7 +6,8 @@ module LLDB
   # Module for checking API availability across different LLDB versions
   # and lldb-ruby binding implementations.
   module APISupport
-    # Feature to FFI method mapping
+    # Legacy method-backed feature mappings are kept for compatibility. Optional
+    # LLDB APIs must be listed in CAPABILITIES instead of inferred from FFI symbols.
     FEATURES = {
       breakpoint_by_address: :lldb_target_breakpoint_create_by_address,
       breakpoint_by_regex: :lldb_target_breakpoint_create_by_regex,
@@ -21,6 +22,10 @@ module LLDB
       registers: :lldb_frame_get_registers,
       find_variable: :lldb_frame_find_variable,
       evaluate_expression: :lldb_frame_evaluate_expression
+    }.freeze
+
+    CAPABILITIES = {
+      watchpoint_access_kind: :watchpoint_access_kind
     }.freeze
 
     class << self
@@ -45,11 +50,23 @@ module LLDB
               "API '#{feature}' is not supported in this LLDB version or binding"
       end
 
+      # @rbs feature: Symbol
+      # @rbs return: void
+      def require_feature!(feature)
+        return if feature_supported?(feature)
+
+        raise UnsupportedAPIError,
+              "Feature '#{feature}' is not supported by the loaded LLDB wrapper"
+      end
+
       # Check if a feature is supported
       #
       # @rbs feature: Symbol
       # @rbs return: bool
       def feature_supported?(feature)
+        capability = CAPABILITIES[feature]
+        return FFIBindings.capability_supported?(capability) if capability
+
         method_name = FEATURES[feature]
         return false unless method_name
 

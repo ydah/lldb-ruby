@@ -40,6 +40,12 @@ RSpec.describe LLDB::APISupport do
     it 'returns false for unknown features' do
       expect(LLDB::APISupport.feature_supported?(:unknown_feature)).to be false
     end
+
+    it 'uses native capability metadata for optional features' do
+      expect(LLDB::APISupport.feature_supported?(:watchpoint_access_kind)).to eq(
+        LLDB::FFIBindings.capability_supported?(:watchpoint_access_kind)
+      )
+    end
   end
 
   describe '.supported_features' do
@@ -70,6 +76,14 @@ RSpec.describe LLDB::APISupport do
 
     it 'is frozen' do
       expect(LLDB::APISupport::FEATURES).to be_frozen
+    end
+  end
+
+  describe 'wrapper metadata' do
+    it 'exposes the wrapper ABI and LLDB versions' do
+      expect(LLDB::FFIBindings.wrapper_abi_version).to eq(1)
+      expect(LLDB::FFIBindings.build_lldb_version).not_to be_empty
+      expect(LLDB::FFIBindings.runtime_lldb_version).not_to be_empty
     end
   end
 end

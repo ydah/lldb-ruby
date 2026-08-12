@@ -1,20 +1,40 @@
 #include "lldb_wrapper.h"
+#include "lldb_wrapper_config.h"
 #include <lldb/API/LLDB.h>
 
 #include <string>
 #include <cstring>
-
-// LLDB version detection
-// LLDB_VERSION_MAJOR is defined in lldb/lldb-defines.h (part of LLDB.h)
-#ifndef LLDB_VERSION_MAJOR
-#define LLDB_VERSION_MAJOR 0
-#endif
 
 // Thread-local storage for temporary strings
 static thread_local std::string g_temp_string;
 static thread_local std::string g_temp_string2;
 
 extern "C" {
+
+// ============================================================================
+// Wrapper metadata and capabilities
+// ============================================================================
+
+uint32_t lldb_wrapper_abi_version(void) {
+    return LLDB_RUBY_WRAPPER_ABI_VERSION;
+}
+
+const char* lldb_wrapper_build_lldb_version(void) {
+    return LLDB_RUBY_BUILD_LLDB_VERSION;
+}
+
+const char* lldb_wrapper_runtime_lldb_version(void) {
+    return lldb::SBDebugger::GetVersionString();
+}
+
+int lldb_wrapper_has_capability(uint32_t capability) {
+    switch (capability) {
+        case LLDB_RUBY_CAPABILITY_WATCHPOINT_ACCESS_KIND:
+            return LLDB_RUBY_HAVE_WATCHPOINT_ACCESS_KIND;
+        default:
+            return 0;
+    }
+}
 
 // ============================================================================
 // Initialization
@@ -2011,25 +2031,25 @@ size_t lldb_watchpoint_get_watch_size(lldb_watchpoint_t wp) {
     return static_cast<lldb::SBWatchpoint*>(wp)->GetWatchSize();
 }
 
-int lldb_watchpoint_is_watching_reads(lldb_watchpoint_t wp) {
-    if (!wp) return 0;
-#if LLDB_VERSION_MAJOR >= 15
-    return static_cast<lldb::SBWatchpoint*>(wp)->IsWatchingReads() ? 1 : 0;
+lldb_ruby_status_t lldb_watchpoint_is_watching_reads(lldb_watchpoint_t wp, int* result) {
+    if (!result) return LLDB_RUBY_STATUS_INVALID_ARGUMENT;
+    if (!wp) return LLDB_RUBY_STATUS_INVALID_HANDLE;
+#if LLDB_RUBY_HAVE_WATCHPOINT_ACCESS_KIND
+    *result = static_cast<lldb::SBWatchpoint*>(wp)->IsWatchingReads() ? 1 : 0;
+    return LLDB_RUBY_STATUS_OK;
 #else
-    // IsWatchingReads() not available in LLDB < 15
-    // Return -1 to indicate the method is not available
-    return -1;
+    return LLDB_RUBY_STATUS_UNSUPPORTED;
 #endif
 }
 
-int lldb_watchpoint_is_watching_writes(lldb_watchpoint_t wp) {
-    if (!wp) return 0;
-#if LLDB_VERSION_MAJOR >= 15
-    return static_cast<lldb::SBWatchpoint*>(wp)->IsWatchingWrites() ? 1 : 0;
+lldb_ruby_status_t lldb_watchpoint_is_watching_writes(lldb_watchpoint_t wp, int* result) {
+    if (!result) return LLDB_RUBY_STATUS_INVALID_ARGUMENT;
+    if (!wp) return LLDB_RUBY_STATUS_INVALID_HANDLE;
+#if LLDB_RUBY_HAVE_WATCHPOINT_ACCESS_KIND
+    *result = static_cast<lldb::SBWatchpoint*>(wp)->IsWatchingWrites() ? 1 : 0;
+    return LLDB_RUBY_STATUS_OK;
 #else
-    // IsWatchingWrites() not available in LLDB < 15
-    // Return -1 to indicate the method is not available
-    return -1;
+    return LLDB_RUBY_STATUS_UNSUPPORTED;
 #endif
 }
 

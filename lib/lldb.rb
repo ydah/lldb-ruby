@@ -3,9 +3,9 @@
 # rbs_inline: enabled
 
 require_relative 'lldb/version'
+require_relative 'lldb/error'
 require_relative 'lldb/ffi_bindings'
 require_relative 'lldb/types'
-require_relative 'lldb/error'
 require_relative 'lldb/api_support'
 require_relative 'lldb/debugger'
 require_relative 'lldb/target'

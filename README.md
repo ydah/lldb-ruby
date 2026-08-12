@@ -9,7 +9,7 @@ This gem provides Ruby bindings for LLDB (Low Level Debugger), allowing you to a
 ## Requirements
 
 - Ruby 3.0 or later
-- LLDB 14 or later
+- LLDB 14 or later (Linux and macOS)
 - C++17 compatible compiler (gcc 8+ / clang 10+)
 - libffi-dev (for the FFI gem)
 
@@ -211,6 +211,18 @@ Stop reasons are available in `LLDB::StopReason`:
 - `SIGNAL`, `EXCEPTION`, `EXEC`, `PLAN_COMPLETE`, `THREAD_EXITING`, `INSTRUMENTATION`
 
 ## Development
+
+The native wrapper build discovers LLDB in this order:
+
+1. `--with-lldb-include` and `--with-lldb-lib`
+2. `--with-lldb-dir`
+3. `LLDB_DIR`
+4. `llvm-config` or a versioned `llvm-config-N` on `PATH`
+5. Homebrew, Xcode, and standard LLVM prefixes
+
+Discovery succeeds only after compiling and linking a C++17 probe against
+`liblldb`. The selected paths and optional API capabilities are printed during
+the build. Windows is not a supported platform yet.
 
 After checking out the repo, run:
 

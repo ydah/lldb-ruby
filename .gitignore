@@ -8,6 +8,7 @@
 
 # C extension build artifacts
 /ext/lldb/*.o
+/ext/lldb/lldb_wrapper_config.h
 /ext/lldb/*.so
 /ext/lldb/*.dylib
 /ext/lldb/*.dll

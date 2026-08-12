@@ -10,6 +10,8 @@ module LLDB
   class BreakpointError < LLDBError; end
   class EvaluationError < LLDBError; end
   class UnsupportedAPIError < LLDBError; end
+  class UnsupportedPlatformError < LLDBError; end
+  class IncompatibleWrapperError < LLDBError; end
 
   class Error
     # @rbs ptr: FFI::Pointer?

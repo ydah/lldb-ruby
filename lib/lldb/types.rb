@@ -3,6 +3,15 @@
 # rbs_inline: enabled
 
 module LLDB
+  module NativeStatus
+    OK = 0 # : Integer
+    INVALID_ARGUMENT = 1 # : Integer
+    INVALID_HANDLE = 2 # : Integer
+    UNSUPPORTED = 3 # : Integer
+    LLDB_ERROR = 4 # : Integer
+    INTERNAL_ERROR = 5 # : Integer
+  end
+
   module State
     INVALID = 0 # : Integer
     UNLOADED = 1 # : Integer
