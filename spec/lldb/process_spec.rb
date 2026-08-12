@@ -192,4 +192,33 @@ RSpec.describe LLDB::Process do
       }
     end
   end
+
+  describe 'blocking native calls' do
+    it 'allows another Ruby thread to run while continuing the inferior' do
+      blocking_executable = compile_fixture('blocking')
+      blocking_target = debugger.create_target(blocking_executable)
+      debugger.async = false
+      blocking_target.breakpoint_create_by_name('main')
+      blocking_process = blocking_target.launch
+      ticks = 0
+      started = Queue.new
+      worker = Thread.new do
+        started << true
+        deadline = Process.clock_gettime(Process::CLOCK_MONOTONIC) + 1.0
+        while Process.clock_gettime(Process::CLOCK_MONOTONIC) < deadline
+          ticks += 1
+          Thread.pass
+        end
+      end
+
+      started.pop
+      before_continue = ticks
+      blocking_process.continue
+      ticks_during_continue = ticks - before_continue
+      worker.join
+
+      expect(ticks_during_continue).to be > 100
+      blocking_process.kill if blocking_process.valid?
+    end
+  end
 end

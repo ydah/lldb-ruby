@@ -131,17 +131,19 @@ module LLDB
     attach_function :lldb_debugger_get_async, [:pointer], :int
     attach_function :lldb_debugger_get_version_string, [], :string
     attach_function :lldb_debugger_get_command_interpreter, [:pointer], :pointer
-    attach_function :lldb_debugger_handle_command, %i[pointer string], :void
+    # LLDB command execution can run user-provided command scripts.
+    attach_function :lldb_debugger_handle_command, %i[pointer string], :void, blocking: true
 
     # =========================================================================
     # SBTarget
     # =========================================================================
     attach_function :lldb_target_destroy, [:pointer], :void
     attach_function :lldb_target_is_valid, [:pointer], :int
-    attach_function :lldb_target_launch_simple, %i[pointer pointer pointer string], :pointer
-    attach_function :lldb_target_launch, %i[pointer pointer pointer], :pointer
-    attach_function :lldb_target_attach_to_process_with_id, %i[pointer uint64 pointer], :pointer
-    attach_function :lldb_target_attach_to_process_with_name, %i[pointer string int pointer], :pointer
+    # Launch and attach may wait for the inferior or its debug server.
+    attach_function :lldb_target_launch_simple, %i[pointer pointer pointer string], :pointer, blocking: true
+    attach_function :lldb_target_launch, %i[pointer pointer pointer], :pointer, blocking: true
+    attach_function :lldb_target_attach_to_process_with_id, %i[pointer uint64 pointer], :pointer, blocking: true
+    attach_function :lldb_target_attach_to_process_with_name, %i[pointer string int pointer], :pointer, blocking: true
     attach_function :lldb_target_breakpoint_create_by_name, %i[pointer string string], :pointer
     attach_function :lldb_target_breakpoint_create_by_location, %i[pointer string uint32], :pointer
     attach_function :lldb_target_breakpoint_create_by_address, %i[pointer uint64], :pointer
@@ -198,7 +200,7 @@ module LLDB
     # =========================================================================
     attach_function :lldb_process_destroy, [:pointer], :void
     attach_function :lldb_process_is_valid, [:pointer], :int
-    attach_function :lldb_process_continue, %i[pointer pointer], :int
+    attach_function :lldb_process_continue, %i[pointer pointer], :int, blocking: true
     attach_function :lldb_process_stop, %i[pointer pointer], :int
     attach_function :lldb_process_kill, %i[pointer pointer], :int
     attach_function :lldb_process_detach, %i[pointer pointer], :int
@@ -245,11 +247,11 @@ module LLDB
     # =========================================================================
     attach_function :lldb_thread_destroy, [:pointer], :void
     attach_function :lldb_thread_is_valid, [:pointer], :int
-    attach_function :lldb_thread_step_over, %i[pointer int pointer], :int
-    attach_function :lldb_thread_step_into, %i[pointer string uint32 int pointer], :int
-    attach_function :lldb_thread_step_out, %i[pointer pointer], :int
-    attach_function :lldb_thread_step_instruction, %i[pointer int pointer], :int
-    attach_function :lldb_thread_run_to_address, %i[pointer uint64 pointer], :int
+    attach_function :lldb_thread_step_over, %i[pointer int pointer], :int, blocking: true
+    attach_function :lldb_thread_step_into, %i[pointer string uint32 int pointer], :int, blocking: true
+    attach_function :lldb_thread_step_out, %i[pointer pointer], :int, blocking: true
+    attach_function :lldb_thread_step_instruction, %i[pointer int pointer], :int, blocking: true
+    attach_function :lldb_thread_run_to_address, %i[pointer uint64 pointer], :int, blocking: true
     attach_function :lldb_thread_get_num_frames, [:pointer], :uint32
     attach_function :lldb_thread_get_frame_at_index, %i[pointer uint32], :pointer
     attach_function :lldb_thread_get_selected_frame, [:pointer], :pointer
@@ -463,7 +465,7 @@ module LLDB
     # =========================================================================
     attach_function :lldb_command_interpreter_destroy, [:pointer], :void
     attach_function :lldb_command_interpreter_is_valid, [:pointer], :int
-    attach_function :lldb_command_interpreter_handle_command, %i[pointer string pointer int], :int
+    attach_function :lldb_command_interpreter_handle_command, %i[pointer string pointer int], :int, blocking: true
     attach_function :lldb_command_interpreter_command_exists, %i[pointer string], :int
     attach_function :lldb_command_interpreter_alias_exists, %i[pointer string], :int
 

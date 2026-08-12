@@ -248,6 +248,10 @@ bundle exec rake rbs:verify
 `bindings/surface.yml` records the classification and exception-safety review
 for every native export. Update it together with any new header declaration.
 
+Only calls that can wait for the inferior, debugger server, or command script
+release Ruby's GVL. The wrapper does not invoke Ruby callbacks from those
+calls; adding callback APIs requires revisiting this policy.
+
 To run tests, you need to compile the test fixtures:
 
 ```bash
