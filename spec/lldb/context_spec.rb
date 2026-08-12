@@ -19,14 +19,12 @@ RSpec.describe LLDB::Context do
 
   it 'does not keep registered handles alive' do
     context = described_class.new
-    releases = []
-    context.register(LLDB::NativeHandle.new(FFI::Pointer.new(3), release: ->(_) { releases << :released }))
+    handle = context.register(
+      LLDB::NativeHandle.new(FFI::Pointer.new(3), release: ->(_) {})
+    )
+    registered_reference = context.instance_variable_get(:@handles).first
 
-    3.times do
-      GC.start
-      break unless releases.empty?
-    end
-
-    expect(releases).to eq([:released])
+    expect(registered_reference).to be_a(WeakRef)
+    expect(registered_reference.__getobj__).to equal(handle)
   end
 end

@@ -35,11 +35,23 @@ jobs:
           sudo apt-get install -y lldb liblldb-dev
           # Allow ptrace for debugging (required for LLDB tests)
           echo 0 | sudo tee /proc/sys/kernel/yama/ptrace_scope
-          # Find and set up lldb-server path
-          LLDB_SERVER=$(find /usr/bin -name 'lldb-server*' | head -1)
-          if [ -n "$LLDB_SERVER" ]; then
-            echo "LLDB_DEBUGSERVER_PATH=$LLDB_SERVER" >> "$GITHUB_ENV"
+          # Debian's lldb-server name may not include the full LLVM version
+          # expected by the LLDB library. Provide that exact compatibility name.
+          LLVM_BIN="$(dirname "$(command -v llvm-config)")"
+          LLDB_VERSION="$(llvm-config --version)"
+          LLDB_SERVER=""
+          for candidate in "$LLVM_BIN"/lldb-server* /usr/bin/lldb-server*; do
+            if [ -x "$candidate" ]; then
+              LLDB_SERVER="$candidate"
+              break
+            fi
+          done
+          test -n "$LLDB_SERVER"
+          VERSIONED_SERVER="$LLVM_BIN/lldb-server-$LLDB_VERSION"
+          if [ ! -x "$VERSIONED_SERVER" ]; then
+            sudo ln -s "$LLDB_SERVER" "$VERSIONED_SERVER"
           fi
+          echo "LLDB_DEBUGSERVER_PATH=$VERSIONED_SERVER" >> "$GITHUB_ENV"
       - name: Install LLDB (macOS)
         if: runner.os == 'macOS'
         run: |
@@ -67,7 +79,7 @@ jobs:
           - os: ubuntu-22.04
             lldb: '14'
             ruby: '3.0'
-          - os: ubuntu-latest
+          - os: ubuntu-22.04
             lldb: '16'
             ruby: ruby
           - os: ubuntu-latest
@@ -108,10 +120,20 @@ jobs:
           echo "$LLVM_BIN" >> "$GITHUB_PATH"
           echo "LLDB_DIR=$(dirname "$LLVM_BIN")" >> "$GITHUB_ENV"
 
-          LLDB_SERVER="$(find "$LLVM_BIN" /usr/bin -type f -name 'lldb-server*' -print -quit 2>/dev/null || true)"
-          if [ -n "$LLDB_SERVER" ]; then
-            echo "LLDB_DEBUGSERVER_PATH=$LLDB_SERVER" >> "$GITHUB_ENV"
+          LLDB_FULL_VERSION="$("$LLVM_BIN/llvm-config" --version)"
+          LLDB_SERVER=""
+          for candidate in "$LLVM_BIN"/lldb-server* /usr/bin/lldb-server*; do
+            if [ -x "$candidate" ]; then
+              LLDB_SERVER="$candidate"
+              break
+            fi
+          done
+          test -n "$LLDB_SERVER"
+          VERSIONED_SERVER="$LLVM_BIN/lldb-server-$LLDB_FULL_VERSION"
+          if [ ! -x "$VERSIONED_SERVER" ]; then
+            sudo ln -s "$LLDB_SERVER" "$VERSIONED_SERVER"
           fi
+          echo "LLDB_DEBUGSERVER_PATH=$VERSIONED_SERVER" >> "$GITHUB_ENV"
 
       - name: Install LLDB (macOS)
         if: runner.os == 'macOS'
@@ -220,7 +242,9 @@ jobs:
 
             puts "loaded lldb from #{gem_path}"
             wrapper_path = LLDB::FFIBindings.library_path
-            abort "wrapper is not inside the installed gem: #{wrapper_path}" unless wrapper_path.start_with?("#{gem_path}/")
+            extension_path = File.expand_path(spec.extension_dir) if spec.respond_to?(:extension_dir)
+            valid_wrapper_roots = ["#{gem_path}/", "#{extension_path}/"].compact
+            abort "wrapper is outside the installed gem: #{wrapper_path}" unless valid_wrapper_roots.any? { |root| wrapper_path.start_with?(root) }
             abort "wrapper is missing: #{wrapper_path}" unless File.file?(wrapper_path)
             puts "wrapper path #{wrapper_path}"
             puts "wrapper ABI #{LLDB::FFIBindings.wrapper_abi_version}"
@@ -254,6 +278,21 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y llvm lldb liblldb-dev
+          llvm_bin="$(dirname "$(command -v llvm-config)")"
+          lldb_version="$(llvm-config --version)"
+          lldb_server=""
+          for candidate in "$llvm_bin"/lldb-server* /usr/bin/lldb-server*; do
+            if [ -x "$candidate" ]; then
+              lldb_server="$candidate"
+              break
+            fi
+          done
+          test -n "$lldb_server"
+          versioned_server="$llvm_bin/lldb-server-$lldb_version"
+          if [ ! -x "$versioned_server" ]; then
+            sudo ln -s "$lldb_server" "$versioned_server"
+          fi
+          echo "LLDB_DEBUGSERVER_PATH=$versioned_server" >> "$GITHUB_ENV"
       - name: Set up Ruby
         uses: ruby/setup-ruby@95ef2b042f9d7a56d8268cba8559e2842e2ad01b # v1
         with:
@@ -279,6 +318,21 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y llvm lldb liblldb-dev
+          llvm_bin="$(dirname "$(command -v llvm-config)")"
+          lldb_version="$(llvm-config --version)"
+          lldb_server=""
+          for candidate in "$llvm_bin"/lldb-server* /usr/bin/lldb-server*; do
+            if [ -x "$candidate" ]; then
+              lldb_server="$candidate"
+              break
+            fi
+          done
+          test -n "$lldb_server"
+          versioned_server="$llvm_bin/lldb-server-$lldb_version"
+          if [ ! -x "$versioned_server" ]; then
+            sudo ln -s "$lldb_server" "$versioned_server"
+          fi
+          echo "LLDB_DEBUGSERVER_PATH=$versioned_server" >> "$GITHUB_ENV"
       - name: Set up Ruby
         uses: ruby/setup-ruby@95ef2b042f9d7a56d8268cba8559e2842e2ad01b # v1
         with:
