@@ -21,6 +21,9 @@ jobs:
       matrix:
         os: [ubuntu-latest, macos-latest]
         ruby: ['3.1', '3.2', '3.3', '3.4']
+        include:
+          - os: ubuntu-latest
+            ruby: '3.0'
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -124,6 +127,32 @@ jobs:
           llvm-config --version
           lldb --version | sed -n '1p'
 
+      - name: Verify selected LLDB version
+        if: runner.os == 'Linux'
+        env:
+          LLDB_VERSION: ${{ matrix.lldb }}
+        run: |
+          set -euo pipefail
+          actual="$(llvm-config --version)"
+          case "$LLDB_VERSION" in
+            14|16|17)
+              case "$actual" in
+                "$LLDB_VERSION".*) ;;
+                *)
+                  echo "expected LLVM $LLDB_VERSION, got $actual" >&2
+                  exit 1
+                  ;;
+              esac
+              ;;
+            current)
+              test -n "$actual"
+              ;;
+            *)
+              echo "unexpected Linux LLDB matrix value: $LLDB_VERSION" >&2
+              exit 1
+              ;;
+          esac
+
       - name: Allow ptrace for debugging (Linux)
         if: runner.os == 'Linux'
         run: echo 0 | sudo tee /proc/sys/kernel/yama/ptrace_scope
@@ -136,6 +165,9 @@ jobs:
 
       - name: Compile C extension
         run: bundle exec rake compile
+
+      - name: Check binding parity for selected LLDB
+        run: ruby script/check_bindings
 
       - name: Run LLDB boundary specs
         run: bundle exec rspec spec/lldb/watchpoint_spec.rb
