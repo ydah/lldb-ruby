@@ -156,6 +156,7 @@ module LLDB
     attach_function :lldb_target_get_breakpoint_at_index, %i[pointer uint32], :pointer
     attach_function :lldb_target_get_process, [:pointer], :pointer
     attach_function :lldb_target_get_executable_path, [:pointer], :string
+    attach_function :lldb_target_get_executable_file, [:pointer], :pointer
     attach_function :lldb_target_get_num_modules, [:pointer], :uint32
     attach_function :lldb_target_get_module_at_index, %i[pointer uint32], :pointer
     attach_function :lldb_target_evaluate_expression, %i[pointer string], :pointer
@@ -178,6 +179,19 @@ module LLDB
     attach_function :lldb_launch_info_set_environment_entries, %i[pointer pointer int], :void
     attach_function :lldb_launch_info_get_launch_flags, [:pointer], :uint32
     attach_function :lldb_launch_info_set_launch_flags, %i[pointer uint32], :void
+
+    # =========================================================================
+    # SBFileSpec
+    # =========================================================================
+    attach_function :lldb_file_spec_create, %i[string int], :pointer
+    attach_function :lldb_file_spec_destroy, [:pointer], :void
+    attach_function :lldb_file_spec_is_valid, [:pointer], :int
+    attach_function :lldb_file_spec_exists, [:pointer], :int
+    attach_function :lldb_file_spec_get_filename, [:pointer], :string
+    attach_function :lldb_file_spec_get_directory, [:pointer], :string
+    attach_function :lldb_file_spec_get_path, %i[pointer pointer size_t], :uint32
+    attach_function :lldb_file_spec_set_filename, %i[pointer string], :void
+    attach_function :lldb_file_spec_set_directory, %i[pointer string], :void
 
     # =========================================================================
     # SBProcess
@@ -245,7 +259,7 @@ module LLDB
     attach_function :lldb_thread_get_name, [:pointer], :string
     attach_function :lldb_thread_get_queue_name, [:pointer], :string
     attach_function :lldb_thread_get_stop_reason, [:pointer], :int
-    attach_function :lldb_thread_get_stop_description, %i[pointer size_t], :string
+    attach_function :lldb_thread_get_stop_description, %i[pointer pointer size_t], :size_t
     attach_function :lldb_thread_get_stop_reason_data_count, [:pointer], :uint64
     attach_function :lldb_thread_get_stop_reason_data_at_index, %i[pointer uint32], :uint64
     attach_function :lldb_thread_is_stopped, [:pointer], :int
@@ -263,6 +277,7 @@ module LLDB
     attach_function :lldb_frame_get_display_function_name, [:pointer], :string
     attach_function :lldb_frame_get_line, [:pointer], :uint32
     attach_function :lldb_frame_get_file_path, [:pointer], :string
+    attach_function :lldb_frame_get_file_spec, [:pointer], :pointer
     attach_function :lldb_frame_get_column, [:pointer], :uint32
     attach_function :lldb_frame_get_pc, [:pointer], :uint64
     attach_function :lldb_frame_set_pc, %i[pointer uint64], :int
@@ -385,6 +400,8 @@ module LLDB
     attach_function :lldb_module_is_valid, [:pointer], :int
     attach_function :lldb_module_get_file_path, [:pointer], :string
     attach_function :lldb_module_get_platform_file_path, [:pointer], :string
+    attach_function :lldb_module_get_file, [:pointer], :pointer
+    attach_function :lldb_module_get_platform_file, [:pointer], :pointer
     attach_function :lldb_module_get_num_symbols, [:pointer], :uint32
 
     # =========================================================================

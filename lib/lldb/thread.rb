@@ -210,8 +210,11 @@ module LLDB
     # @rbs return: String?
     def stop_description(max_size = 256)
       return nil unless valid?
+      return '' if max_size.zero?
 
-      FFIBindings.lldb_thread_get_stop_description(@ptr, max_size)
+      NativeBuffer.read_c_string(max_size: max_size) do |buffer, length|
+        FFIBindings.lldb_thread_get_stop_description(@ptr, buffer, length)
+      end
     end
 
     # @rbs return: bool

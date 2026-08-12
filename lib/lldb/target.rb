@@ -183,7 +183,17 @@ module LLDB
     def executable_path
       raise InvalidObjectError, 'Target is not valid' unless valid?
 
-      FFIBindings.lldb_target_get_executable_path(@ptr)
+      executable_file&.path
+    end
+
+    # @rbs return: FileSpec?
+    def executable_file
+      raise InvalidObjectError, 'Target is not valid' unless valid?
+
+      file_ptr = FFIBindings.lldb_target_get_executable_file(@ptr)
+      return nil if file_ptr.nil? || file_ptr.null?
+
+      FileSpec.from_ptr(file_ptr, context: context)
     end
 
     # @rbs return: Integer

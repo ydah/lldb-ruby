@@ -16,6 +16,11 @@ RSpec.describe LLDB::Module do
     it 'returns the path to the module' do
       expect(mod.file_path).to eq(executable)
     end
+
+    it 'exposes the module file as a FileSpec' do
+      expect(mod.file).to be_a(LLDB::FileSpec)
+      expect(mod.file.path).to eq(executable)
+    end
   end
 
   describe '#num_symbols' do

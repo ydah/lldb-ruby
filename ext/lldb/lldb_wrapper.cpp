@@ -2,6 +2,7 @@
 #include "lldb_wrapper_config.h"
 #include <lldb/API/LLDB.h>
 
+#include <algorithm>
 #include <string>
 #include <cstring>
 #include <exception>
@@ -37,6 +38,27 @@ static lldb_ruby_status_t wrapper_status(lldb::SBError& error, lldb_error_t outp
     wrapper_copy_error(output, error);
     return error.Success() ? LLDB_RUBY_STATUS_OK : LLDB_RUBY_STATUS_LLDB_ERROR;
 }
+
+static bool wrapper_copy_file_spec_path(const lldb::SBFileSpec& file_spec,
+                                        std::string& output) {
+    size_t capacity = 256;
+    for (;;) {
+        output.resize(capacity);
+        uint32_t written = file_spec.GetPath(output.data(), output.size());
+        if (written < output.size() - 1) {
+            output.resize(written);
+            return written > 0;
+        }
+
+        capacity = std::max(capacity * 2, static_cast<size_t>(written) + 2);
+    }
+}
+
+static_assert(LLDB_INVALID_ADDRESS == UINT64_MAX, "unexpected LLDB invalid address sentinel");
+static_assert(LLDB_INVALID_PROCESS_ID == 0, "unexpected LLDB invalid process sentinel");
+static_assert(LLDB_INVALID_THREAD_ID == 0, "unexpected LLDB invalid thread sentinel");
+static_assert(LLDB_INVALID_BREAK_ID == 0, "unexpected LLDB invalid breakpoint sentinel");
+static_assert(LLDB_INVALID_LINE_NUMBER == UINT32_MAX, "unexpected LLDB invalid line sentinel");
 
 extern "C" {
 
@@ -465,13 +487,20 @@ const char* lldb_target_get_executable_path(lldb_target_t target) {
 
     if (!spec.IsValid()) return nullptr;
 
-    char path[4096];
-    if (spec.GetPath(path, sizeof(path)) > 0) {
-        g_temp_string = path;
+    if (wrapper_copy_file_spec_path(spec, g_temp_string)) {
         return g_temp_string.c_str();
     }
 
     return nullptr;
+}
+
+lldb_file_spec_t lldb_target_get_executable_file(lldb_target_t target) {
+    if (!target) return nullptr;
+
+    lldb::SBFileSpec spec = static_cast<lldb::SBTarget*>(target)->GetExecutable();
+    if (!spec.IsValid()) return nullptr;
+
+    return static_cast<lldb_file_spec_t>(new lldb::SBFileSpec(spec));
 }
 
 uint32_t lldb_target_get_num_modules(lldb_target_t target) {
@@ -619,6 +648,58 @@ uint32_t lldb_launch_info_get_launch_flags(lldb_launch_info_t info) {
 void lldb_launch_info_set_launch_flags(lldb_launch_info_t info, uint32_t flags) {
     if (!info) return;
     static_cast<lldb::SBLaunchInfo*>(info)->SetLaunchFlags(flags);
+}
+
+// ============================================================================
+// SBFileSpec
+// ============================================================================
+
+lldb_file_spec_t lldb_file_spec_create(const char* path, int resolve) {
+    if (path) {
+        return static_cast<lldb_file_spec_t>(new lldb::SBFileSpec(path, resolve != 0));
+    }
+    return static_cast<lldb_file_spec_t>(new lldb::SBFileSpec());
+}
+
+void lldb_file_spec_destroy(lldb_file_spec_t file_spec) {
+    if (file_spec) {
+        delete static_cast<lldb::SBFileSpec*>(file_spec);
+    }
+}
+
+int lldb_file_spec_is_valid(lldb_file_spec_t file_spec) {
+    if (!file_spec) return 0;
+    return static_cast<lldb::SBFileSpec*>(file_spec)->IsValid() ? 1 : 0;
+}
+
+int lldb_file_spec_exists(lldb_file_spec_t file_spec) {
+    if (!file_spec) return 0;
+    return static_cast<lldb::SBFileSpec*>(file_spec)->Exists() ? 1 : 0;
+}
+
+const char* lldb_file_spec_get_filename(lldb_file_spec_t file_spec) {
+    if (!file_spec) return nullptr;
+    return static_cast<lldb::SBFileSpec*>(file_spec)->GetFilename();
+}
+
+const char* lldb_file_spec_get_directory(lldb_file_spec_t file_spec) {
+    if (!file_spec) return nullptr;
+    return static_cast<lldb::SBFileSpec*>(file_spec)->GetDirectory();
+}
+
+uint32_t lldb_file_spec_get_path(lldb_file_spec_t file_spec, char* buffer, size_t length) {
+    if (!file_spec) return 0;
+    return static_cast<lldb::SBFileSpec*>(file_spec)->GetPath(buffer, length);
+}
+
+void lldb_file_spec_set_filename(lldb_file_spec_t file_spec, const char* filename) {
+    if (!file_spec || !filename) return;
+    static_cast<lldb::SBFileSpec*>(file_spec)->SetFilename(filename);
+}
+
+void lldb_file_spec_set_directory(lldb_file_spec_t file_spec, const char* directory) {
+    if (!file_spec || !directory) return;
+    static_cast<lldb::SBFileSpec*>(file_spec)->SetDirectory(directory);
 }
 
 // ============================================================================
@@ -1136,14 +1217,9 @@ int lldb_thread_get_stop_reason(lldb_thread_t thread) {
     return static_cast<int>(static_cast<lldb::SBThread*>(thread)->GetStopReason());
 }
 
-const char* lldb_thread_get_stop_description(lldb_thread_t thread, size_t max_size) {
-    if (!thread) return nullptr;
-
-    static thread_local std::string stop_desc;
-    stop_desc.resize(max_size);
-    size_t len = static_cast<lldb::SBThread*>(thread)->GetStopDescription(&stop_desc[0], max_size);
-    stop_desc.resize(len);
-    return stop_desc.c_str();
+size_t lldb_thread_get_stop_description(lldb_thread_t thread, char* buffer, size_t length) {
+    if (!thread) return 0;
+    return static_cast<lldb::SBThread*>(thread)->GetStopDescription(buffer, length);
 }
 
 uint64_t lldb_thread_get_stop_reason_data_count(lldb_thread_t thread) {
@@ -1227,13 +1303,20 @@ const char* lldb_frame_get_file_path(lldb_frame_t frame) {
 
     if (!file_spec.IsValid()) return nullptr;
 
-    char path[4096];
-    if (file_spec.GetPath(path, sizeof(path)) > 0) {
-        g_temp_string = path;
+    if (wrapper_copy_file_spec_path(file_spec, g_temp_string)) {
         return g_temp_string.c_str();
     }
 
     return nullptr;
+}
+
+lldb_file_spec_t lldb_frame_get_file_spec(lldb_frame_t frame) {
+    if (!frame) return nullptr;
+
+    lldb::SBFileSpec file_spec = static_cast<lldb::SBFrame*>(frame)->GetLineEntry().GetFileSpec();
+    if (!file_spec.IsValid()) return nullptr;
+
+    return static_cast<lldb_file_spec_t>(new lldb::SBFileSpec(file_spec));
 }
 
 uint32_t lldb_frame_get_column(lldb_frame_t frame) {
@@ -1243,7 +1326,7 @@ uint32_t lldb_frame_get_column(lldb_frame_t frame) {
 }
 
 uint64_t lldb_frame_get_pc(lldb_frame_t frame) {
-    if (!frame) return 0;
+    if (!frame) return LLDB_INVALID_ADDRESS;
     return static_cast<lldb::SBFrame*>(frame)->GetPC();
 }
 
@@ -1253,12 +1336,12 @@ int lldb_frame_set_pc(lldb_frame_t frame, uint64_t new_pc) {
 }
 
 uint64_t lldb_frame_get_sp(lldb_frame_t frame) {
-    if (!frame) return 0;
+    if (!frame) return LLDB_INVALID_ADDRESS;
     return static_cast<lldb::SBFrame*>(frame)->GetSP();
 }
 
 uint64_t lldb_frame_get_fp(lldb_frame_t frame) {
-    if (!frame) return 0;
+    if (!frame) return LLDB_INVALID_ADDRESS;
     return static_cast<lldb::SBFrame*>(frame)->GetFP();
 }
 
@@ -1512,7 +1595,7 @@ int lldb_breakpoint_location_is_valid(lldb_breakpoint_location_t loc) {
 }
 
 int32_t lldb_breakpoint_location_get_id(lldb_breakpoint_location_t loc) {
-    if (!loc) return -1;
+    if (!loc) return LLDB_INVALID_BREAK_ID;
     return static_cast<lldb::SBBreakpointLocation*>(loc)->GetID();
 }
 
@@ -1924,9 +2007,7 @@ const char* lldb_module_get_file_path(lldb_module_t module) {
 
     if (!spec.IsValid()) return nullptr;
 
-    char path[4096];
-    if (spec.GetPath(path, sizeof(path)) > 0) {
-        g_temp_string = path;
+    if (wrapper_copy_file_spec_path(spec, g_temp_string)) {
         return g_temp_string.c_str();
     }
 
@@ -1941,13 +2022,29 @@ const char* lldb_module_get_platform_file_path(lldb_module_t module) {
 
     if (!spec.IsValid()) return nullptr;
 
-    char path[4096];
-    if (spec.GetPath(path, sizeof(path)) > 0) {
-        g_temp_string2 = path;
+    if (wrapper_copy_file_spec_path(spec, g_temp_string2)) {
         return g_temp_string2.c_str();
     }
 
     return nullptr;
+}
+
+lldb_file_spec_t lldb_module_get_file(lldb_module_t module) {
+    if (!module) return nullptr;
+
+    lldb::SBFileSpec spec = static_cast<lldb::SBModule*>(module)->GetFileSpec();
+    if (!spec.IsValid()) return nullptr;
+
+    return static_cast<lldb_file_spec_t>(new lldb::SBFileSpec(spec));
+}
+
+lldb_file_spec_t lldb_module_get_platform_file(lldb_module_t module) {
+    if (!module) return nullptr;
+
+    lldb::SBFileSpec spec = static_cast<lldb::SBModule*>(module)->GetPlatformFileSpec();
+    if (!spec.IsValid()) return nullptr;
+
+    return static_cast<lldb_file_spec_t>(new lldb::SBFileSpec(spec));
 }
 
 uint32_t lldb_module_get_num_symbols(lldb_module_t module) {
@@ -2229,7 +2326,7 @@ void lldb_watchpoint_set_condition(lldb_watchpoint_t wp, const char* condition) 
 }
 
 uint64_t lldb_watchpoint_get_watch_address(lldb_watchpoint_t wp) {
-    if (!wp) return 0;
+    if (!wp) return LLDB_INVALID_ADDRESS;
     return static_cast<lldb::SBWatchpoint*>(wp)->GetWatchAddress();
 }
 

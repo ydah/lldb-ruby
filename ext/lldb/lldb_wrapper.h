@@ -27,6 +27,7 @@ typedef void* lldb_watchpoint_t;
 typedef void* lldb_command_interpreter_t;
 typedef void* lldb_command_return_object_t;
 typedef void* lldb_memory_region_info_t;
+typedef void* lldb_file_spec_t;
 
 typedef enum {
     LLDB_RUBY_STATUS_OK = 0,
@@ -118,6 +119,7 @@ uint32_t lldb_target_get_num_breakpoints(lldb_target_t target);
 lldb_breakpoint_t lldb_target_get_breakpoint_at_index(lldb_target_t target, uint32_t index);
 lldb_process_t lldb_target_get_process(lldb_target_t target);
 const char* lldb_target_get_executable_path(lldb_target_t target);
+lldb_file_spec_t lldb_target_get_executable_file(lldb_target_t target);
 uint32_t lldb_target_get_num_modules(lldb_target_t target);
 lldb_module_t lldb_target_get_module_at_index(lldb_target_t target, uint32_t index);
 lldb_value_t lldb_target_evaluate_expression(lldb_target_t target, const char* expr);
@@ -140,6 +142,17 @@ void lldb_launch_info_set_environment_entries(lldb_launch_info_t info,
                                                int append);
 uint32_t lldb_launch_info_get_launch_flags(lldb_launch_info_t info);
 void lldb_launch_info_set_launch_flags(lldb_launch_info_t info, uint32_t flags);
+
+// SBFileSpec
+lldb_file_spec_t lldb_file_spec_create(const char* path, int resolve);
+void lldb_file_spec_destroy(lldb_file_spec_t file_spec);
+int lldb_file_spec_is_valid(lldb_file_spec_t file_spec);
+int lldb_file_spec_exists(lldb_file_spec_t file_spec);
+const char* lldb_file_spec_get_filename(lldb_file_spec_t file_spec);
+const char* lldb_file_spec_get_directory(lldb_file_spec_t file_spec);
+uint32_t lldb_file_spec_get_path(lldb_file_spec_t file_spec, char* buffer, size_t length);
+void lldb_file_spec_set_filename(lldb_file_spec_t file_spec, const char* filename);
+void lldb_file_spec_set_directory(lldb_file_spec_t file_spec, const char* directory);
 
 // SBProcess
 void lldb_process_destroy(lldb_process_t process);
@@ -211,7 +224,7 @@ uint32_t lldb_thread_get_index_id(lldb_thread_t thread);
 const char* lldb_thread_get_name(lldb_thread_t thread);
 const char* lldb_thread_get_queue_name(lldb_thread_t thread);
 int lldb_thread_get_stop_reason(lldb_thread_t thread);
-const char* lldb_thread_get_stop_description(lldb_thread_t thread, size_t max_size);
+size_t lldb_thread_get_stop_description(lldb_thread_t thread, char* buffer, size_t length);
 uint64_t lldb_thread_get_stop_reason_data_count(lldb_thread_t thread);
 uint64_t lldb_thread_get_stop_reason_data_at_index(lldb_thread_t thread, uint32_t index);
 int lldb_thread_is_stopped(lldb_thread_t thread);
@@ -227,6 +240,7 @@ const char* lldb_frame_get_function_name(lldb_frame_t frame);
 const char* lldb_frame_get_display_function_name(lldb_frame_t frame);
 uint32_t lldb_frame_get_line(lldb_frame_t frame);
 const char* lldb_frame_get_file_path(lldb_frame_t frame);
+lldb_file_spec_t lldb_frame_get_file_spec(lldb_frame_t frame);
 uint32_t lldb_frame_get_column(lldb_frame_t frame);
 uint64_t lldb_frame_get_pc(lldb_frame_t frame);
 int lldb_frame_set_pc(lldb_frame_t frame, uint64_t new_pc);
@@ -337,6 +351,8 @@ void lldb_module_destroy(lldb_module_t module);
 int lldb_module_is_valid(lldb_module_t module);
 const char* lldb_module_get_file_path(lldb_module_t module);
 const char* lldb_module_get_platform_file_path(lldb_module_t module);
+lldb_file_spec_t lldb_module_get_file(lldb_module_t module);
+lldb_file_spec_t lldb_module_get_platform_file(lldb_module_t module);
 uint32_t lldb_module_get_num_symbols(lldb_module_t module);
 
 // SBSymbolContext

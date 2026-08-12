@@ -64,6 +64,7 @@ module LLDB
     def self.lldb_target_get_breakpoint_at_index: (FFI::Pointer, Integer) -> FFI::Pointer
     def self.lldb_target_get_process: (FFI::Pointer) -> FFI::Pointer
     def self.lldb_target_get_executable_path: (FFI::Pointer) -> String?
+    def self.lldb_target_get_executable_file: (FFI::Pointer) -> FFI::Pointer
     def self.lldb_target_get_num_modules: (FFI::Pointer) -> Integer
     def self.lldb_target_get_module_at_index: (FFI::Pointer, Integer) -> FFI::Pointer
     def self.lldb_target_evaluate_expression: (FFI::Pointer, String) -> FFI::Pointer
@@ -84,6 +85,17 @@ module LLDB
     def self.lldb_launch_info_set_environment_entries: (FFI::Pointer, FFI::Pointer?, Integer) -> void
     def self.lldb_launch_info_get_launch_flags: (FFI::Pointer) -> Integer
     def self.lldb_launch_info_set_launch_flags: (FFI::Pointer, Integer) -> void
+
+    # SBFileSpec
+    def self.lldb_file_spec_create: (String?, Integer) -> FFI::Pointer
+    def self.lldb_file_spec_destroy: (FFI::Pointer) -> void
+    def self.lldb_file_spec_is_valid: (FFI::Pointer) -> Integer
+    def self.lldb_file_spec_exists: (FFI::Pointer) -> Integer
+    def self.lldb_file_spec_get_filename: (FFI::Pointer) -> String?
+    def self.lldb_file_spec_get_directory: (FFI::Pointer) -> String?
+    def self.lldb_file_spec_get_path: (FFI::Pointer, FFI::Pointer?, Integer) -> Integer
+    def self.lldb_file_spec_set_filename: (FFI::Pointer, String) -> void
+    def self.lldb_file_spec_set_directory: (FFI::Pointer, String) -> void
 
     # SBProcess
     def self.lldb_process_destroy: (FFI::Pointer) -> void
@@ -145,7 +157,7 @@ module LLDB
     def self.lldb_thread_get_name: (FFI::Pointer) -> String?
     def self.lldb_thread_get_queue_name: (FFI::Pointer) -> String?
     def self.lldb_thread_get_stop_reason: (FFI::Pointer) -> Integer
-    def self.lldb_thread_get_stop_description: (FFI::Pointer, Integer) -> String?
+    def self.lldb_thread_get_stop_description: (FFI::Pointer, FFI::Pointer?, Integer) -> Integer
     def self.lldb_thread_get_stop_reason_data_count: (FFI::Pointer) -> Integer
     def self.lldb_thread_get_stop_reason_data_at_index: (FFI::Pointer, Integer) -> Integer
     def self.lldb_thread_is_stopped: (FFI::Pointer) -> Integer
@@ -161,6 +173,7 @@ module LLDB
     def self.lldb_frame_get_display_function_name: (FFI::Pointer) -> String?
     def self.lldb_frame_get_line: (FFI::Pointer) -> Integer
     def self.lldb_frame_get_file_path: (FFI::Pointer) -> String?
+    def self.lldb_frame_get_file_spec: (FFI::Pointer) -> FFI::Pointer
     def self.lldb_frame_get_column: (FFI::Pointer) -> Integer
     def self.lldb_frame_get_pc: (FFI::Pointer) -> Integer
     def self.lldb_frame_set_pc: (FFI::Pointer, Integer) -> Integer
@@ -271,6 +284,8 @@ module LLDB
     def self.lldb_module_is_valid: (FFI::Pointer) -> Integer
     def self.lldb_module_get_file_path: (FFI::Pointer) -> String?
     def self.lldb_module_get_platform_file_path: (FFI::Pointer) -> String?
+    def self.lldb_module_get_file: (FFI::Pointer) -> FFI::Pointer
+    def self.lldb_module_get_platform_file: (FFI::Pointer) -> FFI::Pointer
     def self.lldb_module_get_num_symbols: (FFI::Pointer) -> Integer
 
     # SBSymbolContext

@@ -93,6 +93,11 @@ RSpec.describe LLDB::Thread do
       desc = thread.stop_description
       expect(desc).to be_a(String)
     end
+
+    it 'supports an empty and bounded result' do
+      expect(thread.stop_description(0)).to eq('')
+      expect(thread.stop_description(1).bytesize).to be <= 1
+    end
   end
 
   describe '#stopped?' do

@@ -36,14 +36,34 @@ module LLDB
     def file_path
       return nil unless valid?
 
-      FFIBindings.lldb_module_get_file_path(@ptr)
+      file&.path
     end
 
     # @rbs return: String?
     def platform_file_path
       return nil unless valid?
 
-      FFIBindings.lldb_module_get_platform_file_path(@ptr)
+      platform_file&.path
+    end
+
+    # @rbs return: FileSpec?
+    def file
+      return nil unless valid?
+
+      file_ptr = FFIBindings.lldb_module_get_file(@ptr)
+      return nil if file_ptr.nil? || file_ptr.null?
+
+      FileSpec.from_ptr(file_ptr, context: context)
+    end
+
+    # @rbs return: FileSpec?
+    def platform_file
+      return nil unless valid?
+
+      file_ptr = FFIBindings.lldb_module_get_platform_file(@ptr)
+      return nil if file_ptr.nil? || file_ptr.null?
+
+      FileSpec.from_ptr(file_ptr, context: context)
     end
 
     # @rbs return: Integer

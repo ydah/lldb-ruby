@@ -215,7 +215,7 @@ module LLDB
 
     # @rbs return: Integer
     def load_address
-      return 0 unless valid?
+      return INVALID_ADDRESS unless valid?
 
       FFIBindings.lldb_value_get_load_address(@ptr)
     end

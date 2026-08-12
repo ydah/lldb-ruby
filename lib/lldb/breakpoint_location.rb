@@ -34,14 +34,14 @@ module LLDB
 
     # @rbs return: Integer
     def id
-      return -1 unless valid?
+      return INVALID_BREAK_ID unless valid?
 
       FFIBindings.lldb_breakpoint_location_get_id(@ptr)
     end
 
     # @rbs return: Integer
     def load_address
-      return 0 unless valid?
+      return INVALID_ADDRESS unless valid?
 
       FFIBindings.lldb_breakpoint_location_get_load_address(@ptr)
     end

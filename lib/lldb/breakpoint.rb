@@ -34,7 +34,7 @@ module LLDB
 
     # @rbs return: Integer
     def id
-      return -1 unless valid?
+      return INVALID_BREAK_ID unless valid?
 
       FFIBindings.lldb_breakpoint_get_id(@ptr)
     end

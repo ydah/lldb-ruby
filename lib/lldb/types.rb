@@ -3,6 +3,10 @@
 # rbs_inline: enabled
 
 module LLDB
+  INVALID_ADDRESS = (1 << 64) - 1 # : Integer
+  INVALID_PROCESS_ID = 0 # : Integer
+  INVALID_THREAD_ID = 0 # : Integer
+  INVALID_BREAK_ID = 0 # : Integer
   INVALID_LINE_NUMBER = 0xFFFFFFFF # : Integer
 
   module NativeStatus

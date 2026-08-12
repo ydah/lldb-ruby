@@ -20,6 +20,16 @@ RSpec.describe LLDB::State do
   end
 end
 
+RSpec.describe 'LLDB sentinels' do
+  it 'matches the public LLDB sentinel values' do
+    expect(LLDB::INVALID_ADDRESS).to eq((1 << 64) - 1)
+    expect(LLDB::INVALID_PROCESS_ID).to eq(0)
+    expect(LLDB::INVALID_THREAD_ID).to eq(0)
+    expect(LLDB::INVALID_BREAK_ID).to eq(0)
+    expect(LLDB::INVALID_LINE_NUMBER).to eq(0xFFFFFFFF)
+  end
+end
+
 RSpec.describe LLDB::StopReason do
   describe '.name' do
     it "returns 'breakpoint' for BREAKPOINT reason" do

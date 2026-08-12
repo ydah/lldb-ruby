@@ -57,7 +57,17 @@ module LLDB
     def file_path
       raise InvalidObjectError, 'Frame is not valid' unless valid?
 
-      FFIBindings.lldb_frame_get_file_path(@ptr)
+      file_spec&.path
+    end
+
+    # @rbs return: FileSpec?
+    def file_spec
+      raise InvalidObjectError, 'Frame is not valid' unless valid?
+
+      file_ptr = FFIBindings.lldb_frame_get_file_spec(@ptr)
+      return nil if file_ptr.nil? || file_ptr.null?
+
+      FileSpec.from_ptr(file_ptr, context: context)
     end
 
     # @rbs return: Integer
@@ -69,21 +79,21 @@ module LLDB
 
     # @rbs return: Integer
     def pc
-      return 0 unless valid?
+      return INVALID_ADDRESS unless valid?
 
       FFIBindings.lldb_frame_get_pc(@ptr)
     end
 
     # @rbs return: Integer
     def sp
-      return 0 unless valid?
+      return INVALID_ADDRESS unless valid?
 
       FFIBindings.lldb_frame_get_sp(@ptr)
     end
 
     # @rbs return: Integer
     def fp
-      return 0 unless valid?
+      return INVALID_ADDRESS unless valid?
 
       FFIBindings.lldb_frame_get_fp(@ptr)
     end

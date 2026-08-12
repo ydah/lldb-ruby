@@ -68,6 +68,11 @@ RSpec.describe LLDB::Frame do
       location = frame.location
       expect(location).to match(/:\d+$/)
     end
+
+    it 'exposes the source file as a FileSpec' do
+      expect(frame.file_spec).to be_a(LLDB::FileSpec)
+      expect(frame.file_path).to eq(frame.file_spec.path)
+    end
   end
 
   describe '#to_s' do

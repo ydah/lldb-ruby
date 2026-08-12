@@ -34,7 +34,7 @@ module LLDB
 
     # @rbs return: Integer
     def id
-      return -1 unless valid?
+      return INVALID_BREAK_ID unless valid?
 
       FFIBindings.lldb_watchpoint_get_id(@ptr)
     end
@@ -104,7 +104,7 @@ module LLDB
 
     # @rbs return: Integer
     def watch_address
-      return 0 unless valid?
+      return INVALID_ADDRESS unless valid?
 
       FFIBindings.lldb_watchpoint_get_watch_address(@ptr)
     end

@@ -15,6 +15,13 @@ RSpec.describe LLDB::Target do
     it 'returns the path to the executable' do
       expect(target.executable_path).to eq(executable)
     end
+
+    it 'exposes the executable as a FileSpec' do
+      file = target.executable_file
+
+      expect(file).to be_a(LLDB::FileSpec)
+      expect(file.path).to eq(executable)
+    end
   end
 
   describe '#breakpoint_create_by_name' do
