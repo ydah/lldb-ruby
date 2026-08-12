@@ -4,6 +4,7 @@
 
 module LLDB
   class Value
+    prepend NativeLifecycle
     include Enumerable #[Value]
 
     # @rbs return: Frame | Value | Target
@@ -12,10 +13,13 @@ module LLDB
     # @rbs ptr: FFI::Pointer
     # @rbs parent: Frame | Value | Target
     # @rbs return: void
-    def initialize(ptr, parent:)
-      @ptr = ptr # : FFI::Pointer
+    def initialize(ptr, parent:, context: parent.context)
       @parent = parent
-      ObjectSpace.define_finalizer(self, self.class.release(@ptr))
+      initialize_native_object(
+        ptr,
+        release: ->(released) { FFIBindings.lldb_value_destroy(released) },
+        context: context
+      )
     end
 
     # @rbs ptr: FFI::Pointer
@@ -72,7 +76,7 @@ module LLDB
       child_ptr = FFIBindings.lldb_value_get_child_at_index(@ptr, index)
       return nil if child_ptr.nil? || child_ptr.null?
 
-      Value.new(child_ptr, parent: self)
+      Value.new(child_ptr, parent: self, context: context)
     end
 
     # @rbs name: String
@@ -83,7 +87,7 @@ module LLDB
       child_ptr = FFIBindings.lldb_value_get_child_member_with_name(@ptr, name)
       return nil if child_ptr.nil? || child_ptr.null?
 
-      Value.new(child_ptr, parent: self)
+      Value.new(child_ptr, parent: self, context: context)
     end
 
     alias [] child_member
@@ -159,7 +163,7 @@ module LLDB
       deref_ptr = FFIBindings.lldb_value_dereference(@ptr)
       return nil if deref_ptr.nil? || deref_ptr.null?
 
-      Value.new(deref_ptr, parent: self)
+      Value.new(deref_ptr, parent: self, context: context)
     end
 
     # @rbs return: Value?
@@ -169,7 +173,7 @@ module LLDB
       addr_ptr = FFIBindings.lldb_value_address_of(@ptr)
       return nil if addr_ptr.nil? || addr_ptr.null?
 
-      Value.new(addr_ptr, parent: self)
+      Value.new(addr_ptr, parent: self, context: context)
     end
 
     # @rbs return: String
@@ -195,7 +199,7 @@ module LLDB
       type_ptr = FFIBindings.lldb_value_get_type(@ptr)
       return nil if type_ptr.nil? || type_ptr.null?
 
-      Type.new(type_ptr)
+      Type.new(type_ptr, context: context)
     end
 
     # @rbs target_type: Type
@@ -206,7 +210,7 @@ module LLDB
       cast_ptr = FFIBindings.lldb_value_cast(@ptr, target_type.to_ptr)
       return nil if cast_ptr.nil? || cast_ptr.null?
 
-      Value.new(cast_ptr, parent: self)
+      Value.new(cast_ptr, parent: self, context: context)
     end
 
     # @rbs return: Integer
@@ -249,7 +253,7 @@ module LLDB
       child_ptr = FFIBindings.lldb_value_create_child_at_offset(@ptr, name, value_type.to_ptr, offset)
       return nil if child_ptr.nil? || child_ptr.null?
 
-      Value.new(child_ptr, parent: self)
+      Value.new(child_ptr, parent: self, context: context)
     end
 
     # @rbs name: String
@@ -262,7 +266,7 @@ module LLDB
       value_ptr = FFIBindings.lldb_value_create_value_from_address(@ptr, name, address, value_type.to_ptr)
       return nil if value_ptr.nil? || value_ptr.null?
 
-      Value.new(value_ptr, parent: self)
+      Value.new(value_ptr, parent: self, context: context)
     end
 
     # @rbs name: String
@@ -274,7 +278,7 @@ module LLDB
       value_ptr = FFIBindings.lldb_value_create_value_from_expression(@ptr, name, expression)
       return nil if value_ptr.nil? || value_ptr.null?
 
-      Value.new(value_ptr, parent: self)
+      Value.new(value_ptr, parent: self, context: context)
     end
 
     # @rbs resolve: bool
@@ -291,7 +295,7 @@ module LLDB
       return nil if wp_ptr.nil? || wp_ptr.null?
 
       target = get_target_from_parent
-      Watchpoint.new(wp_ptr, target: target)
+      Watchpoint.new(wp_ptr, target: target, context: context)
     end
 
     # @rbs return: String?
@@ -315,7 +319,7 @@ module LLDB
       value_ptr = FFIBindings.lldb_value_get_non_synthetic_value(@ptr)
       return nil if value_ptr.nil? || value_ptr.null?
 
-      Value.new(value_ptr, parent: self)
+      Value.new(value_ptr, parent: self, context: context)
     end
 
     # @rbs return: FFI::Pointer

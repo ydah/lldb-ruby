@@ -1,0 +1,7 @@
+class WeakRef
+  def initialize: (untyped) -> void
+  def __getobj__: () -> untyped
+
+  class RefError < RuntimeError
+  end
+end

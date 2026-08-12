@@ -129,4 +129,24 @@ RSpec.describe LLDB::Debugger do
       expect(debugger.num_targets).to eq(0)
     end
   end
+
+  describe '#close' do
+    let(:debugger) { LLDB::Debugger.create }
+    let(:executable) { compile_fixture('simple') }
+
+    it 'closes child objects before releasing the debugger' do
+      target = debugger.create_target(executable)
+
+      expect(debugger.close).to be true
+      expect(debugger.close).to be false
+      expect(debugger).to be_closed
+      expect(debugger).not_to be_valid
+      expect(target).not_to be_valid
+      expect(debugger.context).to be_closed
+    end
+
+    it 'prevents LLDB termination while a debugger is open' do
+      expect { LLDB.terminate }.to raise_error(LLDB::LifecycleError)
+    end
+  end
 end

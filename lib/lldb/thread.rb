@@ -4,16 +4,21 @@
 
 module LLDB
   class Thread
+    prepend NativeLifecycle
+
     # @rbs return: Process
     attr_reader :process
 
     # @rbs ptr: FFI::Pointer
     # @rbs process: Process
     # @rbs return: void
-    def initialize(ptr, process:)
-      @ptr = ptr # : FFI::Pointer
+    def initialize(ptr, process:, context: process.context)
       @process = process
-      ObjectSpace.define_finalizer(self, self.class.release(@ptr))
+      initialize_native_object(
+        ptr,
+        release: ->(released) { FFIBindings.lldb_thread_destroy(released) },
+        context: context
+      )
     end
 
     # @rbs ptr: FFI::Pointer
@@ -97,7 +102,7 @@ module LLDB
       frame_ptr = FFIBindings.lldb_thread_get_frame_at_index(@ptr, index)
       return nil if frame_ptr.nil? || frame_ptr.null?
 
-      Frame.new(frame_ptr, thread: self)
+      Frame.new(frame_ptr, thread: self, context: context)
     end
 
     # @rbs return: Frame?
@@ -107,7 +112,7 @@ module LLDB
       frame_ptr = FFIBindings.lldb_thread_get_selected_frame(@ptr)
       return nil if frame_ptr.nil? || frame_ptr.null?
 
-      Frame.new(frame_ptr, thread: self)
+      Frame.new(frame_ptr, thread: self, context: context)
     end
 
     # @rbs index: Integer
@@ -244,7 +249,7 @@ module LLDB
       process_ptr = FFIBindings.lldb_thread_get_process(@ptr)
       return nil if process_ptr.nil? || process_ptr.null?
 
-      Process.new(process_ptr, target: @process.target)
+      Process.new(process_ptr, target: @process.target, context: context)
     end
 
     # @rbs return: FFI::Pointer

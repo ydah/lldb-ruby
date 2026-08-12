@@ -4,6 +4,7 @@
 
 module LLDB
   class ValueList
+    prepend NativeLifecycle
     include Enumerable #[Value]
 
     # @rbs return: Frame | Value
@@ -12,10 +13,13 @@ module LLDB
     # @rbs ptr: FFI::Pointer
     # @rbs parent: Frame | Value
     # @rbs return: void
-    def initialize(ptr, parent:)
-      @ptr = ptr # : FFI::Pointer
+    def initialize(ptr, parent:, context: parent.context)
       @parent = parent
-      ObjectSpace.define_finalizer(self, self.class.release(@ptr))
+      initialize_native_object(
+        ptr,
+        release: ->(released) { FFIBindings.lldb_value_list_destroy(released) },
+        context: context
+      )
     end
 
     # @rbs ptr: FFI::Pointer
@@ -46,7 +50,7 @@ module LLDB
       value_ptr = FFIBindings.lldb_value_list_get_value_at_index(@ptr, index)
       return nil if value_ptr.nil? || value_ptr.null?
 
-      Value.new(value_ptr, parent: @parent)
+      Value.new(value_ptr, parent: @parent, context: context)
     end
 
     alias [] value_at_index
@@ -59,7 +63,7 @@ module LLDB
       value_ptr = FFIBindings.lldb_value_list_get_first_value_by_name(@ptr, name)
       return nil if value_ptr.nil? || value_ptr.null?
 
-      Value.new(value_ptr, parent: @parent)
+      Value.new(value_ptr, parent: @parent, context: context)
     end
 
     # @rbs return: Array[Value]

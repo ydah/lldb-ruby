@@ -4,11 +4,16 @@
 
 module LLDB
   class Type
+    prepend NativeLifecycle
+
     # @rbs ptr: FFI::Pointer
     # @rbs return: void
-    def initialize(ptr)
-      @ptr = ptr # : FFI::Pointer
-      ObjectSpace.define_finalizer(self, self.class.release(@ptr))
+    def initialize(ptr, context: nil)
+      initialize_native_object(
+        ptr,
+        release: ->(released) { FFIBindings.lldb_type_destroy(released) },
+        context: context
+      )
     end
 
     # @rbs ptr: FFI::Pointer

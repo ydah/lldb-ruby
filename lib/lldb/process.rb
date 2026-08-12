@@ -4,16 +4,21 @@
 
 module LLDB
   class Process
+    prepend NativeLifecycle
+
     # @rbs return: Target
     attr_reader :target
 
     # @rbs ptr: FFI::Pointer
     # @rbs target: Target
     # @rbs return: void
-    def initialize(ptr, target:)
-      @ptr = ptr # : FFI::Pointer
+    def initialize(ptr, target:, context: target.context)
       @target = target
-      ObjectSpace.define_finalizer(self, self.class.release(@ptr))
+      initialize_native_object(
+        ptr,
+        release: ->(released) { FFIBindings.lldb_process_destroy(released) },
+        context: context
+      )
     end
 
     # @rbs ptr: FFI::Pointer
@@ -104,7 +109,7 @@ module LLDB
       thread_ptr = FFIBindings.lldb_process_get_thread_at_index(@ptr, index)
       return nil if thread_ptr.nil? || thread_ptr.null?
 
-      Thread.new(thread_ptr, process: self)
+      Thread.new(thread_ptr, process: self, context: context)
     end
 
     # @rbs return: Thread?
@@ -114,7 +119,7 @@ module LLDB
       thread_ptr = FFIBindings.lldb_process_get_selected_thread(@ptr)
       return nil if thread_ptr.nil? || thread_ptr.null?
 
-      Thread.new(thread_ptr, process: self)
+      Thread.new(thread_ptr, process: self, context: context)
     end
 
     # @rbs thread_id: Integer
@@ -181,7 +186,7 @@ module LLDB
       thread_ptr = FFIBindings.lldb_process_get_thread_by_id(@ptr, thread_id)
       return nil if thread_ptr.nil? || thread_ptr.null?
 
-      Thread.new(thread_ptr, process: self)
+      Thread.new(thread_ptr, process: self, context: context)
     end
 
     # @rbs index_id: Integer
@@ -192,7 +197,7 @@ module LLDB
       thread_ptr = FFIBindings.lldb_process_get_thread_by_index_id(@ptr, index_id)
       return nil if thread_ptr.nil? || thread_ptr.null?
 
-      Thread.new(thread_ptr, process: self)
+      Thread.new(thread_ptr, process: self, context: context)
     end
 
     # @rbs index_id: Integer
@@ -354,7 +359,7 @@ module LLDB
       error.raise_if_error!('process.get_memory_region_info')
       return nil if info_ptr.nil? || info_ptr.null?
 
-      MemoryRegionInfo.new(info_ptr)
+      MemoryRegionInfo.new(info_ptr, context: context)
     end
 
     # @rbs return: FFI::Pointer

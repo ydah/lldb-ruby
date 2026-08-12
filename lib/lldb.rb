@@ -9,6 +9,7 @@ require_relative 'lldb/types'
 require_relative 'lldb/native'
 require_relative 'lldb/native_handle'
 require_relative 'lldb/context'
+require_relative 'lldb/native_lifecycle'
 require_relative 'lldb/api_support'
 require_relative 'lldb/native_string_array'
 require_relative 'lldb/debugger'
@@ -33,22 +34,29 @@ module LLDB
   class << self
     # @rbs return: void
     def initialize
-      return if @initialized
+      lifecycle_mutex.synchronize do
+        return if @initialized
 
-      error = Error.new
-      status = FFIBindings.lldb_initialize(error.to_ptr)
-      Native.check_status!(status, 'lldb.initialize', error)
-      @initialized = true
+        error = Error.new
+        status = FFIBindings.lldb_initialize(error.to_ptr)
+        Native.check_status!(status, 'lldb.initialize', error)
+        @initialized = true
 
-      at_exit { terminate }
+        at_exit { terminate if open_debugger_count.zero? }
+      end
     end
 
     # @rbs return: void
     def terminate
-      return unless @initialized
+      lifecycle_mutex.synchronize do
+        return unless @initialized
+        if live_debugger_count.positive?
+          raise LifecycleError, 'cannot terminate LLDB while debuggers are open'
+        end
 
-      FFIBindings.lldb_terminate
-      @initialized = false
+        FFIBindings.lldb_terminate
+        @initialized = false
+      end
     end
 
     # @rbs return: bool
@@ -67,6 +75,43 @@ module LLDB
     def create_debugger
       LLDB.initialize
       Debugger.create
+    end
+
+    # @rbs return: Integer
+    def open_debugger_count
+      lifecycle_mutex.synchronize { live_debugger_count }
+    end
+
+    # @rbs debugger: Debugger
+    # @rbs return: void
+    def register_debugger(debugger)
+      lifecycle_mutex.synchronize do
+        debuggers = (@debuggers ||= []) # : Array[WeakRef]
+        debuggers << WeakRef.new(debugger)
+      end
+    end
+
+    private
+
+    # @rbs return: Integer
+    def live_debugger_count
+      live = [] # : Array[WeakRef]
+      count = (@debuggers || []).count do |reference|
+        begin
+          debugger = reference.__getobj__
+          live << reference
+          !debugger.closed?
+        rescue WeakRef::RefError
+          false
+        end
+      end
+      @debuggers = live
+      count
+    end
+
+    # @rbs return: Mutex
+    def lifecycle_mutex
+      @lifecycle_mutex ||= Mutex.new
     end
   end
 end

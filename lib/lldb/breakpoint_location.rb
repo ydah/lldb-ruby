@@ -4,16 +4,21 @@
 
 module LLDB
   class BreakpointLocation
+    prepend NativeLifecycle
+
     # @rbs return: Breakpoint
     attr_reader :breakpoint
 
     # @rbs ptr: FFI::Pointer
     # @rbs breakpoint: Breakpoint
     # @rbs return: void
-    def initialize(ptr, breakpoint:)
-      @ptr = ptr # : FFI::Pointer
+    def initialize(ptr, breakpoint:, context: breakpoint.context)
       @breakpoint = breakpoint
-      ObjectSpace.define_finalizer(self, self.class.release(@ptr))
+      initialize_native_object(
+        ptr,
+        release: ->(released) { FFIBindings.lldb_breakpoint_location_destroy(released) },
+        context: context
+      )
     end
 
     # @rbs ptr: FFI::Pointer

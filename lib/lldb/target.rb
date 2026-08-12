@@ -4,19 +4,24 @@
 
 module LLDB
   class Target
+    prepend NativeLifecycle
+
     # @rbs return: Debugger
     attr_reader :debugger
 
     # @rbs ptr: FFI::Pointer
     # @rbs debugger: Debugger
     # @rbs return: void
-    def initialize(ptr, debugger:)
-      @ptr = ptr # : FFI::Pointer
+    def initialize(ptr, debugger:, context: debugger.context)
       @debugger = debugger
       @breakpoints = [] # : Array[Breakpoint]
       @watchpoints = [] # : Array[Watchpoint]
       @process = nil # : Process?
-      ObjectSpace.define_finalizer(self, self.class.release(@ptr))
+      initialize_native_object(
+        ptr,
+        release: ->(released) { FFIBindings.lldb_target_destroy(released) },
+        context: context
+      )
     end
 
     # @rbs ptr: FFI::Pointer
@@ -38,7 +43,7 @@ module LLDB
       raise InvalidObjectError, 'Target is not valid' unless valid?
 
       # Use LaunchInfo with STOP_AT_ENTRY flag for reliable cross-platform behavior
-      launch_info = LaunchInfo.new(args)
+      launch_info = LaunchInfo.new(args, context: context)
       launch_info.launch_flags = LaunchFlags::STOP_AT_ENTRY
       launch_info.working_directory = working_dir if working_dir
       launch_info.set_environment(env) if env
@@ -49,7 +54,7 @@ module LLDB
       error.raise_if_error!
       raise LaunchError, 'Failed to launch process' if process_ptr.nil? || process_ptr.null?
 
-      @process = Process.new(process_ptr, target: self)
+      @process = Process.new(process_ptr, target: self, context: context)
 
       # Wait for process to stop when in synchronous mode
       # On some platforms (Linux), the process may not be immediately stopped
@@ -79,7 +84,7 @@ module LLDB
       error.raise_if_error!
       raise LaunchError, 'Failed to launch process' if process_ptr.nil? || process_ptr.null?
 
-      @process = Process.new(process_ptr, target: self)
+      @process = Process.new(process_ptr, target: self, context: context)
     end
 
     # @rbs pid: Integer
@@ -93,7 +98,7 @@ module LLDB
       error.raise_if_error!
       raise AttachError, "Failed to attach to process #{pid}" if process_ptr.nil? || process_ptr.null?
 
-      @process = Process.new(process_ptr, target: self)
+      @process = Process.new(process_ptr, target: self, context: context)
     end
 
     # @rbs symbol_name: String
@@ -105,7 +110,7 @@ module LLDB
       bp_ptr = FFIBindings.lldb_target_breakpoint_create_by_name(@ptr, symbol_name, module_name)
       raise BreakpointError, "Failed to create breakpoint for '#{symbol_name}'" if bp_ptr.nil? || bp_ptr.null?
 
-      bp = Breakpoint.new(bp_ptr, target: self)
+      bp = Breakpoint.new(bp_ptr, target: self, context: context)
       @breakpoints << bp
       bp
     end
@@ -119,7 +124,7 @@ module LLDB
       bp_ptr = FFIBindings.lldb_target_breakpoint_create_by_location(@ptr, file, line)
       raise BreakpointError, "Failed to create breakpoint at #{file}:#{line}" if bp_ptr.nil? || bp_ptr.null?
 
-      bp = Breakpoint.new(bp_ptr, target: self)
+      bp = Breakpoint.new(bp_ptr, target: self, context: context)
       @breakpoints << bp
       bp
     end
@@ -137,7 +142,7 @@ module LLDB
               "Failed to create breakpoint at address 0x#{address.to_s(16)}"
       end
 
-      bp = Breakpoint.new(bp_ptr, target: self)
+      bp = Breakpoint.new(bp_ptr, target: self, context: context)
       @breakpoints << bp
       bp
     end
@@ -160,7 +165,7 @@ module LLDB
       bp_ptr = FFIBindings.lldb_target_find_breakpoint_by_id(@ptr, id)
       return nil if bp_ptr.nil? || bp_ptr.null?
 
-      Breakpoint.new(bp_ptr, target: self)
+      Breakpoint.new(bp_ptr, target: self, context: context)
     end
 
     # @rbs return: Integer
@@ -178,7 +183,7 @@ module LLDB
       bp_ptr = FFIBindings.lldb_target_get_breakpoint_at_index(@ptr, index)
       return nil if bp_ptr.nil? || bp_ptr.null?
 
-      Breakpoint.new(bp_ptr, target: self)
+      Breakpoint.new(bp_ptr, target: self, context: context)
     end
 
     # @rbs return: Array[Breakpoint]
@@ -193,7 +198,7 @@ module LLDB
       process_ptr = FFIBindings.lldb_target_get_process(@ptr)
       return nil if process_ptr.nil? || process_ptr.null?
 
-      Process.new(process_ptr, target: self)
+      Process.new(process_ptr, target: self, context: context)
     end
 
     # @rbs return: String?
@@ -218,7 +223,7 @@ module LLDB
       mod_ptr = FFIBindings.lldb_target_get_module_at_index(@ptr, index)
       return nil if mod_ptr.nil? || mod_ptr.null?
 
-      Module.new(mod_ptr, target: self)
+      Module.new(mod_ptr, target: self, context: context)
     end
 
     # @rbs return: Array[Module]
@@ -238,7 +243,7 @@ module LLDB
       error.raise_if_error!
       raise AttachError, "Failed to attach to process '#{name}'" if process_ptr.nil? || process_ptr.null?
 
-      @process = Process.new(process_ptr, target: self)
+      @process = Process.new(process_ptr, target: self, context: context)
     end
 
     # @rbs regex: String
@@ -252,7 +257,7 @@ module LLDB
       bp_ptr = FFIBindings.lldb_target_breakpoint_create_by_regex(@ptr, regex, module_name)
       raise BreakpointError, "Failed to create breakpoint for regex '#{regex}'" if bp_ptr.nil? || bp_ptr.null?
 
-      bp = Breakpoint.new(bp_ptr, target: self)
+      bp = Breakpoint.new(bp_ptr, target: self, context: context)
       @breakpoints << bp
       bp
     end
@@ -266,7 +271,7 @@ module LLDB
       bp_ptr = FFIBindings.lldb_target_breakpoint_create_by_source_regex(@ptr, regex, source_file)
       raise BreakpointError, "Failed to create breakpoint for source regex '#{regex}'" if bp_ptr.nil? || bp_ptr.null?
 
-      bp = Breakpoint.new(bp_ptr, target: self)
+      bp = Breakpoint.new(bp_ptr, target: self, context: context)
       @breakpoints << bp
       bp
     end
@@ -302,7 +307,7 @@ module LLDB
       value_ptr = FFIBindings.lldb_target_evaluate_expression(@ptr, expression)
       return nil if value_ptr.nil? || value_ptr.null?
 
-      Value.new(value_ptr, parent: self)
+      Value.new(value_ptr, parent: self, context: context)
     end
 
     # @rbs address: Integer
@@ -347,7 +352,7 @@ module LLDB
       error.raise_if_error!
       raise LLDBError, "Failed to create watchpoint at address 0x#{address.to_s(16)}" if wp_ptr.nil? || wp_ptr.null?
 
-      wp = Watchpoint.new(wp_ptr, target: self)
+      wp = Watchpoint.new(wp_ptr, target: self, context: context)
       @watchpoints << wp
       wp
     end
@@ -379,7 +384,7 @@ module LLDB
       wp_ptr = FFIBindings.lldb_target_find_watchpoint_by_id(@ptr, id)
       return nil if wp_ptr.nil? || wp_ptr.null?
 
-      Watchpoint.new(wp_ptr, target: self)
+      Watchpoint.new(wp_ptr, target: self, context: context)
     end
 
     # @rbs return: Integer
@@ -397,7 +402,7 @@ module LLDB
       wp_ptr = FFIBindings.lldb_target_get_watchpoint_at_index(@ptr, index)
       return nil if wp_ptr.nil? || wp_ptr.null?
 
-      Watchpoint.new(wp_ptr, target: self)
+      Watchpoint.new(wp_ptr, target: self, context: context)
     end
 
     # @rbs return: Array[Watchpoint]

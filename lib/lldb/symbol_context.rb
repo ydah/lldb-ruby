@@ -4,16 +4,21 @@
 
 module LLDB
   class SymbolContext
+    prepend NativeLifecycle
+
     # @rbs return: Frame
     attr_reader :parent
 
     # @rbs ptr: FFI::Pointer
     # @rbs parent: Frame
     # @rbs return: void
-    def initialize(ptr, parent:)
-      @ptr = ptr # : FFI::Pointer
+    def initialize(ptr, parent:, context: parent.context)
       @parent = parent
-      ObjectSpace.define_finalizer(self, self.class.release(@ptr))
+      initialize_native_object(
+        ptr,
+        release: ->(released) { FFIBindings.lldb_symbol_context_destroy(released) },
+        context: context
+      )
     end
 
     # @rbs ptr: FFI::Pointer
@@ -34,7 +39,7 @@ module LLDB
       mod_ptr = FFIBindings.lldb_symbol_context_get_module(@ptr)
       return nil if mod_ptr.nil? || mod_ptr.null?
 
-      Module.new(mod_ptr, target: nil)
+      Module.new(mod_ptr, target: nil, context: context)
     end
 
     # @rbs return: String?

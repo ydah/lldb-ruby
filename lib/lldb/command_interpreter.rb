@@ -4,16 +4,21 @@
 
 module LLDB
   class CommandInterpreter
+    prepend NativeLifecycle
+
     # @rbs return: Debugger
     attr_reader :debugger
 
     # @rbs ptr: FFI::Pointer
     # @rbs debugger: Debugger
     # @rbs return: void
-    def initialize(ptr, debugger:)
-      @ptr = ptr # : FFI::Pointer
+    def initialize(ptr, debugger:, context: debugger.context)
       @debugger = debugger
-      ObjectSpace.define_finalizer(self, self.class.release(@ptr))
+      initialize_native_object(
+        ptr,
+        release: ->(released) { FFIBindings.lldb_command_interpreter_destroy(released) },
+        context: context
+      )
     end
 
     # @rbs ptr: FFI::Pointer
@@ -33,7 +38,7 @@ module LLDB
     def handle_command(command, add_to_history: true)
       raise InvalidObjectError, 'CommandInterpreter is not valid' unless valid?
 
-      result = CommandReturnObject.create
+      result = CommandReturnObject.create(context: context)
       FFIBindings.lldb_command_interpreter_handle_command(@ptr, command, result.to_ptr, add_to_history ? 1 : 0)
       result
     end

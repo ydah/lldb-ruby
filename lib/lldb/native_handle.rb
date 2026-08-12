@@ -48,7 +48,7 @@ module LLDB
     # @rbs state: Hash[Symbol, untyped]
     # @rbs return: ^(Integer) -> void
     def self.finalizer(state)
-      proc do |_object_id|
+      ->(_object_id) do
         pointer = state[:mutex].synchronize do
           next nil if state[:closed]
 

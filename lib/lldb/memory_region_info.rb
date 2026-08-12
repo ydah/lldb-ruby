@@ -5,11 +5,16 @@
 module LLDB
   # Represents information about a memory region in the target process.
   class MemoryRegionInfo
+    prepend NativeLifecycle
+
     # @rbs ptr: FFI::Pointer
     # @rbs return: void
-    def initialize(ptr)
-      @ptr = ptr # : FFI::Pointer
-      ObjectSpace.define_finalizer(self, self.class.release(@ptr))
+    def initialize(ptr, context: nil)
+      initialize_native_object(
+        ptr,
+        release: ->(released) { FFIBindings.lldb_memory_region_info_destroy(released) },
+        context: context
+      )
     end
 
     # @rbs ptr: FFI::Pointer

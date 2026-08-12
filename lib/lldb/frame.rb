@@ -4,16 +4,21 @@
 
 module LLDB
   class Frame
+    prepend NativeLifecycle
+
     # @rbs return: Thread
     attr_reader :thread
 
     # @rbs ptr: FFI::Pointer
     # @rbs thread: Thread
     # @rbs return: void
-    def initialize(ptr, thread:)
-      @ptr = ptr # : FFI::Pointer
+    def initialize(ptr, thread:, context: thread.context)
       @thread = thread
-      ObjectSpace.define_finalizer(self, self.class.release(@ptr))
+      initialize_native_object(
+        ptr,
+        release: ->(released) { FFIBindings.lldb_frame_destroy(released) },
+        context: context
+      )
     end
 
     # @rbs ptr: FFI::Pointer
@@ -101,7 +106,7 @@ module LLDB
       value_ptr = FFIBindings.lldb_frame_find_variable(@ptr, name)
       return nil if value_ptr.nil? || value_ptr.null?
 
-      Value.new(value_ptr, parent: self)
+      Value.new(value_ptr, parent: self, context: context)
     end
 
     # @rbs expression: String
@@ -113,7 +118,7 @@ module LLDB
       value_ptr = FFIBindings.lldb_frame_evaluate_expression(@ptr, expression)
       return nil if value_ptr.nil? || value_ptr.null?
 
-      Value.new(value_ptr, parent: self)
+      Value.new(value_ptr, parent: self, context: context)
     end
 
     # @rbs path: String
@@ -124,7 +129,7 @@ module LLDB
       value_ptr = FFIBindings.lldb_frame_get_value_for_variable_path(@ptr, path)
       return nil if value_ptr.nil? || value_ptr.null?
 
-      Value.new(value_ptr, parent: self)
+      Value.new(value_ptr, parent: self, context: context)
     end
 
     # @rbs scope: Integer
@@ -135,7 +140,7 @@ module LLDB
       ctx_ptr = FFIBindings.lldb_frame_get_symbol_context(@ptr, scope)
       return nil if ctx_ptr.nil? || ctx_ptr.null?
 
-      SymbolContext.new(ctx_ptr, parent: self)
+      SymbolContext.new(ctx_ptr, parent: self, context: context)
     end
 
     # @rbs return: String
@@ -173,7 +178,7 @@ module LLDB
       )
       raise LLDBError, 'Failed to get variables' if list_ptr.nil? || list_ptr.null?
 
-      ValueList.new(list_ptr, parent: self)
+      ValueList.new(list_ptr, parent: self, context: context)
     end
 
     # @rbs return: ValueList
@@ -184,7 +189,7 @@ module LLDB
       list_ptr = FFIBindings.lldb_frame_get_registers(@ptr)
       raise LLDBError, 'Failed to get registers' if list_ptr.nil? || list_ptr.null?
 
-      ValueList.new(list_ptr, parent: self)
+      ValueList.new(list_ptr, parent: self, context: context)
     end
 
     # @rbs return: bool
@@ -208,7 +213,7 @@ module LLDB
       mod_ptr = FFIBindings.lldb_frame_get_module(@ptr)
       return nil if mod_ptr.nil? || mod_ptr.null?
 
-      Module.new(mod_ptr, target: @thread.process.target)
+      Module.new(mod_ptr, target: @thread.process.target, context: context)
     end
 
     # @rbs return: Thread?
@@ -218,7 +223,7 @@ module LLDB
       thread_ptr = FFIBindings.lldb_frame_get_thread(@ptr)
       return nil if thread_ptr.nil? || thread_ptr.null?
 
-      Thread.new(thread_ptr, process: @thread.process)
+      Thread.new(thread_ptr, process: @thread.process, context: context)
     end
 
     # @rbs return: FFI::Pointer

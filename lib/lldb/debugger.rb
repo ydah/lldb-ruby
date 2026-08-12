@@ -4,21 +4,27 @@
 
 module LLDB
   class Debugger
+    prepend NativeLifecycle
+
     # @rbs return: Debugger
     def self.create
       LLDB.ensure_initialized!
       ptr = FFIBindings.lldb_debugger_create
       raise LLDBError, 'Failed to create debugger' if ptr.null?
 
-      new(ptr)
+      new(ptr, context: Context.new).tap { |debugger| LLDB.register_debugger(debugger) }
     end
 
     # @rbs ptr: FFI::Pointer
+    # @rbs context: Context
     # @rbs return: void
-    def initialize(ptr)
-      @ptr = ptr # : FFI::Pointer
+    def initialize(ptr, context: Context.new)
       @targets = [] # : Array[Target]
-      ObjectSpace.define_finalizer(self, self.class.release(@ptr))
+      initialize_native_object(
+        ptr,
+        release: ->(released) { FFIBindings.lldb_debugger_destroy(released) },
+        context: context
+      )
     end
 
     # @rbs ptr: FFI::Pointer
@@ -30,6 +36,16 @@ module LLDB
     # @rbs return: bool
     def valid?
       !@ptr.null? && FFIBindings.lldb_debugger_is_valid(@ptr) != 0
+    end
+
+    # @rbs return: bool
+    def close
+      return false if closed?
+
+      context!.close(except: @native_handle)
+      @native_handle.close
+      @ptr = NativeHandle::NULL_POINTER
+      true
     end
 
     # @rbs filename: String
@@ -53,7 +69,7 @@ module LLDB
       error.raise_if_error!
       raise LLDBError, "Failed to create target for '#{filename}'" if target_ptr.nil? || target_ptr.null?
 
-      target = Target.new(target_ptr, debugger: self)
+      target = Target.new(target_ptr, debugger: self, context: context)
       @targets << target
       target
     end
@@ -66,7 +82,7 @@ module LLDB
       target_ptr = FFIBindings.lldb_debugger_create_target_simple(@ptr, filename.to_s)
       raise LLDBError, "Failed to create target for '#{filename}'" if target_ptr.nil? || target_ptr.null?
 
-      target = Target.new(target_ptr, debugger: self)
+      target = Target.new(target_ptr, debugger: self, context: context)
       @targets << target
       target
     end
@@ -86,7 +102,7 @@ module LLDB
       target_ptr = FFIBindings.lldb_debugger_get_target_at_index(@ptr, index)
       return nil if target_ptr.nil? || target_ptr.null?
 
-      Target.new(target_ptr, debugger: self)
+      Target.new(target_ptr, debugger: self, context: context)
     end
 
     # @rbs return: Target?
@@ -96,7 +112,7 @@ module LLDB
       target_ptr = FFIBindings.lldb_debugger_get_selected_target(@ptr)
       return nil if target_ptr.nil? || target_ptr.null?
 
-      Target.new(target_ptr, debugger: self)
+      Target.new(target_ptr, debugger: self, context: context)
     end
 
     # @rbs return: Array[Target]
@@ -145,7 +161,7 @@ module LLDB
       target_ptr = FFIBindings.lldb_debugger_find_target_with_process_id(@ptr, pid)
       return nil if target_ptr.nil? || target_ptr.null?
 
-      Target.new(target_ptr, debugger: self)
+      Target.new(target_ptr, debugger: self, context: context)
     end
 
     # @rbs return: String?
@@ -160,7 +176,7 @@ module LLDB
       ci_ptr = FFIBindings.lldb_debugger_get_command_interpreter(@ptr)
       raise LLDBError, 'Failed to get command interpreter' if ci_ptr.nil? || ci_ptr.null?
 
-      CommandInterpreter.new(ci_ptr, debugger: self)
+      CommandInterpreter.new(ci_ptr, debugger: self, context: context)
     end
 
     # @rbs command: String
@@ -174,6 +190,13 @@ module LLDB
     # @rbs return: FFI::Pointer
     def to_ptr
       @ptr
+    end
+
+    private
+
+    # @rbs return: void
+    def close_context
+      context!.close(except: @native_handle)
     end
   end
 end

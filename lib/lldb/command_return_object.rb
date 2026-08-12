@@ -4,19 +4,23 @@
 
 module LLDB
   class CommandReturnObject
+    prepend NativeLifecycle
     # @rbs return: CommandReturnObject
-    def self.create
+    def self.create(context: nil)
       ptr = FFIBindings.lldb_command_return_object_create
       raise LLDBError, 'Failed to create command return object' if ptr.nil? || ptr.null?
 
-      new(ptr)
+      new(ptr, context: context)
     end
 
     # @rbs ptr: FFI::Pointer
     # @rbs return: void
-    def initialize(ptr)
-      @ptr = ptr # : FFI::Pointer
-      ObjectSpace.define_finalizer(self, self.class.release(@ptr))
+    def initialize(ptr, context: nil)
+      initialize_native_object(
+        ptr,
+        release: ->(released) { FFIBindings.lldb_command_return_object_destroy(released) },
+        context: context
+      )
     end
 
     # @rbs ptr: FFI::Pointer

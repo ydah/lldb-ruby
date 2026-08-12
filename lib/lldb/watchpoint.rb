@@ -4,16 +4,21 @@
 
 module LLDB
   class Watchpoint
+    prepend NativeLifecycle
+
     # @rbs return: Target
     attr_reader :target
 
     # @rbs ptr: FFI::Pointer
     # @rbs target: Target
     # @rbs return: void
-    def initialize(ptr, target:)
-      @ptr = ptr # : FFI::Pointer
+    def initialize(ptr, target:, context: target.context)
       @target = target
-      ObjectSpace.define_finalizer(self, self.class.release(@ptr))
+      initialize_native_object(
+        ptr,
+        release: ->(released) { FFIBindings.lldb_watchpoint_destroy(released) },
+        context: context
+      )
     end
 
     # @rbs ptr: FFI::Pointer

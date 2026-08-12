@@ -20,6 +20,7 @@ RSpec.configure do |config|
 
   # Terminate LLDB after running tests
   config.after(:suite) do
+    ObjectSpace.each_object(LLDB::Debugger, &:close)
     LLDB.terminate
   end
 end

@@ -22,15 +22,21 @@ module LLDB
   end
 
   class LaunchInfo
+    prepend NativeLifecycle
+
     # @rbs args: Array[String]?
     # @rbs return: void
-    def initialize(args = nil)
+    def initialize(args = nil, context: nil)
       @arguments = if args && !args.empty?
                      NativeStringArray.new(args)
                    end
 
-      @ptr = FFIBindings.lldb_launch_info_create(@arguments&.to_ptr) # : FFI::Pointer
-      ObjectSpace.define_finalizer(self, self.class.release(@ptr))
+      ptr = FFIBindings.lldb_launch_info_create(@arguments&.to_ptr)
+      initialize_native_object(
+        ptr,
+        release: ->(released) { FFIBindings.lldb_launch_info_destroy(released) },
+        context: context
+      )
     end
 
     # @rbs ptr: FFI::Pointer

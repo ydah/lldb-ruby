@@ -4,16 +4,21 @@
 
 module LLDB
   class Breakpoint
+    prepend NativeLifecycle
+
     # @rbs return: Target
     attr_reader :target
 
     # @rbs ptr: FFI::Pointer
     # @rbs target: Target
     # @rbs return: void
-    def initialize(ptr, target:)
-      @ptr = ptr # : FFI::Pointer
+    def initialize(ptr, target:, context: target.context)
       @target = target
-      ObjectSpace.define_finalizer(self, self.class.release(@ptr))
+      initialize_native_object(
+        ptr,
+        release: ->(released) { FFIBindings.lldb_breakpoint_destroy(released) },
+        context: context
+      )
     end
 
     # @rbs ptr: FFI::Pointer
@@ -139,7 +144,7 @@ module LLDB
       loc_ptr = FFIBindings.lldb_breakpoint_get_location_at_index(@ptr, index)
       return nil if loc_ptr.nil? || loc_ptr.null?
 
-      BreakpointLocation.new(loc_ptr, breakpoint: self)
+      BreakpointLocation.new(loc_ptr, breakpoint: self, context: context)
     end
 
     # @rbs location_id: Integer
@@ -150,7 +155,7 @@ module LLDB
       loc_ptr = FFIBindings.lldb_breakpoint_find_location_by_id(@ptr, location_id)
       return nil if loc_ptr.nil? || loc_ptr.null?
 
-      BreakpointLocation.new(loc_ptr, breakpoint: self)
+      BreakpointLocation.new(loc_ptr, breakpoint: self, context: context)
     end
 
     # @rbs return: Array[BreakpointLocation]
