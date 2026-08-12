@@ -8499,7 +8499,52 @@ lldb_type_member_t lldb_type_get_virtual_base_class_at_index(lldb_type_t type, u
 int lldb_type_get_basic_type(lldb_type_t type)  LLDB_WRAPPER_NOEXCEPT {
     try {
     if (!type) return static_cast<int>(lldb::eBasicTypeInvalid);
-    return static_cast<int>(static_cast<lldb::SBType*>(type)->GetBasicType());
+
+    // LLDB added eBasicTypeChar8 in the middle of this enum after the
+    // minimum supported LLDB release. Keep the Ruby-facing values stable so
+    // a Type returned by LLDB 14 and the same Type returned by current LLDB
+    // are interpreted identically by BasicType.
+    switch (static_cast<lldb::SBType*>(type)->GetBasicType()) {
+      case lldb::eBasicTypeInvalid: return 0;
+      case lldb::eBasicTypeVoid: return 1;
+      case lldb::eBasicTypeChar: return 2;
+      case lldb::eBasicTypeSignedChar: return 3;
+      case lldb::eBasicTypeUnsignedChar: return 4;
+      case lldb::eBasicTypeWChar: return 5;
+      case lldb::eBasicTypeSignedWChar: return 6;
+      case lldb::eBasicTypeUnsignedWChar: return 7;
+      case lldb::eBasicTypeChar16: return 8;
+      case lldb::eBasicTypeChar32: return 9;
+      case lldb::eBasicTypeShort: return 10;
+      case lldb::eBasicTypeUnsignedShort: return 11;
+      case lldb::eBasicTypeInt: return 12;
+      case lldb::eBasicTypeUnsignedInt: return 13;
+      case lldb::eBasicTypeLong: return 14;
+      case lldb::eBasicTypeUnsignedLong: return 15;
+      case lldb::eBasicTypeLongLong: return 16;
+      case lldb::eBasicTypeUnsignedLongLong: return 17;
+      case lldb::eBasicTypeInt128: return 18;
+      case lldb::eBasicTypeUnsignedInt128: return 19;
+      case lldb::eBasicTypeBool: return 20;
+      case lldb::eBasicTypeHalf: return 21;
+      case lldb::eBasicTypeFloat: return 22;
+      case lldb::eBasicTypeDouble: return 23;
+      case lldb::eBasicTypeLongDouble: return 24;
+      case lldb::eBasicTypeFloatComplex: return 25;
+      case lldb::eBasicTypeDoubleComplex: return 26;
+      case lldb::eBasicTypeLongDoubleComplex: return 27;
+      case lldb::eBasicTypeObjCID: return 28;
+      case lldb::eBasicTypeObjCClass: return 29;
+      case lldb::eBasicTypeObjCSel: return 30;
+      case lldb::eBasicTypeNullPtr: return 31;
+#if LLDB_RUBY_HAVE_BASIC_TYPE_CHAR8
+      case lldb::eBasicTypeChar8: return 32;
+#endif
+      default:
+        // Preserve unknown future enum values instead of turning them into a
+        // misleading known Ruby BasicType.
+        return static_cast<int>(static_cast<lldb::SBType*>(type)->GetBasicType());
+    }
 
       } catch (const std::bad_alloc&) {
         wrapper_set_error_state("native allocation failed across the C ABI");

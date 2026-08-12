@@ -171,6 +171,9 @@ module LLDB
     OBJ_C_CLASS = 29 # : Integer
     OBJ_C_SEL = 30 # : Integer
     NULL_PTR = 31 # : Integer
+    # LLDB inserted eBasicTypeChar8 before SHORT in newer releases. The
+    # wrapper normalizes it to this value so the public Ruby enum is stable.
+    CHAR8 = 32 # : Integer
 
     NAMES = { # : Hash[Integer, String]
       INVALID => 'invalid',
@@ -204,7 +207,8 @@ module LLDB
       OBJ_C_ID => 'id',
       OBJ_C_CLASS => 'Class',
       OBJ_C_SEL => 'SEL',
-      NULL_PTR => 'nullptr_t'
+      NULL_PTR => 'nullptr_t',
+      CHAR8 => 'char8_t'
     }.freeze
 
     # @rbs basic_type: Integer

@@ -191,6 +191,9 @@ symbol_get_size = api_capability_probe(
 function_get_base_name = api_capability_probe(
   compiler, selected, 'SBFunction.h', '&lldb::SBFunction::GetBaseName'
 )
+basic_type_char8 = api_capability_probe(
+  compiler, selected, 'SBType.h', 'static_cast<int>(lldb::eBasicTypeChar8)'
+)
 build_version = llvm_config_version(selected)
 config_path = File.expand_path('lldb_wrapper_config.h', __dir__)
 File.write(config_path, <<~HEADER)
@@ -205,6 +208,7 @@ File.write(config_path, <<~HEADER)
   #define LLDB_RUBY_HAVE_SYMBOL_GET_VALUE #{symbol_get_value ? 1 : 0}
   #define LLDB_RUBY_HAVE_SYMBOL_GET_SIZE #{symbol_get_size ? 1 : 0}
   #define LLDB_RUBY_HAVE_FUNCTION_GET_BASE_NAME #{function_get_base_name ? 1 : 0}
+  #define LLDB_RUBY_HAVE_BASIC_TYPE_CHAR8 #{basic_type_char8 ? 1 : 0}
 
   #endif
 HEADER
@@ -214,6 +218,7 @@ puts "SBSymbol::GetID capability: #{symbol_get_id ? 'supported' : 'unsupported'}
 puts "SBSymbol::GetValue capability: #{symbol_get_value ? 'supported' : 'unsupported'}"
 puts "SBSymbol::GetSize capability: #{symbol_get_size ? 'supported' : 'unsupported'}"
 puts "SBFunction::GetBaseName capability: #{function_get_base_name ? 'supported' : 'unsupported'}"
+puts "BasicType::Char8 capability: #{basic_type_char8 ? 'supported' : 'unsupported'}"
 puts "Build LLDB version: #{build_version}"
 
 $CXXFLAGS << " -I#{selected.include_dir}"

@@ -39,6 +39,17 @@ RSpec.describe LLDB::Type do
     end
   end
 
+  describe '#basic_type' do
+    it 'keeps basic type values stable across LLDB enum insertions' do
+      skip 'Value or type not found' if type.nil?
+
+      first_field_type = type.field_at_index(0)&.type
+      skip 'First field type not found' if first_field_type.nil?
+
+      expect(first_field_type.basic_type).to eq(LLDB::BasicType::INT)
+    end
+  end
+
   describe '#pointer_type?' do
     it 'returns a boolean' do
       skip 'Value or type not found' if type.nil?

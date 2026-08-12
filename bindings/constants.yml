@@ -11,3 +11,127 @@ constants:
     native: LLDB_INVALID_BREAK_ID
   - ruby: INVALID_LINE_NUMBER
     native: LLDB_INVALID_LINE_NUMBER
+  - ruby: State::INVALID
+    native: lldb::eStateInvalid
+  - ruby: State::UNLOADED
+    native: lldb::eStateUnloaded
+  - ruby: State::CONNECTED
+    native: lldb::eStateConnected
+  - ruby: State::ATTACHING
+    native: lldb::eStateAttaching
+  - ruby: State::LAUNCHING
+    native: lldb::eStateLaunching
+  - ruby: State::STOPPED
+    native: lldb::eStateStopped
+  - ruby: State::RUNNING
+    native: lldb::eStateRunning
+  - ruby: State::STEPPING
+    native: lldb::eStateStepping
+  - ruby: State::CRASHED
+    native: lldb::eStateCrashed
+  - ruby: State::DETACHED
+    native: lldb::eStateDetached
+  - ruby: State::EXITED
+    native: lldb::eStateExited
+  - ruby: State::SUSPENDED
+    native: lldb::eStateSuspended
+  - ruby: StopReason::INVALID
+    native: lldb::eStopReasonInvalid
+  - ruby: StopReason::NONE
+    native: lldb::eStopReasonNone
+  - ruby: StopReason::TRACE
+    native: lldb::eStopReasonTrace
+  - ruby: StopReason::BREAKPOINT
+    native: lldb::eStopReasonBreakpoint
+  - ruby: StopReason::WATCHPOINT
+    native: lldb::eStopReasonWatchpoint
+  - ruby: StopReason::SIGNAL
+    native: lldb::eStopReasonSignal
+  - ruby: StopReason::EXCEPTION
+    native: lldb::eStopReasonException
+  - ruby: StopReason::EXEC
+    native: lldb::eStopReasonExec
+  - ruby: StopReason::PLAN_COMPLETE
+    native: lldb::eStopReasonPlanComplete
+  - ruby: StopReason::THREAD_EXITING
+    native: lldb::eStopReasonThreadExiting
+  - ruby: StopReason::INSTRUMENTATION
+    native: lldb::eStopReasonInstrumentation
+  - ruby: StopReason::PROCESSOR_TRACE
+    native: lldb::eStopReasonProcessorTrace
+  - ruby: StopReason::FORK
+    native: lldb::eStopReasonFork
+  - ruby: StopReason::VFORK
+    native: lldb::eStopReasonVFork
+  - ruby: StopReason::VFORK_DONE
+    native: lldb::eStopReasonVForkDone
+  - ruby: SymbolContextItem::TARGET
+    native: lldb::eSymbolContextTarget
+  - ruby: SymbolContextItem::MODULE
+    native: lldb::eSymbolContextModule
+  - ruby: SymbolContextItem::COMPILE_UNIT
+    native: lldb::eSymbolContextCompUnit
+  - ruby: SymbolContextItem::FUNCTION
+    native: lldb::eSymbolContextFunction
+  - ruby: SymbolContextItem::BLOCK
+    native: lldb::eSymbolContextBlock
+  - ruby: SymbolContextItem::LINE_ENTRY
+    native: lldb::eSymbolContextLineEntry
+  - ruby: SymbolContextItem::SYMBOL
+    native: lldb::eSymbolContextSymbol
+  - ruby: SymbolContextItem::EVERYTHING
+    native: lldb::eSymbolContextEverything
+  - ruby: SymbolContextItem::VARIABLE
+    native: lldb::eSymbolContextVariable
+  - ruby: ValueType::INVALID
+    native: lldb::eValueTypeInvalid
+  - ruby: ValueType::VARIABLE_GLOBAL
+    native: lldb::eValueTypeVariableGlobal
+  - ruby: ValueType::VARIABLE_STATIC
+    native: lldb::eValueTypeVariableStatic
+  - ruby: ValueType::VARIABLE_ARGUMENT
+    native: lldb::eValueTypeVariableArgument
+  - ruby: ValueType::VARIABLE_LOCAL
+    native: lldb::eValueTypeVariableLocal
+  - ruby: ValueType::REGISTER
+    native: lldb::eValueTypeRegister
+  - ruby: ValueType::REGISTER_SET
+    native: lldb::eValueTypeRegisterSet
+  - ruby: ValueType::CONSTANT_RESULT
+    native: lldb::eValueTypeConstResult
+  - ruby: ValueType::VARIABLE_THREAD_LOCAL
+    native: lldb::eValueTypeVariableThreadLocal
+  - ruby: ErrorType::INVALID
+    native: lldb::eErrorTypeInvalid
+  - ruby: ErrorType::GENERIC
+    native: lldb::eErrorTypeGeneric
+  - ruby: ErrorType::MACH_KERNEL
+    native: lldb::eErrorTypeMachKernel
+  - ruby: ErrorType::POSIX
+    native: lldb::eErrorTypePOSIX
+  - ruby: ErrorType::EXPRESSION
+    native: lldb::eErrorTypeExpression
+  - ruby: ErrorType::WIN32
+    native: lldb::eErrorTypeWin32
+  - ruby: ReturnStatus::INVALID
+    native: lldb::eReturnStatusInvalid
+  - ruby: ReturnStatus::SUCCESS_FINISH_NO_RESULT
+    native: lldb::eReturnStatusSuccessFinishNoResult
+  - ruby: ReturnStatus::SUCCESS_FINISH_RESULT
+    native: lldb::eReturnStatusSuccessFinishResult
+  - ruby: ReturnStatus::SUCCESS_CONTINUING_NO_RESULT
+    native: lldb::eReturnStatusSuccessContinuingNoResult
+  - ruby: ReturnStatus::SUCCESS_CONTINUING_RESULT
+    native: lldb::eReturnStatusSuccessContinuingResult
+  - ruby: ReturnStatus::STARTED
+    native: lldb::eReturnStatusStarted
+  - ruby: ReturnStatus::FAILED
+    native: lldb::eReturnStatusFailed
+  - ruby: ReturnStatus::QUIT
+    native: lldb::eReturnStatusQuit
+  - ruby: RunMode::ONLY_THIS_THREAD
+    native: lldb::eOnlyThisThread
+  - ruby: RunMode::ALL_THREADS
+    native: lldb::eAllThreads
+  - ruby: RunMode::ONLY_DURING_STEPPING
+    native: lldb::eOnlyDuringStepping
