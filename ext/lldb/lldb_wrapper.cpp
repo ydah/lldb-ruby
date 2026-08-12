@@ -262,6 +262,197 @@ void lldb_debugger_handle_command(lldb_debugger_t dbg, const char* command) {
     debugger->HandleCommand(command);
 }
 
+lldb_broadcaster_t lldb_debugger_get_broadcaster(lldb_debugger_t dbg) {
+    if (!dbg) return nullptr;
+    lldb::SBBroadcaster broadcaster = static_cast<lldb::SBDebugger*>(dbg)->GetBroadcaster();
+    if (!broadcaster.IsValid()) return nullptr;
+    return static_cast<lldb_broadcaster_t>(new lldb::SBBroadcaster(broadcaster));
+}
+
+lldb_listener_t lldb_debugger_get_listener(lldb_debugger_t dbg) {
+    if (!dbg) return nullptr;
+    lldb::SBListener listener = static_cast<lldb::SBDebugger*>(dbg)->GetListener();
+    if (!listener.IsValid()) return nullptr;
+    return static_cast<lldb_listener_t>(new lldb::SBListener(listener));
+}
+
+// ============================================================================
+// SBBroadcaster, SBListener, and SBEvent
+// ============================================================================
+
+lldb_broadcaster_t lldb_broadcaster_create(const char* name) {
+    return static_cast<lldb_broadcaster_t>(new lldb::SBBroadcaster(name));
+}
+
+void lldb_broadcaster_destroy(lldb_broadcaster_t broadcaster) {
+    if (broadcaster) delete static_cast<lldb::SBBroadcaster*>(broadcaster);
+}
+
+int lldb_broadcaster_is_valid(lldb_broadcaster_t broadcaster) {
+    return broadcaster && static_cast<lldb::SBBroadcaster*>(broadcaster)->IsValid() ? 1 : 0;
+}
+
+const char* lldb_broadcaster_get_name(lldb_broadcaster_t broadcaster) {
+    if (!broadcaster) return nullptr;
+    return static_cast<lldb::SBBroadcaster*>(broadcaster)->GetName();
+}
+
+uint32_t lldb_broadcaster_add_listener(lldb_broadcaster_t broadcaster,
+                                        lldb_listener_t listener,
+                                        uint32_t event_mask) {
+    if (!broadcaster || !listener) return 0;
+    return static_cast<lldb::SBBroadcaster*>(broadcaster)->AddListener(
+        *static_cast<lldb::SBListener*>(listener), event_mask);
+}
+
+int lldb_broadcaster_remove_listener(lldb_broadcaster_t broadcaster,
+                                     lldb_listener_t listener,
+                                     uint32_t event_mask) {
+    if (!broadcaster || !listener) return 0;
+    return static_cast<lldb::SBBroadcaster*>(broadcaster)->RemoveListener(
+               *static_cast<lldb::SBListener*>(listener), event_mask)
+               ? 1
+               : 0;
+}
+
+int lldb_broadcaster_event_type_has_listeners(lldb_broadcaster_t broadcaster,
+                                              uint32_t event_type) {
+    if (!broadcaster) return 0;
+    return static_cast<lldb::SBBroadcaster*>(broadcaster)->EventTypeHasListeners(event_type) ? 1 : 0;
+}
+
+void lldb_broadcaster_broadcast_event_by_type(lldb_broadcaster_t broadcaster,
+                                               uint32_t event_type,
+                                               int unique) {
+    if (!broadcaster) return;
+    static_cast<lldb::SBBroadcaster*>(broadcaster)->BroadcastEventByType(event_type, unique != 0);
+}
+
+lldb_listener_t lldb_listener_create(const char* name) {
+    return static_cast<lldb_listener_t>(new lldb::SBListener(name));
+}
+
+void lldb_listener_destroy(lldb_listener_t listener) {
+    if (listener) delete static_cast<lldb::SBListener*>(listener);
+}
+
+int lldb_listener_is_valid(lldb_listener_t listener) {
+    return listener && static_cast<lldb::SBListener*>(listener)->IsValid() ? 1 : 0;
+}
+
+uint32_t lldb_listener_start_listening_for_events(lldb_listener_t listener,
+                                                  lldb_broadcaster_t broadcaster,
+                                                  uint32_t event_mask) {
+    if (!listener || !broadcaster) return 0;
+    return static_cast<lldb::SBListener*>(listener)->StartListeningForEvents(
+        *static_cast<lldb::SBBroadcaster*>(broadcaster), event_mask);
+}
+
+int lldb_listener_stop_listening_for_events(lldb_listener_t listener,
+                                            lldb_broadcaster_t broadcaster,
+                                            uint32_t event_mask) {
+    if (!listener || !broadcaster) return 0;
+    return static_cast<lldb::SBListener*>(listener)->StopListeningForEvents(
+               *static_cast<lldb::SBBroadcaster*>(broadcaster), event_mask)
+               ? 1
+               : 0;
+}
+
+lldb_event_t lldb_listener_wait_for_event(lldb_listener_t listener, uint32_t timeout_seconds) {
+    if (!listener) return nullptr;
+    lldb::SBEvent event;
+    if (!static_cast<lldb::SBListener*>(listener)->WaitForEvent(timeout_seconds, event)) return nullptr;
+    return static_cast<lldb_event_t>(new lldb::SBEvent(event));
+}
+
+lldb_event_t lldb_listener_peek_event(lldb_listener_t listener) {
+    if (!listener) return nullptr;
+    lldb::SBEvent event;
+    if (!static_cast<lldb::SBListener*>(listener)->PeekAtNextEvent(event)) return nullptr;
+    return static_cast<lldb_event_t>(new lldb::SBEvent(event));
+}
+
+lldb_event_t lldb_listener_next_event(lldb_listener_t listener) {
+    if (!listener) return nullptr;
+    lldb::SBEvent event;
+    if (!static_cast<lldb::SBListener*>(listener)->GetNextEvent(event)) return nullptr;
+    return static_cast<lldb_event_t>(new lldb::SBEvent(event));
+}
+
+void lldb_event_destroy(lldb_event_t event) {
+    if (event) delete static_cast<lldb::SBEvent*>(event);
+}
+
+int lldb_event_is_valid(lldb_event_t event) {
+    return event && static_cast<lldb::SBEvent*>(event)->IsValid() ? 1 : 0;
+}
+
+uint32_t lldb_event_get_type(lldb_event_t event) {
+    if (!event) return 0;
+    return static_cast<lldb::SBEvent*>(event)->GetType();
+}
+
+const char* lldb_event_get_data_flavor(lldb_event_t event) {
+    if (!event) return nullptr;
+    return static_cast<lldb::SBEvent*>(event)->GetDataFlavor();
+}
+
+const char* lldb_event_get_broadcaster_class(lldb_event_t event) {
+    if (!event) return nullptr;
+    return static_cast<lldb::SBEvent*>(event)->GetBroadcasterClass();
+}
+
+uint32_t lldb_event_get_description(lldb_event_t event, char* buffer, size_t length) {
+    if (!event) return 0;
+    lldb::SBStream stream;
+    if (!static_cast<lldb::SBEvent*>(event)->GetDescription(stream)) return 0;
+    const char* description = stream.GetData();
+    if (!description) return 0;
+
+    size_t required = std::strlen(description);
+    if (!buffer || length == 0) return static_cast<uint32_t>(required);
+
+    size_t copied = std::min(required, length - 1);
+    std::memcpy(buffer, description, copied);
+    buffer[copied] = '\0';
+    return static_cast<uint32_t>(copied);
+}
+
+lldb_broadcaster_t lldb_event_get_broadcaster(lldb_event_t event) {
+    if (!event) return nullptr;
+    lldb::SBBroadcaster broadcaster = static_cast<lldb::SBEvent*>(event)->GetBroadcaster();
+    if (!broadcaster.IsValid()) return nullptr;
+    return static_cast<lldb_broadcaster_t>(new lldb::SBBroadcaster(broadcaster));
+}
+
+int lldb_event_is_process_event(lldb_event_t event) {
+    if (!event) return 0;
+    return lldb::SBProcess::EventIsProcessEvent(*static_cast<lldb::SBEvent*>(event)) ? 1 : 0;
+}
+
+int lldb_event_get_process_state(lldb_event_t event) {
+    if (!event) return 0;
+    return static_cast<int>(lldb::SBProcess::GetStateFromEvent(*static_cast<lldb::SBEvent*>(event)));
+}
+
+int lldb_event_get_restarted(lldb_event_t event) {
+    if (!event) return 0;
+    return lldb::SBProcess::GetRestartedFromEvent(*static_cast<lldb::SBEvent*>(event)) ? 1 : 0;
+}
+
+int lldb_event_get_interrupted(lldb_event_t event) {
+    if (!event) return 0;
+    return lldb::SBProcess::GetInterruptedFromEvent(*static_cast<lldb::SBEvent*>(event)) ? 1 : 0;
+}
+
+lldb_process_t lldb_event_get_process(lldb_event_t event) {
+    if (!event) return nullptr;
+    lldb::SBProcess process = lldb::SBProcess::GetProcessFromEvent(
+        *static_cast<lldb::SBEvent*>(event));
+    if (!process.IsValid()) return nullptr;
+    return static_cast<lldb_process_t>(new lldb::SBProcess(process));
+}
+
 // ============================================================================
 // SBTarget
 // ============================================================================
@@ -961,6 +1152,13 @@ size_t lldb_process_put_stdin(lldb_process_t process, const char* buf, size_t si
 void lldb_process_send_async_interrupt(lldb_process_t process) {
     if (!process) return;
     static_cast<lldb::SBProcess*>(process)->SendAsyncInterrupt();
+}
+
+lldb_broadcaster_t lldb_process_get_broadcaster(lldb_process_t process) {
+    if (!process) return nullptr;
+    lldb::SBBroadcaster broadcaster = static_cast<lldb::SBProcess*>(process)->GetBroadcaster();
+    if (!broadcaster.IsValid()) return nullptr;
+    return static_cast<lldb_broadcaster_t>(new lldb::SBBroadcaster(broadcaster));
 }
 
 lldb_ruby_status_t lldb_process_get_num_supported_hardware_watchpoints(lldb_process_t process,

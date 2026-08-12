@@ -6,13 +6,22 @@ module LLDB
   class Process
     prepend NativeLifecycle
 
-    # @rbs return: Target
+    module BroadcastBit
+      STATE_CHANGED = 1 << 0
+      INTERRUPT = 1 << 1
+      STDOUT = 1 << 2
+      STDERR = 1 << 3
+      PROFILE_DATA = 1 << 4
+      STRUCTURED_DATA = 1 << 5
+    end
+
+    # @rbs return: Target?
     attr_reader :target
 
     # @rbs ptr: FFI::Pointer
-    # @rbs target: Target
+    # @rbs target: Target?
     # @rbs return: void
-    def initialize(ptr, target:, context: target.context)
+    def initialize(ptr, target: nil, context: target&.context)
       @target = target
       initialize_native_object(
         ptr,
@@ -320,6 +329,16 @@ module LLDB
 
       FFIBindings.lldb_process_send_async_interrupt(@ptr)
       nil
+    end
+
+    # @rbs return: Broadcaster
+    def broadcaster
+      raise InvalidObjectError, 'Process is not valid' unless valid?
+
+      broadcaster_ptr = FFIBindings.lldb_process_get_broadcaster(@ptr)
+      raise LLDBError, 'Failed to get process broadcaster' if broadcaster_ptr.nil? || broadcaster_ptr.null?
+
+      Broadcaster.from_ptr(broadcaster_ptr, context: context)
     end
 
     # @rbs return: Integer

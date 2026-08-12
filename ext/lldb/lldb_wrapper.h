@@ -28,6 +28,9 @@ typedef void* lldb_command_interpreter_t;
 typedef void* lldb_command_return_object_t;
 typedef void* lldb_memory_region_info_t;
 typedef void* lldb_file_spec_t;
+typedef void* lldb_broadcaster_t;
+typedef void* lldb_listener_t;
+typedef void* lldb_event_t;
 
 typedef enum {
     LLDB_RUBY_STATUS_OK = 0,
@@ -77,7 +80,55 @@ void lldb_debugger_set_async(lldb_debugger_t dbg, int async);
 int lldb_debugger_get_async(lldb_debugger_t dbg);
 const char* lldb_debugger_get_version_string(void);
 lldb_command_interpreter_t lldb_debugger_get_command_interpreter(lldb_debugger_t dbg);
+lldb_broadcaster_t lldb_debugger_get_broadcaster(lldb_debugger_t dbg);
+lldb_listener_t lldb_debugger_get_listener(lldb_debugger_t dbg);
 void lldb_debugger_handle_command(lldb_debugger_t dbg, const char* command);
+
+// SBBroadcaster
+lldb_broadcaster_t lldb_broadcaster_create(const char* name);
+void lldb_broadcaster_destroy(lldb_broadcaster_t broadcaster);
+int lldb_broadcaster_is_valid(lldb_broadcaster_t broadcaster);
+const char* lldb_broadcaster_get_name(lldb_broadcaster_t broadcaster);
+uint32_t lldb_broadcaster_add_listener(lldb_broadcaster_t broadcaster,
+                                        lldb_listener_t listener,
+                                        uint32_t event_mask);
+int lldb_broadcaster_remove_listener(lldb_broadcaster_t broadcaster,
+                                     lldb_listener_t listener,
+                                     uint32_t event_mask);
+int lldb_broadcaster_event_type_has_listeners(lldb_broadcaster_t broadcaster,
+                                              uint32_t event_type);
+void lldb_broadcaster_broadcast_event_by_type(lldb_broadcaster_t broadcaster,
+                                               uint32_t event_type,
+                                               int unique);
+
+// SBListener
+lldb_listener_t lldb_listener_create(const char* name);
+void lldb_listener_destroy(lldb_listener_t listener);
+int lldb_listener_is_valid(lldb_listener_t listener);
+uint32_t lldb_listener_start_listening_for_events(lldb_listener_t listener,
+                                                  lldb_broadcaster_t broadcaster,
+                                                  uint32_t event_mask);
+int lldb_listener_stop_listening_for_events(lldb_listener_t listener,
+                                            lldb_broadcaster_t broadcaster,
+                                            uint32_t event_mask);
+lldb_event_t lldb_listener_wait_for_event(lldb_listener_t listener,
+                                          uint32_t timeout_seconds);
+lldb_event_t lldb_listener_peek_event(lldb_listener_t listener);
+lldb_event_t lldb_listener_next_event(lldb_listener_t listener);
+
+// SBEvent
+void lldb_event_destroy(lldb_event_t event);
+int lldb_event_is_valid(lldb_event_t event);
+uint32_t lldb_event_get_type(lldb_event_t event);
+const char* lldb_event_get_data_flavor(lldb_event_t event);
+const char* lldb_event_get_broadcaster_class(lldb_event_t event);
+uint32_t lldb_event_get_description(lldb_event_t event, char* buffer, size_t length);
+lldb_broadcaster_t lldb_event_get_broadcaster(lldb_event_t event);
+int lldb_event_is_process_event(lldb_event_t event);
+int lldb_event_get_process_state(lldb_event_t event);
+int lldb_event_get_restarted(lldb_event_t event);
+int lldb_event_get_interrupted(lldb_event_t event);
+lldb_process_t lldb_event_get_process(lldb_event_t event);
 
 // SBTarget
 void lldb_target_destroy(lldb_target_t target);
@@ -183,6 +234,7 @@ size_t lldb_process_get_stdout(lldb_process_t process, char* buf, size_t size);
 size_t lldb_process_get_stderr(lldb_process_t process, char* buf, size_t size);
 size_t lldb_process_put_stdin(lldb_process_t process, const char* buf, size_t size);
 void lldb_process_send_async_interrupt(lldb_process_t process);
+lldb_broadcaster_t lldb_process_get_broadcaster(lldb_process_t process);
 lldb_ruby_status_t lldb_process_get_num_supported_hardware_watchpoints(lldb_process_t process,
                                                                         uint32_t* result,
                                                                         lldb_error_t error);

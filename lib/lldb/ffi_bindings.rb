@@ -131,8 +131,44 @@ module LLDB
     attach_function :lldb_debugger_get_async, [:pointer], :int
     attach_function :lldb_debugger_get_version_string, [], :string
     attach_function :lldb_debugger_get_command_interpreter, [:pointer], :pointer
+    attach_function :lldb_debugger_get_broadcaster, [:pointer], :pointer
+    attach_function :lldb_debugger_get_listener, [:pointer], :pointer
     # LLDB command execution can run user-provided command scripts.
     attach_function :lldb_debugger_handle_command, %i[pointer string], :void, blocking: true
+
+    # =========================================================================
+    # SBBroadcaster, SBListener, and SBEvent
+    # =========================================================================
+    attach_function :lldb_broadcaster_create, [:string], :pointer
+    attach_function :lldb_broadcaster_destroy, [:pointer], :void
+    attach_function :lldb_broadcaster_is_valid, [:pointer], :int
+    attach_function :lldb_broadcaster_get_name, [:pointer], :string
+    attach_function :lldb_broadcaster_add_listener, %i[pointer pointer uint32], :uint32
+    attach_function :lldb_broadcaster_remove_listener, %i[pointer pointer uint32], :int
+    attach_function :lldb_broadcaster_event_type_has_listeners, %i[pointer uint32], :int
+    attach_function :lldb_broadcaster_broadcast_event_by_type, %i[pointer uint32 int], :void
+
+    attach_function :lldb_listener_create, [:string], :pointer
+    attach_function :lldb_listener_destroy, [:pointer], :void
+    attach_function :lldb_listener_is_valid, [:pointer], :int
+    attach_function :lldb_listener_start_listening_for_events, %i[pointer pointer uint32], :uint32
+    attach_function :lldb_listener_stop_listening_for_events, %i[pointer pointer uint32], :int
+    attach_function :lldb_listener_wait_for_event, [:pointer, :uint32], :pointer, blocking: true
+    attach_function :lldb_listener_peek_event, [:pointer], :pointer
+    attach_function :lldb_listener_next_event, [:pointer], :pointer
+
+    attach_function :lldb_event_destroy, [:pointer], :void
+    attach_function :lldb_event_is_valid, [:pointer], :int
+    attach_function :lldb_event_get_type, [:pointer], :uint32
+    attach_function :lldb_event_get_data_flavor, [:pointer], :string
+    attach_function :lldb_event_get_broadcaster_class, [:pointer], :string
+    attach_function :lldb_event_get_description, %i[pointer pointer size_t], :uint32
+    attach_function :lldb_event_get_broadcaster, [:pointer], :pointer
+    attach_function :lldb_event_is_process_event, [:pointer], :int
+    attach_function :lldb_event_get_process_state, [:pointer], :int
+    attach_function :lldb_event_get_restarted, [:pointer], :int
+    attach_function :lldb_event_get_interrupted, [:pointer], :int
+    attach_function :lldb_event_get_process, [:pointer], :pointer
 
     # =========================================================================
     # SBTarget
@@ -226,6 +262,7 @@ module LLDB
     attach_function :lldb_process_get_stderr, %i[pointer pointer size_t], :size_t
     attach_function :lldb_process_put_stdin, %i[pointer pointer size_t], :size_t
     attach_function :lldb_process_send_async_interrupt, [:pointer], :void
+    attach_function :lldb_process_get_broadcaster, [:pointer], :pointer
     attach_function :lldb_process_get_num_supported_hardware_watchpoints, %i[pointer pointer pointer], :int
     attach_function :lldb_process_get_unique_id, [:pointer], :uint32
     attach_function :lldb_process_get_memory_region_info, %i[pointer uint64 pointer], :pointer

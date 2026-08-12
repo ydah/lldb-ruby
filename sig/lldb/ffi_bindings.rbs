@@ -41,7 +41,39 @@ module LLDB
     def self.lldb_debugger_get_async: (FFI::Pointer) -> Integer
     def self.lldb_debugger_get_version_string: () -> String?
     def self.lldb_debugger_get_command_interpreter: (FFI::Pointer) -> FFI::Pointer
+    def self.lldb_debugger_get_broadcaster: (FFI::Pointer) -> FFI::Pointer
+    def self.lldb_debugger_get_listener: (FFI::Pointer) -> FFI::Pointer
     def self.lldb_debugger_handle_command: (FFI::Pointer, String) -> void
+
+    # SBBroadcaster, SBListener, and SBEvent
+    def self.lldb_broadcaster_create: (String?) -> FFI::Pointer
+    def self.lldb_broadcaster_destroy: (FFI::Pointer) -> void
+    def self.lldb_broadcaster_is_valid: (FFI::Pointer) -> Integer
+    def self.lldb_broadcaster_get_name: (FFI::Pointer) -> String?
+    def self.lldb_broadcaster_add_listener: (FFI::Pointer, FFI::Pointer, Integer) -> Integer
+    def self.lldb_broadcaster_remove_listener: (FFI::Pointer, FFI::Pointer, Integer) -> Integer
+    def self.lldb_broadcaster_event_type_has_listeners: (FFI::Pointer, Integer) -> Integer
+    def self.lldb_broadcaster_broadcast_event_by_type: (FFI::Pointer, Integer, Integer) -> void
+    def self.lldb_listener_create: (String?) -> FFI::Pointer
+    def self.lldb_listener_destroy: (FFI::Pointer) -> void
+    def self.lldb_listener_is_valid: (FFI::Pointer) -> Integer
+    def self.lldb_listener_start_listening_for_events: (FFI::Pointer, FFI::Pointer, Integer) -> Integer
+    def self.lldb_listener_stop_listening_for_events: (FFI::Pointer, FFI::Pointer, Integer) -> Integer
+    def self.lldb_listener_wait_for_event: (FFI::Pointer, Integer) -> FFI::Pointer
+    def self.lldb_listener_peek_event: (FFI::Pointer) -> FFI::Pointer
+    def self.lldb_listener_next_event: (FFI::Pointer) -> FFI::Pointer
+    def self.lldb_event_destroy: (FFI::Pointer) -> void
+    def self.lldb_event_is_valid: (FFI::Pointer) -> Integer
+    def self.lldb_event_get_type: (FFI::Pointer) -> Integer
+    def self.lldb_event_get_data_flavor: (FFI::Pointer) -> String?
+    def self.lldb_event_get_broadcaster_class: (FFI::Pointer) -> String?
+    def self.lldb_event_get_description: (FFI::Pointer, FFI::Pointer?, Integer) -> Integer
+    def self.lldb_event_get_broadcaster: (FFI::Pointer) -> FFI::Pointer
+    def self.lldb_event_is_process_event: (FFI::Pointer) -> Integer
+    def self.lldb_event_get_process_state: (FFI::Pointer) -> Integer
+    def self.lldb_event_get_restarted: (FFI::Pointer) -> Integer
+    def self.lldb_event_get_interrupted: (FFI::Pointer) -> Integer
+    def self.lldb_event_get_process: (FFI::Pointer) -> FFI::Pointer
 
     # SBTarget
     def self.lldb_target_destroy: (FFI::Pointer) -> void
@@ -126,6 +158,7 @@ module LLDB
     def self.lldb_process_get_stderr: (FFI::Pointer, FFI::Pointer, Integer) -> Integer
     def self.lldb_process_put_stdin: (FFI::Pointer, FFI::Pointer, Integer) -> Integer
     def self.lldb_process_send_async_interrupt: (FFI::Pointer) -> void
+    def self.lldb_process_get_broadcaster: (FFI::Pointer) -> FFI::Pointer
     def self.lldb_process_get_num_supported_hardware_watchpoints: (FFI::Pointer, FFI::Pointer, FFI::Pointer) -> Integer
     def self.lldb_process_get_unique_id: (FFI::Pointer) -> Integer
     def self.lldb_process_get_memory_region_info: (FFI::Pointer, Integer, FFI::Pointer) -> FFI::Pointer

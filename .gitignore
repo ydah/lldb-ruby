@@ -22,6 +22,8 @@
 # Compiled test fixtures
 /spec/fixtures/simple
 /spec/fixtures/loop
+/spec/fixtures/blocking
+/spec/fixtures/blocking.dSYM/
 /examples/test_program
 
 # RBS generated files

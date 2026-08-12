@@ -171,6 +171,23 @@ Set `launch_flags: LLDB::LaunchFlags::STOP_AT_ENTRY` explicitly when that
 behavior is required; callers are responsible for waiting on asynchronous
 processes.
 
+### Handling Events Explicitly
+
+Use LLDB's listener queue when asynchronous state changes are needed:
+
+```ruby
+listener = debugger.listener
+broadcaster = process.broadcaster
+listener.start_listening_for_events(broadcaster, LLDB::Process::BroadcastBit::STATE_CHANGED)
+
+if (event = listener.wait_for_event(timeout_seconds: 1))
+  puts "state = #{LLDB::State.name(event.process_state)}"
+end
+```
+
+`timeout_seconds: 0` performs a non-blocking poll. The library does not start
+background event threads.
+
 ### Working with Threads
 
 ```ruby

@@ -1802,6 +1802,193 @@ entries:
       kind: reviewed_no_throw
       reason: The export is tracked explicitly until its native error boundary is upgraded.
 
+  lldb_broadcaster_add_listener:
+    classification: public
+    reason: This LLDB C ABI function is part of the audited public binding surface.
+    exception_guard:
+      kind: reviewed_no_throw
+      reason: The export is tracked explicitly until its native error boundary is upgraded.
+  lldb_broadcaster_broadcast_event_by_type:
+    classification: public
+    reason: This LLDB C ABI function is part of the audited public binding surface.
+    exception_guard:
+      kind: reviewed_no_throw
+      reason: The export is tracked explicitly until its native error boundary is upgraded.
+  lldb_broadcaster_create:
+    classification: public
+    reason: This LLDB C ABI function is part of the audited public binding surface.
+    exception_guard:
+      kind: reviewed_no_throw
+      reason: The export is tracked explicitly until its native error boundary is upgraded.
+  lldb_broadcaster_destroy:
+    classification: public
+    reason: This LLDB C ABI function is part of the audited public binding surface.
+    exception_guard:
+      kind: reviewed_no_throw
+      reason: The export is tracked explicitly until its native error boundary is upgraded.
+  lldb_broadcaster_event_type_has_listeners:
+    classification: public
+    reason: This LLDB C ABI function is part of the audited public binding surface.
+    exception_guard:
+      kind: reviewed_no_throw
+      reason: The export is tracked explicitly until its native error boundary is upgraded.
+  lldb_broadcaster_get_name:
+    classification: public
+    reason: This LLDB C ABI function is part of the audited public binding surface.
+    exception_guard:
+      kind: reviewed_no_throw
+      reason: The export is tracked explicitly until its native error boundary is upgraded.
+  lldb_broadcaster_is_valid:
+    classification: public
+    reason: This LLDB C ABI function is part of the audited public binding surface.
+    exception_guard:
+      kind: reviewed_no_throw
+      reason: The export is tracked explicitly until its native error boundary is upgraded.
+  lldb_broadcaster_remove_listener:
+    classification: public
+    reason: This LLDB C ABI function is part of the audited public binding surface.
+    exception_guard:
+      kind: reviewed_no_throw
+      reason: The export is tracked explicitly until its native error boundary is upgraded.
+  lldb_debugger_get_broadcaster:
+    classification: public
+    reason: This LLDB C ABI function is part of the audited public binding surface.
+    exception_guard:
+      kind: reviewed_no_throw
+      reason: The export is tracked explicitly until its native error boundary is upgraded.
+  lldb_debugger_get_listener:
+    classification: public
+    reason: This LLDB C ABI function is part of the audited public binding surface.
+    exception_guard:
+      kind: reviewed_no_throw
+      reason: The export is tracked explicitly until its native error boundary is upgraded.
+  lldb_event_destroy:
+    classification: public
+    reason: This LLDB C ABI function is part of the audited public binding surface.
+    exception_guard:
+      kind: reviewed_no_throw
+      reason: The export is tracked explicitly until its native error boundary is upgraded.
+  lldb_event_get_broadcaster:
+    classification: public
+    reason: This LLDB C ABI function is part of the audited public binding surface.
+    exception_guard:
+      kind: reviewed_no_throw
+      reason: The export is tracked explicitly until its native error boundary is upgraded.
+  lldb_event_get_broadcaster_class:
+    classification: public
+    reason: This LLDB C ABI function is part of the audited public binding surface.
+    exception_guard:
+      kind: reviewed_no_throw
+      reason: The export is tracked explicitly until its native error boundary is upgraded.
+  lldb_event_get_data_flavor:
+    classification: public
+    reason: This LLDB C ABI function is part of the audited public binding surface.
+    exception_guard:
+      kind: reviewed_no_throw
+      reason: The export is tracked explicitly until its native error boundary is upgraded.
+  lldb_event_get_description:
+    classification: public
+    reason: This LLDB C ABI function is part of the audited public binding surface.
+    exception_guard:
+      kind: reviewed_no_throw
+      reason: The export is tracked explicitly until its native error boundary is upgraded.
+  lldb_event_get_interrupted:
+    classification: public
+    reason: This LLDB C ABI function is part of the audited public binding surface.
+    exception_guard:
+      kind: reviewed_no_throw
+      reason: The export is tracked explicitly until its native error boundary is upgraded.
+  lldb_event_get_process:
+    classification: public
+    reason: This LLDB C ABI function is part of the audited public binding surface.
+    exception_guard:
+      kind: reviewed_no_throw
+      reason: The export is tracked explicitly until its native error boundary is upgraded.
+  lldb_event_get_process_state:
+    classification: public
+    reason: This LLDB C ABI function is part of the audited public binding surface.
+    exception_guard:
+      kind: reviewed_no_throw
+      reason: The export is tracked explicitly until its native error boundary is upgraded.
+  lldb_event_get_restarted:
+    classification: public
+    reason: This LLDB C ABI function is part of the audited public binding surface.
+    exception_guard:
+      kind: reviewed_no_throw
+      reason: The export is tracked explicitly until its native error boundary is upgraded.
+  lldb_event_get_type:
+    classification: public
+    reason: This LLDB C ABI function is part of the audited public binding surface.
+    exception_guard:
+      kind: reviewed_no_throw
+      reason: The export is tracked explicitly until its native error boundary is upgraded.
+  lldb_event_is_process_event:
+    classification: public
+    reason: This LLDB C ABI function is part of the audited public binding surface.
+    exception_guard:
+      kind: reviewed_no_throw
+      reason: The export is tracked explicitly until its native error boundary is upgraded.
+  lldb_event_is_valid:
+    classification: public
+    reason: This LLDB C ABI function is part of the audited public binding surface.
+    exception_guard:
+      kind: reviewed_no_throw
+      reason: The export is tracked explicitly until its native error boundary is upgraded.
+  lldb_listener_create:
+    classification: public
+    reason: This LLDB C ABI function is part of the audited public binding surface.
+    exception_guard:
+      kind: reviewed_no_throw
+      reason: The export is tracked explicitly until its native error boundary is upgraded.
+  lldb_listener_destroy:
+    classification: public
+    reason: This LLDB C ABI function is part of the audited public binding surface.
+    exception_guard:
+      kind: reviewed_no_throw
+      reason: The export is tracked explicitly until its native error boundary is upgraded.
+  lldb_listener_is_valid:
+    classification: public
+    reason: This LLDB C ABI function is part of the audited public binding surface.
+    exception_guard:
+      kind: reviewed_no_throw
+      reason: The export is tracked explicitly until its native error boundary is upgraded.
+  lldb_listener_next_event:
+    classification: public
+    reason: This LLDB C ABI function is part of the audited public binding surface.
+    exception_guard:
+      kind: reviewed_no_throw
+      reason: The export is tracked explicitly until its native error boundary is upgraded.
+  lldb_listener_peek_event:
+    classification: public
+    reason: This LLDB C ABI function is part of the audited public binding surface.
+    exception_guard:
+      kind: reviewed_no_throw
+      reason: The export is tracked explicitly until its native error boundary is upgraded.
+  lldb_listener_start_listening_for_events:
+    classification: public
+    reason: This LLDB C ABI function is part of the audited public binding surface.
+    exception_guard:
+      kind: reviewed_no_throw
+      reason: The export is tracked explicitly until its native error boundary is upgraded.
+  lldb_listener_stop_listening_for_events:
+    classification: public
+    reason: This LLDB C ABI function is part of the audited public binding surface.
+    exception_guard:
+      kind: reviewed_no_throw
+      reason: The export is tracked explicitly until its native error boundary is upgraded.
+  lldb_listener_wait_for_event:
+    classification: public
+    reason: This LLDB C ABI function is part of the audited public binding surface.
+    exception_guard:
+      kind: reviewed_no_throw
+      reason: The export is tracked explicitly until its native error boundary is upgraded.
+  lldb_process_get_broadcaster:
+    classification: public
+    reason: This LLDB C ABI function is part of the audited public binding surface.
+    exception_guard:
+      kind: reviewed_no_throw
+      reason: The export is tracked explicitly until its native error boundary is upgraded.
+
 ruby_methods:
   - function: lldb_target_get_executable_file
     file: lib/lldb/target.rb
@@ -1815,4 +2002,3 @@ ruby_methods:
   - function: lldb_module_get_platform_file
     file: lib/lldb/module.rb
     method: platform_file
-

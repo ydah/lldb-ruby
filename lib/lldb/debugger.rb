@@ -179,6 +179,26 @@ module LLDB
       CommandInterpreter.new(ci_ptr, debugger: self, context: context)
     end
 
+    # @rbs return: Broadcaster
+    def broadcaster
+      raise InvalidObjectError, 'Debugger is not valid' unless valid?
+
+      broadcaster_ptr = FFIBindings.lldb_debugger_get_broadcaster(@ptr)
+      raise LLDBError, 'Failed to get debugger broadcaster' if broadcaster_ptr.nil? || broadcaster_ptr.null?
+
+      Broadcaster.from_ptr(broadcaster_ptr, context: context)
+    end
+
+    # @rbs return: Listener
+    def listener
+      raise InvalidObjectError, 'Debugger is not valid' unless valid?
+
+      listener_ptr = FFIBindings.lldb_debugger_get_listener(@ptr)
+      raise LLDBError, 'Failed to get debugger listener' if listener_ptr.nil? || listener_ptr.null?
+
+      Listener.from_ptr(listener_ptr, context: context)
+    end
+
     # @rbs command: String
     # @rbs return: void
     def handle_command(command)
