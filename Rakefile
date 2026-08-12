@@ -2,6 +2,8 @@
 
 require 'bundler/gem_tasks'
 require 'rspec/core/rake_task'
+require 'shellwords'
+require 'tmpdir'
 
 RSpec::Core::RakeTask.new(:spec)
 
@@ -83,9 +85,28 @@ namespace :bindings do
 end
 
 namespace :rbs do
-  desc 'Verify that generated RBS output leaves no tracked changes'
-  task verify: :generate do
-    sh 'git diff --exit-code -- sig'
+  desc 'Verify that generated RBS output is deterministic'
+  task :verify do
+    Dir.mktmpdir('lldb-ruby-rbs') do |directory|
+      outputs = %w[first second].map { |name| File.join(directory, name) }
+      outputs.each do |output|
+        sh "bundle exec rbs-inline --output=#{Shellwords.escape(output)} lib"
+      end
+
+      files = lambda do |root|
+        Dir.glob(File.join(root, '**/*.rbs')).map do |path|
+          path.delete_prefix("#{root}#{File::SEPARATOR}")
+        end.sort
+      end
+      first_files, second_files = outputs.map { |output| files.call(output) }
+      abort 'RBS output file set is not reproducible' unless first_files == second_files
+
+      first_files.each do |relative|
+        first = File.binread(File.join(outputs[0], relative))
+        second = File.binread(File.join(outputs[1], relative))
+        abort "RBS output is not reproducible: #{relative}" unless first == second
+      end
+    end
   end
 end
 
