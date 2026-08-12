@@ -5,6 +5,7 @@ require 'fileutils'
 require 'open3'
 require 'optparse'
 require 'rbconfig'
+require 'shellwords'
 require 'tempfile'
 require 'tmpdir'
 require 'yaml'
@@ -204,9 +205,9 @@ def check_constants(path, include_dir)
     source_path = File.join(directory, 'probe.cpp')
     binary_path = File.join(directory, 'probe')
     File.write(source_path, source)
-    compiler = ENV.fetch('CXX', RbConfig::CONFIG['CXX'] || 'c++')
+    compiler = Shellwords.split(ENV.fetch('CXX', RbConfig::CONFIG['CXX'] || 'c++'))
     _stdout, stderr, status = Open3.capture3(
-      compiler, '-std=c++17', '-I', include_dir, source_path, '-o', binary_path
+      *compiler, '-std=c++17', '-I', include_dir, source_path, '-o', binary_path
     )
     return ["constant probe compilation failed: #{stderr.strip}"] unless status.success?
 

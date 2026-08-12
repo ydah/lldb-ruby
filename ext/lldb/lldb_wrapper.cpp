@@ -6981,7 +6981,11 @@ const char* lldb_symbol_get_mangled_name(lldb_symbol_t symbol)  LLDB_WRAPPER_NOE
 const char* lldb_symbol_get_base_name(lldb_symbol_t symbol)  LLDB_WRAPPER_NOEXCEPT {
     try {
     if (!symbol) return nullptr;
+#if LLDB_RUBY_HAVE_SYMBOL_GET_BASE_NAME
     return static_cast<lldb::SBSymbol*>(symbol)->GetBaseName();
+#else
+    return static_cast<lldb::SBSymbol*>(symbol)->GetName();
+#endif
 
       } catch (const std::bad_alloc&) {
         wrapper_set_error_state("native allocation failed across the C ABI");
@@ -7104,7 +7108,11 @@ int lldb_symbol_get_type(lldb_symbol_t symbol)  LLDB_WRAPPER_NOEXCEPT {
 uint32_t lldb_symbol_get_id(lldb_symbol_t symbol)  LLDB_WRAPPER_NOEXCEPT {
     try {
     if (!symbol) return 0;
+#if LLDB_RUBY_HAVE_SYMBOL_GET_ID
     return static_cast<lldb::SBSymbol*>(symbol)->GetID();
+#else
+    return 0;
+#endif
 
       } catch (const std::bad_alloc&) {
         wrapper_set_error_state("native allocation failed across the C ABI");
@@ -7206,7 +7214,11 @@ const char* lldb_function_get_mangled_name(lldb_function_t function)  LLDB_WRAPP
 const char* lldb_function_get_base_name(lldb_function_t function)  LLDB_WRAPPER_NOEXCEPT {
     try {
     if (!function) return nullptr;
+#if LLDB_RUBY_HAVE_FUNCTION_GET_BASE_NAME
     return static_cast<lldb::SBFunction*>(function)->GetBaseName();
+#else
+    return static_cast<lldb::SBFunction*>(function)->GetName();
+#endif
 
       } catch (const std::bad_alloc&) {
         wrapper_set_error_state("native allocation failed across the C ABI");

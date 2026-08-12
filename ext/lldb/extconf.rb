@@ -4,6 +4,7 @@
 require 'mkmf'
 require 'open3'
 require 'rbconfig'
+require 'shellwords'
 require 'tmpdir'
 
 require_relative 'discovery'
@@ -26,7 +27,7 @@ def native_probe(compiler, include_dir, lib_dir, source, link:)
     output_path = File.join(directory, 'probe')
     File.write(source_path, source)
 
-    command = [compiler, '-std=c++17', '-I', include_dir]
+    command = [*compiler, '-std=c++17', '-I', include_dir]
     if link
       command.concat([source_path, '-L', lib_dir, '-llldb', '-o', output_path])
       command << "-Wl,-rpath,#{lib_dir}"
@@ -95,6 +96,27 @@ def watchpoint_capability_probe(compiler, candidate)
   status.success?
 end
 
+def api_capability_probe(compiler, candidate, header, expression)
+  source = <<~CPP
+    #include <lldb/API/#{header}>
+
+    int main() {
+      auto method = #{expression};
+      (void)method;
+      return 0;
+    }
+  CPP
+
+  _stdout, _stderr, status = native_probe(
+    compiler,
+    candidate.include_dir,
+    candidate.lib_dir,
+    source,
+    link: false
+  )
+  status.success?
+end
+
 def llvm_config_version(candidate)
   llvm_config = candidate.llvm_config
   if !llvm_config
@@ -113,7 +135,8 @@ explicit_options = {
   lib: with_config('lldb-lib')
 }.compact
 
-compiler = ENV.fetch('CXX', RbConfig::CONFIG['CXX'] || 'c++')
+compiler = Shellwords.split(ENV.fetch('CXX', RbConfig::CONFIG['CXX'] || 'c++'))
+abort 'C++ compiler command is empty' if compiler.empty?
 attempts = []
 selected = nil
 
@@ -150,9 +173,18 @@ end
 puts "Found LLDB library directory: #{selected.lib_dir}"
 puts "Found LLDB include directory: #{selected.include_dir}"
 puts "Found LLDB via: #{selected.llvm_config || 'prefix discovery'}"
-puts "Using C++ compiler: #{compiler}"
+puts "Using C++ compiler: #{compiler.join(' ')}"
 
 watchpoint_access_kind = watchpoint_capability_probe(compiler, selected)
+symbol_get_base_name = api_capability_probe(
+  compiler, selected, 'SBSymbol.h', '&lldb::SBSymbol::GetBaseName'
+)
+symbol_get_id = api_capability_probe(
+  compiler, selected, 'SBSymbol.h', '&lldb::SBSymbol::GetID'
+)
+function_get_base_name = api_capability_probe(
+  compiler, selected, 'SBFunction.h', '&lldb::SBFunction::GetBaseName'
+)
 build_version = llvm_config_version(selected)
 config_path = File.expand_path('lldb_wrapper_config.h', __dir__)
 File.write(config_path, <<~HEADER)
@@ -162,10 +194,16 @@ File.write(config_path, <<~HEADER)
   #define LLDB_RUBY_WRAPPER_ABI_VERSION 1
   #define LLDB_RUBY_BUILD_LLDB_VERSION #{build_version.dump}
   #define LLDB_RUBY_HAVE_WATCHPOINT_ACCESS_KIND #{watchpoint_access_kind ? 1 : 0}
+  #define LLDB_RUBY_HAVE_SYMBOL_GET_BASE_NAME #{symbol_get_base_name ? 1 : 0}
+  #define LLDB_RUBY_HAVE_SYMBOL_GET_ID #{symbol_get_id ? 1 : 0}
+  #define LLDB_RUBY_HAVE_FUNCTION_GET_BASE_NAME #{function_get_base_name ? 1 : 0}
 
   #endif
 HEADER
 puts "Watchpoint access capability: #{watchpoint_access_kind ? 'supported' : 'unsupported'}"
+puts "SBSymbol::GetBaseName capability: #{symbol_get_base_name ? 'supported' : 'unsupported'}"
+puts "SBSymbol::GetID capability: #{symbol_get_id ? 'supported' : 'unsupported'}"
+puts "SBFunction::GetBaseName capability: #{function_get_base_name ? 'supported' : 'unsupported'}"
 puts "Build LLDB version: #{build_version}"
 
 $CXXFLAGS << " -I#{selected.include_dir}"
