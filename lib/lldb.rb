@@ -14,6 +14,8 @@ require_relative 'lldb/native_buffer'
 require_relative 'lldb/api_support'
 require_relative 'lldb/native_string_array'
 require_relative 'lldb/file_spec'
+require_relative 'lldb/attach_info'
+require_relative 'lldb/expression_options'
 require_relative 'lldb/broadcaster'
 require_relative 'lldb/listener'
 require_relative 'lldb/event'
@@ -77,9 +79,9 @@ module LLDB
     end
 
     # @rbs return: Debugger
-    def create_debugger
+    def create_debugger(source_init_files: false)
       LLDB.initialize
-      Debugger.create
+      Debugger.create(source_init_files: source_init_files)
     end
 
     # @rbs return: Integer

@@ -120,12 +120,23 @@ module LLDB
     end
 
     # @rbs expression: String
+    # @rbs options: ExpressionOptions?
     # @rbs return: Value?
-    def evaluate_expression(expression)
+    def evaluate_expression(expression, options: nil)
       raise InvalidObjectError, 'Frame is not valid' unless valid?
       APISupport.require_method!(:lldb_frame_evaluate_expression, 'evaluate_expression')
 
-      value_ptr = FFIBindings.lldb_frame_evaluate_expression(@ptr, expression)
+      value_ptr = if options
+                    unless options.is_a?(ExpressionOptions)
+                      raise ArgumentError, 'options must be an ExpressionOptions'
+                    end
+
+                    FFIBindings.lldb_frame_evaluate_expression_with_options(
+                      @ptr, expression, options.to_ptr
+                    )
+                  else
+                    FFIBindings.lldb_frame_evaluate_expression(@ptr, expression)
+                  end
       return nil if value_ptr.nil? || value_ptr.null?
 
       Value.new(value_ptr, parent: self, context: context)

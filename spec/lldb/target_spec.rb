@@ -24,6 +24,19 @@ RSpec.describe LLDB::Target do
     end
   end
 
+  describe '#evaluate_expression' do
+    it 'passes ExpressionOptions to LLDB' do
+      options = LLDB::ExpressionOptions.new(context: target.context)
+      options.ignore_breakpoints = true
+
+      value = target.evaluate_expression('1 + 1', options: options)
+      expect(value).to be_a(LLDB::Value)
+      expect(value).to be_valid
+    ensure
+      options&.close
+    end
+  end
+
   describe '#breakpoint_create_by_name' do
     it 'creates a breakpoint by function name' do
       bp = target.breakpoint_create_by_name('main')

@@ -129,7 +129,12 @@ void lldb_terminate(void) {
 // ============================================================================
 
 lldb_debugger_t lldb_debugger_create(void) {
-    lldb::SBDebugger* dbg = new lldb::SBDebugger(lldb::SBDebugger::Create(false));
+    return lldb_debugger_create_with_source_init_files(0);
+}
+
+lldb_debugger_t lldb_debugger_create_with_source_init_files(int source_init_files) {
+    lldb::SBDebugger* dbg = new lldb::SBDebugger(
+        lldb::SBDebugger::Create(source_init_files != 0));
     return static_cast<lldb_debugger_t>(dbg);
 }
 
@@ -543,6 +548,21 @@ lldb_process_t lldb_target_attach_to_process_with_name(lldb_target_t target,
     return static_cast<lldb_process_t>(new lldb::SBProcess(process));
 }
 
+lldb_process_t lldb_target_attach_with_info(lldb_target_t target,
+                                             lldb_attach_info_t attach_info,
+                                             lldb_error_t error) {
+    if (!target || !attach_info) return nullptr;
+
+    lldb::SBTarget* t = static_cast<lldb::SBTarget*>(target);
+    lldb::SBAttachInfo* info = static_cast<lldb::SBAttachInfo*>(attach_info);
+    lldb::SBError* err = error ? static_cast<lldb::SBError*>(error) : nullptr;
+    lldb::SBError local_error;
+    lldb::SBProcess process = t->Attach(*info, err ? *err : local_error);
+
+    if (!process.IsValid()) return nullptr;
+    return static_cast<lldb_process_t>(new lldb::SBProcess(process));
+}
+
 lldb_breakpoint_t lldb_target_breakpoint_create_by_name(lldb_target_t target,
                                                          const char* symbol_name,
                                                          const char* module_name) {
@@ -721,6 +741,18 @@ lldb_value_t lldb_target_evaluate_expression(lldb_target_t target, const char* e
     return static_cast<lldb_value_t>(new lldb::SBValue(value));
 }
 
+lldb_value_t lldb_target_evaluate_expression_with_options(lldb_target_t target,
+                                                          const char* expr,
+                                                          lldb_expression_options_t options) {
+    if (!target || !expr || !options) return nullptr;
+
+    lldb::SBValue value = static_cast<lldb::SBTarget*>(target)->EvaluateExpression(
+        expr, *static_cast<lldb::SBExpressionOptions*>(options));
+    if (!value.IsValid()) return nullptr;
+
+    return static_cast<lldb_value_t>(new lldb::SBValue(value));
+}
+
 size_t lldb_target_read_memory(lldb_target_t target, uint64_t addr, void* buf, size_t size, lldb_error_t error) {
     if (!target || !buf) return 0;
 
@@ -807,9 +839,23 @@ void lldb_launch_info_destroy(lldb_launch_info_t info) {
     }
 }
 
+uint32_t lldb_launch_info_get_num_arguments(lldb_launch_info_t info) {
+    return info ? static_cast<lldb::SBLaunchInfo*>(info)->GetNumArguments() : 0;
+}
+
+const char* lldb_launch_info_get_argument_at_index(lldb_launch_info_t info, uint32_t index) {
+    if (!info) return nullptr;
+    return static_cast<lldb::SBLaunchInfo*>(info)->GetArgumentAtIndex(index);
+}
+
 void lldb_launch_info_set_working_directory(lldb_launch_info_t info, const char* dir) {
     if (!info) return;
     static_cast<lldb::SBLaunchInfo*>(info)->SetWorkingDirectory(dir);
+}
+
+const char* lldb_launch_info_get_working_directory(lldb_launch_info_t info) {
+    if (!info) return nullptr;
+    return static_cast<lldb::SBLaunchInfo*>(info)->GetWorkingDirectory();
 }
 
 void lldb_launch_info_set_environment_entries(lldb_launch_info_t info,
@@ -831,6 +877,16 @@ void lldb_launch_info_set_environment_entries(lldb_launch_info_t info,
     static_cast<lldb::SBLaunchInfo*>(info)->SetEnvironment(env, append != 0);
 }
 
+uint32_t lldb_launch_info_get_num_environment_entries(lldb_launch_info_t info) {
+    return info ? static_cast<lldb::SBLaunchInfo*>(info)->GetNumEnvironmentEntries() : 0;
+}
+
+const char* lldb_launch_info_get_environment_entry_at_index(lldb_launch_info_t info,
+                                                             uint32_t index) {
+    if (!info) return nullptr;
+    return static_cast<lldb::SBLaunchInfo*>(info)->GetEnvironmentEntryAtIndex(index);
+}
+
 uint32_t lldb_launch_info_get_launch_flags(lldb_launch_info_t info) {
     if (!info) return 0;
     return static_cast<lldb::SBLaunchInfo*>(info)->GetLaunchFlags();
@@ -839,6 +895,248 @@ uint32_t lldb_launch_info_get_launch_flags(lldb_launch_info_t info) {
 void lldb_launch_info_set_launch_flags(lldb_launch_info_t info, uint32_t flags) {
     if (!info) return;
     static_cast<lldb::SBLaunchInfo*>(info)->SetLaunchFlags(flags);
+}
+
+void lldb_launch_info_set_arguments(lldb_launch_info_t info, const char** argv, int append) {
+    if (!info) return;
+    static_cast<lldb::SBLaunchInfo*>(info)->SetArguments(argv, append != 0);
+}
+
+lldb_file_spec_t lldb_launch_info_get_executable_file(lldb_launch_info_t info) {
+    if (!info) return nullptr;
+    lldb::SBFileSpec file = static_cast<lldb::SBLaunchInfo*>(info)->GetExecutableFile();
+    if (!file.IsValid()) return nullptr;
+    return static_cast<lldb_file_spec_t>(new lldb::SBFileSpec(file));
+}
+
+void lldb_launch_info_set_executable_file(lldb_launch_info_t info,
+                                           lldb_file_spec_t file_spec,
+                                           int add_as_first_arg) {
+    if (!info || !file_spec) return;
+    static_cast<lldb::SBLaunchInfo*>(info)->SetExecutableFile(
+        *static_cast<lldb::SBFileSpec*>(file_spec), add_as_first_arg != 0);
+}
+
+lldb_listener_t lldb_launch_info_get_listener(lldb_launch_info_t info) {
+    if (!info) return nullptr;
+    lldb::SBListener listener = static_cast<lldb::SBLaunchInfo*>(info)->GetListener();
+    if (!listener.IsValid()) return nullptr;
+    return static_cast<lldb_listener_t>(new lldb::SBListener(listener));
+}
+
+void lldb_launch_info_set_listener(lldb_launch_info_t info, lldb_listener_t listener) {
+    if (!info || !listener) return;
+    static_cast<lldb::SBLaunchInfo*>(info)->SetListener(
+        *static_cast<lldb::SBListener*>(listener));
+}
+
+const char* lldb_launch_info_get_process_plugin_name(lldb_launch_info_t info) {
+    if (!info) return nullptr;
+    return static_cast<lldb::SBLaunchInfo*>(info)->GetProcessPluginName();
+}
+
+void lldb_launch_info_set_process_plugin_name(lldb_launch_info_t info, const char* name) {
+    if (!info || !name) return;
+    static_cast<lldb::SBLaunchInfo*>(info)->SetProcessPluginName(name);
+}
+
+const char* lldb_launch_info_get_shell(lldb_launch_info_t info) {
+    if (!info) return nullptr;
+    return static_cast<lldb::SBLaunchInfo*>(info)->GetShell();
+}
+
+void lldb_launch_info_set_shell(lldb_launch_info_t info, const char* path) {
+    if (!info || !path) return;
+    static_cast<lldb::SBLaunchInfo*>(info)->SetShell(path);
+}
+
+int lldb_launch_info_add_close_file_action(lldb_launch_info_t info, int fd) {
+    return info && static_cast<lldb::SBLaunchInfo*>(info)->AddCloseFileAction(fd) ? 1 : 0;
+}
+
+int lldb_launch_info_add_duplicate_file_action(lldb_launch_info_t info, int fd, int dup_fd) {
+    return info && static_cast<lldb::SBLaunchInfo*>(info)->AddDuplicateFileAction(fd, dup_fd) ? 1 : 0;
+}
+
+int lldb_launch_info_add_open_file_action(lldb_launch_info_t info,
+                                          int fd,
+                                          const char* path,
+                                          int read,
+                                          int write) {
+    return info && path && static_cast<lldb::SBLaunchInfo*>(info)->AddOpenFileAction(
+                               fd, path, read != 0, write != 0)
+               ? 1
+               : 0;
+}
+
+int lldb_launch_info_add_suppress_file_action(lldb_launch_info_t info,
+                                              int fd,
+                                              int read,
+                                              int write) {
+    return info && static_cast<lldb::SBLaunchInfo*>(info)->AddSuppressFileAction(
+                               fd, read != 0, write != 0)
+               ? 1
+               : 0;
+}
+
+// ============================================================================
+// SBAttachInfo
+// ============================================================================
+
+lldb_attach_info_t lldb_attach_info_create(uint64_t pid) {
+    lldb::SBAttachInfo info;
+    if (pid != 0) info.SetProcessID(pid);
+    return static_cast<lldb_attach_info_t>(new lldb::SBAttachInfo(info));
+}
+
+void lldb_attach_info_destroy(lldb_attach_info_t info) {
+    if (info) delete static_cast<lldb::SBAttachInfo*>(info);
+}
+
+uint64_t lldb_attach_info_get_process_id(lldb_attach_info_t info) {
+    return info ? static_cast<lldb::SBAttachInfo*>(info)->GetProcessID() : 0;
+}
+
+void lldb_attach_info_set_process_id(lldb_attach_info_t info, uint64_t pid) {
+    if (info) static_cast<lldb::SBAttachInfo*>(info)->SetProcessID(pid);
+}
+
+void lldb_attach_info_set_executable(lldb_attach_info_t info, const char* path) {
+    if (info && path) static_cast<lldb::SBAttachInfo*>(info)->SetExecutable(path);
+}
+
+void lldb_attach_info_set_executable_file(lldb_attach_info_t info, lldb_file_spec_t file_spec) {
+    if (info && file_spec) {
+        static_cast<lldb::SBAttachInfo*>(info)->SetExecutable(
+            *static_cast<lldb::SBFileSpec*>(file_spec));
+    }
+}
+
+int lldb_attach_info_get_wait_for_launch(lldb_attach_info_t info) {
+    return info && static_cast<lldb::SBAttachInfo*>(info)->GetWaitForLaunch() ? 1 : 0;
+}
+
+void lldb_attach_info_set_wait_for_launch(lldb_attach_info_t info, int wait_for) {
+    if (info) static_cast<lldb::SBAttachInfo*>(info)->SetWaitForLaunch(wait_for != 0);
+}
+
+int lldb_attach_info_get_ignore_existing(lldb_attach_info_t info) {
+    return info && static_cast<lldb::SBAttachInfo*>(info)->GetIgnoreExisting() ? 1 : 0;
+}
+
+void lldb_attach_info_set_ignore_existing(lldb_attach_info_t info, int ignore_existing) {
+    if (info) static_cast<lldb::SBAttachInfo*>(info)->SetIgnoreExisting(ignore_existing != 0);
+}
+
+uint32_t lldb_attach_info_get_resume_count(lldb_attach_info_t info) {
+    return info ? static_cast<lldb::SBAttachInfo*>(info)->GetResumeCount() : 0;
+}
+
+void lldb_attach_info_set_resume_count(lldb_attach_info_t info, uint32_t count) {
+    if (info) static_cast<lldb::SBAttachInfo*>(info)->SetResumeCount(count);
+}
+
+const char* lldb_attach_info_get_process_plugin_name(lldb_attach_info_t info) {
+    if (!info) return nullptr;
+    return static_cast<lldb::SBAttachInfo*>(info)->GetProcessPluginName();
+}
+
+void lldb_attach_info_set_process_plugin_name(lldb_attach_info_t info, const char* name) {
+    if (info && name) static_cast<lldb::SBAttachInfo*>(info)->SetProcessPluginName(name);
+}
+
+lldb_listener_t lldb_attach_info_get_listener(lldb_attach_info_t info) {
+    if (!info) return nullptr;
+    lldb::SBListener listener = static_cast<lldb::SBAttachInfo*>(info)->GetListener();
+    if (!listener.IsValid()) return nullptr;
+    return static_cast<lldb_listener_t>(new lldb::SBListener(listener));
+}
+
+void lldb_attach_info_set_listener(lldb_attach_info_t info, lldb_listener_t listener) {
+    if (info && listener) {
+        static_cast<lldb::SBAttachInfo*>(info)->SetListener(
+            *static_cast<lldb::SBListener*>(listener));
+    }
+}
+
+// ============================================================================
+// SBExpressionOptions
+// ============================================================================
+
+lldb_expression_options_t lldb_expression_options_create(void) {
+    return static_cast<lldb_expression_options_t>(new lldb::SBExpressionOptions());
+}
+
+void lldb_expression_options_destroy(lldb_expression_options_t options) {
+    if (options) delete static_cast<lldb::SBExpressionOptions*>(options);
+}
+
+uint32_t lldb_expression_options_get_timeout(lldb_expression_options_t options) {
+    return options ? static_cast<lldb::SBExpressionOptions*>(options)->GetTimeoutInMicroSeconds() : 0;
+}
+
+void lldb_expression_options_set_timeout(lldb_expression_options_t options, uint32_t timeout) {
+    if (options) static_cast<lldb::SBExpressionOptions*>(options)->SetTimeoutInMicroSeconds(timeout);
+}
+
+int lldb_expression_options_get_unwind_on_error(lldb_expression_options_t options) {
+    return options && static_cast<lldb::SBExpressionOptions*>(options)->GetUnwindOnError() ? 1 : 0;
+}
+
+void lldb_expression_options_set_unwind_on_error(lldb_expression_options_t options, int value) {
+    if (options) static_cast<lldb::SBExpressionOptions*>(options)->SetUnwindOnError(value != 0);
+}
+
+int lldb_expression_options_get_ignore_breakpoints(lldb_expression_options_t options) {
+    return options && static_cast<lldb::SBExpressionOptions*>(options)->GetIgnoreBreakpoints() ? 1 : 0;
+}
+
+void lldb_expression_options_set_ignore_breakpoints(lldb_expression_options_t options, int value) {
+    if (options) static_cast<lldb::SBExpressionOptions*>(options)->SetIgnoreBreakpoints(value != 0);
+}
+
+int lldb_expression_options_get_fetch_dynamic_value(lldb_expression_options_t options) {
+    return options ? static_cast<int>(static_cast<lldb::SBExpressionOptions*>(options)->GetFetchDynamicValue()) : 0;
+}
+
+void lldb_expression_options_set_fetch_dynamic_value(lldb_expression_options_t options, int value) {
+    if (options) {
+        static_cast<lldb::SBExpressionOptions*>(options)->SetFetchDynamicValue(
+            static_cast<lldb::DynamicValueType>(value));
+    }
+}
+
+int lldb_expression_options_get_try_all_threads(lldb_expression_options_t options) {
+    return options && static_cast<lldb::SBExpressionOptions*>(options)->GetTryAllThreads() ? 1 : 0;
+}
+
+void lldb_expression_options_set_try_all_threads(lldb_expression_options_t options, int value) {
+    if (options) static_cast<lldb::SBExpressionOptions*>(options)->SetTryAllThreads(value != 0);
+}
+
+int lldb_expression_options_get_stop_others(lldb_expression_options_t options) {
+    return options && static_cast<lldb::SBExpressionOptions*>(options)->GetStopOthers() ? 1 : 0;
+}
+
+void lldb_expression_options_set_stop_others(lldb_expression_options_t options, int value) {
+    if (options) static_cast<lldb::SBExpressionOptions*>(options)->SetStopOthers(value != 0);
+}
+
+void lldb_expression_options_set_language(lldb_expression_options_t options, int value) {
+    if (options) {
+        static_cast<lldb::SBExpressionOptions*>(options)->SetLanguage(
+            static_cast<lldb::LanguageType>(value));
+    }
+}
+
+int lldb_expression_options_get_suppress_persistent_result(lldb_expression_options_t options) {
+    return options && static_cast<lldb::SBExpressionOptions*>(options)->GetSuppressPersistentResult() ? 1 : 0;
+}
+
+void lldb_expression_options_set_suppress_persistent_result(lldb_expression_options_t options, int value) {
+    if (options) {
+        static_cast<lldb::SBExpressionOptions*>(options)->SetSuppressPersistentResult(value != 0);
+    }
 }
 
 // ============================================================================
@@ -1560,6 +1858,18 @@ lldb_value_t lldb_frame_evaluate_expression(lldb_frame_t frame, const char* expr
     lldb::SBFrame* f = static_cast<lldb::SBFrame*>(frame);
     lldb::SBValue value = f->EvaluateExpression(expr);
 
+    if (!value.IsValid()) return nullptr;
+
+    return static_cast<lldb_value_t>(new lldb::SBValue(value));
+}
+
+lldb_value_t lldb_frame_evaluate_expression_with_options(lldb_frame_t frame,
+                                                         const char* expr,
+                                                         lldb_expression_options_t options) {
+    if (!frame || !expr || !options) return nullptr;
+
+    lldb::SBValue value = static_cast<lldb::SBFrame*>(frame)->EvaluateExpression(
+        expr, *static_cast<lldb::SBExpressionOptions*>(options));
     if (!value.IsValid()) return nullptr;
 
     return static_cast<lldb_value_t>(new lldb::SBValue(value));

@@ -188,6 +188,11 @@ end
 `timeout_seconds: 0` performs a non-blocking poll. The library does not start
 background event threads.
 
+Debugger and launch choices are explicit option objects. For example,
+`LLDB::Debugger.create(source_init_files: true)` opts into LLDB init files,
+while `LLDB::ExpressionOptions` can be passed to expression evaluation without
+changing the no-options call path.
+
 ### Working with Threads
 
 ```ruby

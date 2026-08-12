@@ -12,6 +12,7 @@
 - Add binding parity, surface-ledger, reproducible RBS, and sanitizer checks.
 - Release the GVL around launch, attach, continue, stepping, and command execution calls.
 - Expose explicit broadcaster, listener, and event handles for LLDB state events.
+- Add `source_init_files`, `LaunchInfo`, `AttachInfo`, and `ExpressionOptions` controls.
 - Add LLDB discovery and compile/link validation for Linux and macOS builds.
 - Expose wrapper ABI and LLDB version metadata with capability-based watchpoint access checks.
 

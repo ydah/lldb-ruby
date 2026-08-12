@@ -79,6 +79,21 @@ module LLDB
       @process = Process.new(process_ptr, target: self, context: context)
     end
 
+    # @rbs attach_info: AttachInfo
+    # @rbs return: Process
+    def attach_with_info(attach_info)
+      raise InvalidObjectError, 'Target is not valid' unless valid?
+      raise ArgumentError, 'attach_info is required' unless attach_info.is_a?(AttachInfo)
+
+      error = Error.new
+      process_ptr = FFIBindings.lldb_target_attach_with_info(@ptr, attach_info.to_ptr, error.to_ptr)
+
+      error.raise_if_error!('target.attach')
+      raise AttachError, 'Failed to attach using attach info' if process_ptr.nil? || process_ptr.null?
+
+      @process = Process.new(process_ptr, target: self, context: context)
+    end
+
     # @rbs symbol_name: String
     # @rbs module_name: String?
     # @rbs return: Breakpoint
@@ -288,11 +303,22 @@ module LLDB
     end
 
     # @rbs expression: String
+    # @rbs options: ExpressionOptions?
     # @rbs return: Value?
-    def evaluate_expression(expression)
+    def evaluate_expression(expression, options: nil)
       raise InvalidObjectError, 'Target is not valid' unless valid?
 
-      value_ptr = FFIBindings.lldb_target_evaluate_expression(@ptr, expression)
+      value_ptr = if options
+                    unless options.is_a?(ExpressionOptions)
+                      raise ArgumentError, 'options must be an ExpressionOptions'
+                    end
+
+                    FFIBindings.lldb_target_evaluate_expression_with_options(
+                      @ptr, expression, options.to_ptr
+                    )
+                  else
+                    FFIBindings.lldb_target_evaluate_expression(@ptr, expression)
+                  end
       return nil if value_ptr.nil? || value_ptr.null?
 
       Value.new(value_ptr, parent: self, context: context)

@@ -27,6 +27,7 @@ module LLDB
 
     # SBDebugger
     def self.lldb_debugger_create: () -> FFI::Pointer
+    def self.lldb_debugger_create_with_source_init_files: (Integer) -> FFI::Pointer
     def self.lldb_debugger_destroy: (FFI::Pointer) -> void
     def self.lldb_debugger_is_valid: (FFI::Pointer) -> Integer
     def self.lldb_debugger_create_target: (FFI::Pointer, String?, String?, String?, Integer, FFI::Pointer) -> FFI::Pointer
@@ -82,6 +83,7 @@ module LLDB
     def self.lldb_target_launch: (FFI::Pointer, FFI::Pointer, FFI::Pointer) -> FFI::Pointer
     def self.lldb_target_attach_to_process_with_id: (FFI::Pointer, Integer, FFI::Pointer) -> FFI::Pointer
     def self.lldb_target_attach_to_process_with_name: (FFI::Pointer, String, Integer, FFI::Pointer) -> FFI::Pointer
+    def self.lldb_target_attach_with_info: (FFI::Pointer, FFI::Pointer, FFI::Pointer) -> FFI::Pointer
     def self.lldb_target_breakpoint_create_by_name: (FFI::Pointer, String, String?) -> FFI::Pointer
     def self.lldb_target_breakpoint_create_by_location: (FFI::Pointer, String, Integer) -> FFI::Pointer
     def self.lldb_target_breakpoint_create_by_address: (FFI::Pointer, Integer) -> FFI::Pointer
@@ -100,6 +102,7 @@ module LLDB
     def self.lldb_target_get_num_modules: (FFI::Pointer) -> Integer
     def self.lldb_target_get_module_at_index: (FFI::Pointer, Integer) -> FFI::Pointer
     def self.lldb_target_evaluate_expression: (FFI::Pointer, String) -> FFI::Pointer
+    def self.lldb_target_evaluate_expression_with_options: (FFI::Pointer, String, FFI::Pointer) -> FFI::Pointer
     def self.lldb_target_read_memory: (FFI::Pointer, Integer, FFI::Pointer, Integer, FFI::Pointer) -> Integer
     def self.lldb_target_get_address_byte_size: (FFI::Pointer) -> Integer
     def self.lldb_target_get_triple: (FFI::Pointer) -> String?
@@ -113,10 +116,65 @@ module LLDB
     # SBLaunchInfo
     def self.lldb_launch_info_create: (FFI::Pointer?) -> FFI::Pointer
     def self.lldb_launch_info_destroy: (FFI::Pointer) -> void
+    def self.lldb_launch_info_get_num_arguments: (FFI::Pointer) -> Integer
+    def self.lldb_launch_info_get_argument_at_index: (FFI::Pointer, Integer) -> String?
     def self.lldb_launch_info_set_working_directory: (FFI::Pointer, String) -> void
+    def self.lldb_launch_info_get_working_directory: (FFI::Pointer) -> String?
     def self.lldb_launch_info_set_environment_entries: (FFI::Pointer, FFI::Pointer?, Integer) -> void
+    def self.lldb_launch_info_get_num_environment_entries: (FFI::Pointer) -> Integer
+    def self.lldb_launch_info_get_environment_entry_at_index: (FFI::Pointer, Integer) -> String?
     def self.lldb_launch_info_get_launch_flags: (FFI::Pointer) -> Integer
     def self.lldb_launch_info_set_launch_flags: (FFI::Pointer, Integer) -> void
+    def self.lldb_launch_info_set_arguments: (FFI::Pointer, FFI::Pointer?, Integer) -> void
+    def self.lldb_launch_info_get_executable_file: (FFI::Pointer) -> FFI::Pointer
+    def self.lldb_launch_info_set_executable_file: (FFI::Pointer, FFI::Pointer, Integer) -> void
+    def self.lldb_launch_info_get_listener: (FFI::Pointer) -> FFI::Pointer
+    def self.lldb_launch_info_set_listener: (FFI::Pointer, FFI::Pointer) -> void
+    def self.lldb_launch_info_get_process_plugin_name: (FFI::Pointer) -> String?
+    def self.lldb_launch_info_set_process_plugin_name: (FFI::Pointer, String) -> void
+    def self.lldb_launch_info_get_shell: (FFI::Pointer) -> String?
+    def self.lldb_launch_info_set_shell: (FFI::Pointer, String) -> void
+    def self.lldb_launch_info_add_close_file_action: (FFI::Pointer, Integer) -> Integer
+    def self.lldb_launch_info_add_duplicate_file_action: (FFI::Pointer, Integer, Integer) -> Integer
+    def self.lldb_launch_info_add_open_file_action: (FFI::Pointer, Integer, String, Integer, Integer) -> Integer
+    def self.lldb_launch_info_add_suppress_file_action: (FFI::Pointer, Integer, Integer, Integer) -> Integer
+
+    # SBAttachInfo
+    def self.lldb_attach_info_create: (Integer) -> FFI::Pointer
+    def self.lldb_attach_info_destroy: (FFI::Pointer) -> void
+    def self.lldb_attach_info_get_process_id: (FFI::Pointer) -> Integer
+    def self.lldb_attach_info_set_process_id: (FFI::Pointer, Integer) -> void
+    def self.lldb_attach_info_set_executable: (FFI::Pointer, String) -> void
+    def self.lldb_attach_info_set_executable_file: (FFI::Pointer, FFI::Pointer) -> void
+    def self.lldb_attach_info_get_wait_for_launch: (FFI::Pointer) -> Integer
+    def self.lldb_attach_info_set_wait_for_launch: (FFI::Pointer, Integer) -> void
+    def self.lldb_attach_info_get_ignore_existing: (FFI::Pointer) -> Integer
+    def self.lldb_attach_info_set_ignore_existing: (FFI::Pointer, Integer) -> void
+    def self.lldb_attach_info_get_resume_count: (FFI::Pointer) -> Integer
+    def self.lldb_attach_info_set_resume_count: (FFI::Pointer, Integer) -> void
+    def self.lldb_attach_info_get_process_plugin_name: (FFI::Pointer) -> String?
+    def self.lldb_attach_info_set_process_plugin_name: (FFI::Pointer, String) -> void
+    def self.lldb_attach_info_get_listener: (FFI::Pointer) -> FFI::Pointer
+    def self.lldb_attach_info_set_listener: (FFI::Pointer, FFI::Pointer) -> void
+
+    # SBExpressionOptions
+    def self.lldb_expression_options_create: () -> FFI::Pointer
+    def self.lldb_expression_options_destroy: (FFI::Pointer) -> void
+    def self.lldb_expression_options_get_timeout: (FFI::Pointer) -> Integer
+    def self.lldb_expression_options_set_timeout: (FFI::Pointer, Integer) -> void
+    def self.lldb_expression_options_get_unwind_on_error: (FFI::Pointer) -> Integer
+    def self.lldb_expression_options_set_unwind_on_error: (FFI::Pointer, Integer) -> void
+    def self.lldb_expression_options_get_ignore_breakpoints: (FFI::Pointer) -> Integer
+    def self.lldb_expression_options_set_ignore_breakpoints: (FFI::Pointer, Integer) -> void
+    def self.lldb_expression_options_get_fetch_dynamic_value: (FFI::Pointer) -> Integer
+    def self.lldb_expression_options_set_fetch_dynamic_value: (FFI::Pointer, Integer) -> void
+    def self.lldb_expression_options_get_try_all_threads: (FFI::Pointer) -> Integer
+    def self.lldb_expression_options_set_try_all_threads: (FFI::Pointer, Integer) -> void
+    def self.lldb_expression_options_get_stop_others: (FFI::Pointer) -> Integer
+    def self.lldb_expression_options_set_stop_others: (FFI::Pointer, Integer) -> void
+    def self.lldb_expression_options_set_language: (FFI::Pointer, Integer) -> void
+    def self.lldb_expression_options_get_suppress_persistent_result: (FFI::Pointer) -> Integer
+    def self.lldb_expression_options_set_suppress_persistent_result: (FFI::Pointer, Integer) -> void
 
     # SBFileSpec
     def self.lldb_file_spec_create: (String?, Integer) -> FFI::Pointer
@@ -214,6 +272,7 @@ module LLDB
     def self.lldb_frame_get_fp: (FFI::Pointer) -> Integer
     def self.lldb_frame_find_variable: (FFI::Pointer, String) -> FFI::Pointer
     def self.lldb_frame_evaluate_expression: (FFI::Pointer, String) -> FFI::Pointer
+    def self.lldb_frame_evaluate_expression_with_options: (FFI::Pointer, String, FFI::Pointer) -> FFI::Pointer
     def self.lldb_frame_get_value_for_variable_path: (FFI::Pointer, String) -> FFI::Pointer
     def self.lldb_frame_get_frame_id: (FFI::Pointer) -> Integer
     def self.lldb_frame_get_thread: (FFI::Pointer) -> FFI::Pointer

@@ -117,6 +117,7 @@ module LLDB
     # SBDebugger
     # =========================================================================
     attach_function :lldb_debugger_create, [], :pointer
+    attach_function :lldb_debugger_create_with_source_init_files, [:int], :pointer
     attach_function :lldb_debugger_destroy, [:pointer], :void
     attach_function :lldb_debugger_is_valid, [:pointer], :int
     attach_function :lldb_debugger_create_target, %i[pointer string string string int pointer], :pointer
@@ -180,6 +181,7 @@ module LLDB
     attach_function :lldb_target_launch, %i[pointer pointer pointer], :pointer, blocking: true
     attach_function :lldb_target_attach_to_process_with_id, %i[pointer uint64 pointer], :pointer, blocking: true
     attach_function :lldb_target_attach_to_process_with_name, %i[pointer string int pointer], :pointer, blocking: true
+    attach_function :lldb_target_attach_with_info, %i[pointer pointer pointer], :pointer, blocking: true
     attach_function :lldb_target_breakpoint_create_by_name, %i[pointer string string], :pointer
     attach_function :lldb_target_breakpoint_create_by_location, %i[pointer string uint32], :pointer
     attach_function :lldb_target_breakpoint_create_by_address, %i[pointer uint64], :pointer
@@ -198,6 +200,7 @@ module LLDB
     attach_function :lldb_target_get_num_modules, [:pointer], :uint32
     attach_function :lldb_target_get_module_at_index, %i[pointer uint32], :pointer
     attach_function :lldb_target_evaluate_expression, %i[pointer string], :pointer
+    attach_function :lldb_target_evaluate_expression_with_options, %i[pointer string pointer], :pointer
     attach_function :lldb_target_read_memory, %i[pointer uint64 pointer size_t pointer], :size_t
     attach_function :lldb_target_get_address_byte_size, [:pointer], :uint32
     attach_function :lldb_target_get_triple, [:pointer], :string
@@ -213,10 +216,65 @@ module LLDB
     # =========================================================================
     attach_function :lldb_launch_info_create, [:pointer], :pointer
     attach_function :lldb_launch_info_destroy, [:pointer], :void
+    attach_function :lldb_launch_info_get_num_arguments, [:pointer], :uint32
+    attach_function :lldb_launch_info_get_argument_at_index, %i[pointer uint32], :string
     attach_function :lldb_launch_info_set_working_directory, %i[pointer string], :void
+    attach_function :lldb_launch_info_get_working_directory, [:pointer], :string
     attach_function :lldb_launch_info_set_environment_entries, %i[pointer pointer int], :void
+    attach_function :lldb_launch_info_get_num_environment_entries, [:pointer], :uint32
+    attach_function :lldb_launch_info_get_environment_entry_at_index, %i[pointer uint32], :string
     attach_function :lldb_launch_info_get_launch_flags, [:pointer], :uint32
     attach_function :lldb_launch_info_set_launch_flags, %i[pointer uint32], :void
+    attach_function :lldb_launch_info_set_arguments, %i[pointer pointer int], :void
+    attach_function :lldb_launch_info_get_executable_file, [:pointer], :pointer
+    attach_function :lldb_launch_info_set_executable_file, %i[pointer pointer int], :void
+    attach_function :lldb_launch_info_get_listener, [:pointer], :pointer
+    attach_function :lldb_launch_info_set_listener, %i[pointer pointer], :void
+    attach_function :lldb_launch_info_get_process_plugin_name, [:pointer], :string
+    attach_function :lldb_launch_info_set_process_plugin_name, %i[pointer string], :void
+    attach_function :lldb_launch_info_get_shell, [:pointer], :string
+    attach_function :lldb_launch_info_set_shell, %i[pointer string], :void
+    attach_function :lldb_launch_info_add_close_file_action, %i[pointer int], :int
+    attach_function :lldb_launch_info_add_duplicate_file_action, %i[pointer int int], :int
+    attach_function :lldb_launch_info_add_open_file_action, %i[pointer int string int int], :int
+    attach_function :lldb_launch_info_add_suppress_file_action, %i[pointer int int int], :int
+
+    # SBAttachInfo
+    attach_function :lldb_attach_info_create, [:uint64], :pointer
+    attach_function :lldb_attach_info_destroy, [:pointer], :void
+    attach_function :lldb_attach_info_get_process_id, [:pointer], :uint64
+    attach_function :lldb_attach_info_set_process_id, %i[pointer uint64], :void
+    attach_function :lldb_attach_info_set_executable, %i[pointer string], :void
+    attach_function :lldb_attach_info_set_executable_file, %i[pointer pointer], :void
+    attach_function :lldb_attach_info_get_wait_for_launch, [:pointer], :int
+    attach_function :lldb_attach_info_set_wait_for_launch, %i[pointer int], :void
+    attach_function :lldb_attach_info_get_ignore_existing, [:pointer], :int
+    attach_function :lldb_attach_info_set_ignore_existing, %i[pointer int], :void
+    attach_function :lldb_attach_info_get_resume_count, [:pointer], :uint32
+    attach_function :lldb_attach_info_set_resume_count, %i[pointer uint32], :void
+    attach_function :lldb_attach_info_get_process_plugin_name, [:pointer], :string
+    attach_function :lldb_attach_info_set_process_plugin_name, %i[pointer string], :void
+    attach_function :lldb_attach_info_get_listener, [:pointer], :pointer
+    attach_function :lldb_attach_info_set_listener, %i[pointer pointer], :void
+
+    # SBExpressionOptions
+    attach_function :lldb_expression_options_create, [], :pointer
+    attach_function :lldb_expression_options_destroy, [:pointer], :void
+    attach_function :lldb_expression_options_get_timeout, [:pointer], :uint32
+    attach_function :lldb_expression_options_set_timeout, %i[pointer uint32], :void
+    attach_function :lldb_expression_options_get_unwind_on_error, [:pointer], :int
+    attach_function :lldb_expression_options_set_unwind_on_error, %i[pointer int], :void
+    attach_function :lldb_expression_options_get_ignore_breakpoints, [:pointer], :int
+    attach_function :lldb_expression_options_set_ignore_breakpoints, %i[pointer int], :void
+    attach_function :lldb_expression_options_get_fetch_dynamic_value, [:pointer], :int
+    attach_function :lldb_expression_options_set_fetch_dynamic_value, %i[pointer int], :void
+    attach_function :lldb_expression_options_get_try_all_threads, [:pointer], :int
+    attach_function :lldb_expression_options_set_try_all_threads, %i[pointer int], :void
+    attach_function :lldb_expression_options_get_stop_others, [:pointer], :int
+    attach_function :lldb_expression_options_set_stop_others, %i[pointer int], :void
+    attach_function :lldb_expression_options_set_language, %i[pointer int], :void
+    attach_function :lldb_expression_options_get_suppress_persistent_result, [:pointer], :int
+    attach_function :lldb_expression_options_set_suppress_persistent_result, %i[pointer int], :void
 
     # =========================================================================
     # SBFileSpec
@@ -324,6 +382,7 @@ module LLDB
     attach_function :lldb_frame_get_fp, [:pointer], :uint64
     attach_function :lldb_frame_find_variable, %i[pointer string], :pointer
     attach_function :lldb_frame_evaluate_expression, %i[pointer string], :pointer
+    attach_function :lldb_frame_evaluate_expression_with_options, %i[pointer string pointer], :pointer
     attach_function :lldb_frame_get_value_for_variable_path, %i[pointer string], :pointer
     attach_function :lldb_frame_get_frame_id, [:pointer], :uint32
     attach_function :lldb_frame_get_thread, [:pointer], :pointer

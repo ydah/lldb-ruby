@@ -61,6 +61,17 @@ RSpec.describe LLDB::Frame do
       expect(result).to be_a(LLDB::Value)
       expect(result).to be_valid
     end
+
+    it 'passes ExpressionOptions to LLDB' do
+      options = LLDB::ExpressionOptions.new(context: frame.context)
+      options.ignore_breakpoints = true
+
+      result = frame.evaluate_expression('a + b', options: options)
+      expect(result).to be_a(LLDB::Value)
+      expect(result).to be_valid
+    ensure
+      options&.close
+    end
   end
 
   describe '#location' do

@@ -31,6 +31,8 @@ typedef void* lldb_file_spec_t;
 typedef void* lldb_broadcaster_t;
 typedef void* lldb_listener_t;
 typedef void* lldb_event_t;
+typedef void* lldb_attach_info_t;
+typedef void* lldb_expression_options_t;
 
 typedef enum {
     LLDB_RUBY_STATUS_OK = 0,
@@ -60,6 +62,7 @@ void lldb_terminate(void);
 
 // SBDebugger
 lldb_debugger_t lldb_debugger_create(void);
+lldb_debugger_t lldb_debugger_create_with_source_init_files(int source_init_files);
 void lldb_debugger_destroy(lldb_debugger_t dbg);
 int lldb_debugger_is_valid(lldb_debugger_t dbg);
 lldb_target_t lldb_debugger_create_target(lldb_debugger_t dbg,
@@ -147,6 +150,9 @@ lldb_process_t lldb_target_attach_to_process_with_name(lldb_target_t target,
                                                         const char* name,
                                                         int wait_for,
                                                         lldb_error_t error);
+lldb_process_t lldb_target_attach_with_info(lldb_target_t target,
+                                             lldb_attach_info_t attach_info,
+                                             lldb_error_t error);
 lldb_breakpoint_t lldb_target_breakpoint_create_by_name(lldb_target_t target,
                                                          const char* symbol_name,
                                                          const char* module_name);
@@ -174,6 +180,9 @@ lldb_file_spec_t lldb_target_get_executable_file(lldb_target_t target);
 uint32_t lldb_target_get_num_modules(lldb_target_t target);
 lldb_module_t lldb_target_get_module_at_index(lldb_target_t target, uint32_t index);
 lldb_value_t lldb_target_evaluate_expression(lldb_target_t target, const char* expr);
+lldb_value_t lldb_target_evaluate_expression_with_options(lldb_target_t target,
+                                                          const char* expr,
+                                                          lldb_expression_options_t options);
 size_t lldb_target_read_memory(lldb_target_t target, uint64_t addr, void* buf, size_t size, lldb_error_t error);
 uint32_t lldb_target_get_address_byte_size(lldb_target_t target);
 const char* lldb_target_get_triple(lldb_target_t target);
@@ -187,12 +196,77 @@ lldb_watchpoint_t lldb_target_get_watchpoint_at_index(lldb_target_t target, uint
 // SBLaunchInfo
 lldb_launch_info_t lldb_launch_info_create(const char** argv);
 void lldb_launch_info_destroy(lldb_launch_info_t info);
+uint32_t lldb_launch_info_get_num_arguments(lldb_launch_info_t info);
+const char* lldb_launch_info_get_argument_at_index(lldb_launch_info_t info, uint32_t index);
 void lldb_launch_info_set_working_directory(lldb_launch_info_t info, const char* dir);
+const char* lldb_launch_info_get_working_directory(lldb_launch_info_t info);
 void lldb_launch_info_set_environment_entries(lldb_launch_info_t info,
                                                const char** envp,
                                                int append);
+uint32_t lldb_launch_info_get_num_environment_entries(lldb_launch_info_t info);
+const char* lldb_launch_info_get_environment_entry_at_index(lldb_launch_info_t info,
+                                                             uint32_t index);
 uint32_t lldb_launch_info_get_launch_flags(lldb_launch_info_t info);
 void lldb_launch_info_set_launch_flags(lldb_launch_info_t info, uint32_t flags);
+void lldb_launch_info_set_arguments(lldb_launch_info_t info, const char** argv, int append);
+lldb_file_spec_t lldb_launch_info_get_executable_file(lldb_launch_info_t info);
+void lldb_launch_info_set_executable_file(lldb_launch_info_t info,
+                                           lldb_file_spec_t file_spec,
+                                           int add_as_first_arg);
+lldb_listener_t lldb_launch_info_get_listener(lldb_launch_info_t info);
+void lldb_launch_info_set_listener(lldb_launch_info_t info, lldb_listener_t listener);
+const char* lldb_launch_info_get_process_plugin_name(lldb_launch_info_t info);
+void lldb_launch_info_set_process_plugin_name(lldb_launch_info_t info, const char* name);
+const char* lldb_launch_info_get_shell(lldb_launch_info_t info);
+void lldb_launch_info_set_shell(lldb_launch_info_t info, const char* path);
+int lldb_launch_info_add_close_file_action(lldb_launch_info_t info, int fd);
+int lldb_launch_info_add_duplicate_file_action(lldb_launch_info_t info, int fd, int dup_fd);
+int lldb_launch_info_add_open_file_action(lldb_launch_info_t info,
+                                          int fd,
+                                          const char* path,
+                                          int read,
+                                          int write);
+int lldb_launch_info_add_suppress_file_action(lldb_launch_info_t info,
+                                              int fd,
+                                              int read,
+                                              int write);
+
+// SBAttachInfo
+lldb_attach_info_t lldb_attach_info_create(uint64_t pid);
+void lldb_attach_info_destroy(lldb_attach_info_t info);
+uint64_t lldb_attach_info_get_process_id(lldb_attach_info_t info);
+void lldb_attach_info_set_process_id(lldb_attach_info_t info, uint64_t pid);
+void lldb_attach_info_set_executable(lldb_attach_info_t info, const char* path);
+void lldb_attach_info_set_executable_file(lldb_attach_info_t info, lldb_file_spec_t file_spec);
+int lldb_attach_info_get_wait_for_launch(lldb_attach_info_t info);
+void lldb_attach_info_set_wait_for_launch(lldb_attach_info_t info, int wait_for);
+int lldb_attach_info_get_ignore_existing(lldb_attach_info_t info);
+void lldb_attach_info_set_ignore_existing(lldb_attach_info_t info, int ignore_existing);
+uint32_t lldb_attach_info_get_resume_count(lldb_attach_info_t info);
+void lldb_attach_info_set_resume_count(lldb_attach_info_t info, uint32_t count);
+const char* lldb_attach_info_get_process_plugin_name(lldb_attach_info_t info);
+void lldb_attach_info_set_process_plugin_name(lldb_attach_info_t info, const char* name);
+lldb_listener_t lldb_attach_info_get_listener(lldb_attach_info_t info);
+void lldb_attach_info_set_listener(lldb_attach_info_t info, lldb_listener_t listener);
+
+// SBExpressionOptions
+lldb_expression_options_t lldb_expression_options_create(void);
+void lldb_expression_options_destroy(lldb_expression_options_t options);
+uint32_t lldb_expression_options_get_timeout(lldb_expression_options_t options);
+void lldb_expression_options_set_timeout(lldb_expression_options_t options, uint32_t timeout);
+int lldb_expression_options_get_unwind_on_error(lldb_expression_options_t options);
+void lldb_expression_options_set_unwind_on_error(lldb_expression_options_t options, int value);
+int lldb_expression_options_get_ignore_breakpoints(lldb_expression_options_t options);
+void lldb_expression_options_set_ignore_breakpoints(lldb_expression_options_t options, int value);
+int lldb_expression_options_get_fetch_dynamic_value(lldb_expression_options_t options);
+void lldb_expression_options_set_fetch_dynamic_value(lldb_expression_options_t options, int value);
+int lldb_expression_options_get_try_all_threads(lldb_expression_options_t options);
+void lldb_expression_options_set_try_all_threads(lldb_expression_options_t options, int value);
+int lldb_expression_options_get_stop_others(lldb_expression_options_t options);
+void lldb_expression_options_set_stop_others(lldb_expression_options_t options, int value);
+void lldb_expression_options_set_language(lldb_expression_options_t options, int value);
+int lldb_expression_options_get_suppress_persistent_result(lldb_expression_options_t options);
+void lldb_expression_options_set_suppress_persistent_result(lldb_expression_options_t options, int value);
 
 // SBFileSpec
 lldb_file_spec_t lldb_file_spec_create(const char* path, int resolve);
@@ -300,6 +374,9 @@ uint64_t lldb_frame_get_sp(lldb_frame_t frame);
 uint64_t lldb_frame_get_fp(lldb_frame_t frame);
 lldb_value_t lldb_frame_find_variable(lldb_frame_t frame, const char* name);
 lldb_value_t lldb_frame_evaluate_expression(lldb_frame_t frame, const char* expr);
+lldb_value_t lldb_frame_evaluate_expression_with_options(lldb_frame_t frame,
+                                                         const char* expr,
+                                                         lldb_expression_options_t options);
 lldb_value_t lldb_frame_get_value_for_variable_path(lldb_frame_t frame, const char* path);
 uint32_t lldb_frame_get_frame_id(lldb_frame_t frame);
 lldb_thread_t lldb_frame_get_thread(lldb_frame_t frame);

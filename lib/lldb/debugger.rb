@@ -7,9 +7,9 @@ module LLDB
     prepend NativeLifecycle
 
     # @rbs return: Debugger
-    def self.create
+    def self.create(source_init_files: false)
       LLDB.ensure_initialized!
-      ptr = FFIBindings.lldb_debugger_create
+      ptr = FFIBindings.lldb_debugger_create_with_source_init_files(source_init_files ? 1 : 0)
       raise LLDBError, 'Failed to create debugger' if ptr.null?
 
       new(ptr, context: Context.new).tap { |debugger| LLDB.register_debugger(debugger) }
