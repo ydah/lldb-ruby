@@ -3,6 +3,8 @@
 # rbs_inline: enabled
 
 module LLDB
+  INVALID_LINE_NUMBER = 0xFFFFFFFF # : Integer
+
   module NativeStatus
     OK = 0 # : Integer
     INVALID_ARGUMENT = 1 # : Integer
@@ -215,6 +217,15 @@ module LLDB
     POSIX = 3 # : Integer
     EXPRESSION = 4 # : Integer
     WIN32 = 5 # : Integer
+
+    NAMES = { # : Hash[Integer, String]
+      INVALID => 'invalid',
+      GENERIC => 'generic',
+      MACH_KERNEL => 'mach kernel',
+      POSIX => 'POSIX',
+      EXPRESSION => 'expression',
+      WIN32 => 'Win32'
+    }.freeze
   end
 
   module ReturnStatus

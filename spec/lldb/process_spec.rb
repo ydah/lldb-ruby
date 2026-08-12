@@ -166,10 +166,30 @@ RSpec.describe LLDB::Process do
 
       if process.running?
         result = process.send_async_interrupt
-        expect(result).to be true
+        expect(result).to be_nil
       end
 
       process.kill
+    end
+  end
+
+  describe 'operation errors' do
+    before do
+      debugger.async = false
+      target.breakpoint_create_by_name('main')
+    end
+
+    it 'preserves the native error and operation name' do
+      process = target.launch
+      process.kill
+
+      expect { process.continue }.to raise_error(LLDB::OperationError) { |error|
+        expect(error.operation).to eq('process.continue')
+        expect(error.error).to be_a(LLDB::Error)
+        expect(error.error).to be_fail
+        expect(error.code).to eq(error.error.code)
+        expect(error.error_type).to eq(error.error.type)
+      }
     end
   end
 end

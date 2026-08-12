@@ -55,10 +55,15 @@ RSpec.describe LLDB::Error do
       expect { error.raise_if_error! }.not_to raise_error
     end
 
-    it 'raises LLDBError for failure' do
+    it 'raises OperationError for failure' do
       error = LLDB::Error.new
       error.set_error('Test error')
-      expect { error.raise_if_error! }.to raise_error(LLDB::LLDBError, 'Test error')
+      exception = nil
+      expect { error.raise_if_error!('test.operation') }.to raise_error(LLDB::OperationError) { |raised|
+        exception = raised
+      }
+      expect(exception.operation).to eq('test.operation')
+      expect(exception.error).to equal(error)
     end
   end
 end

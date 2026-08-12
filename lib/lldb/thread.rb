@@ -27,37 +27,59 @@ module LLDB
       !@ptr.null? && FFIBindings.lldb_thread_is_valid(@ptr) != 0
     end
 
-    # @rbs return: bool
-    def step_over
+    # @rbs run_mode: Integer
+    # @rbs return: true
+    def step_over(run_mode: RunMode::ONLY_DURING_STEPPING)
       raise InvalidObjectError, 'Thread is not valid' unless valid?
       APISupport.require_method!(:lldb_thread_step_over, 'step_over')
 
-      FFIBindings.lldb_thread_step_over(@ptr) != 0
+      error = Error.new
+      status = FFIBindings.lldb_thread_step_over(@ptr, run_mode, error.to_ptr)
+      Native.check_status!(status, 'thread.step_over', error)
+      true
     end
 
-    # @rbs return: bool
-    def step_into
+    # @rbs target_name: String?
+    # @rbs end_line: Integer
+    # @rbs run_mode: Integer
+    # @rbs return: true
+    def step_into(target_name: nil, end_line: INVALID_LINE_NUMBER, run_mode: RunMode::ONLY_DURING_STEPPING)
       raise InvalidObjectError, 'Thread is not valid' unless valid?
       APISupport.require_method!(:lldb_thread_step_into, 'step_into')
 
-      FFIBindings.lldb_thread_step_into(@ptr) != 0
+      error = Error.new
+      status = FFIBindings.lldb_thread_step_into(
+        @ptr,
+        target_name,
+        end_line,
+        run_mode,
+        error.to_ptr
+      )
+      Native.check_status!(status, 'thread.step_into', error)
+      true
     end
 
-    # @rbs return: bool
+    # @rbs return: true
     def step_out
       raise InvalidObjectError, 'Thread is not valid' unless valid?
       APISupport.require_method!(:lldb_thread_step_out, 'step_out')
 
-      FFIBindings.lldb_thread_step_out(@ptr) != 0
+      error = Error.new
+      status = FFIBindings.lldb_thread_step_out(@ptr, error.to_ptr)
+      Native.check_status!(status, 'thread.step_out', error)
+      true
     end
 
     # @rbs step_over: bool
-    # @rbs return: bool
+    # @rbs return: true
     def step_instruction(step_over: false)
       raise InvalidObjectError, 'Thread is not valid' unless valid?
       APISupport.require_method!(:lldb_thread_step_instruction, 'step_instruction')
 
-      FFIBindings.lldb_thread_step_instruction(@ptr, step_over ? 1 : 0) != 0
+      error = Error.new
+      status = FFIBindings.lldb_thread_step_instruction(@ptr, step_over ? 1 : 0, error.to_ptr)
+      Native.check_status!(status, 'thread.step_instruction', error)
+      true
     end
 
     # @rbs return: Integer
@@ -159,7 +181,10 @@ module LLDB
     def run_to_address(address)
       raise InvalidObjectError, 'Thread is not valid' unless valid?
 
-      FFIBindings.lldb_thread_run_to_address(@ptr, address) != 0
+      error = Error.new
+      status = FFIBindings.lldb_thread_run_to_address(@ptr, address, error.to_ptr)
+      Native.check_status!(status, 'thread.run_to_address', error)
+      true
     end
 
     # @rbs return: Integer

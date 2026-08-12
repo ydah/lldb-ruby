@@ -27,32 +27,34 @@ module LLDB
       !@ptr.null? && FFIBindings.lldb_process_is_valid(@ptr) != 0
     end
 
-    # @rbs return: bool
+    # @rbs return: true
     def continue
       raise InvalidObjectError, 'Process is not valid' unless valid?
 
-      FFIBindings.lldb_process_continue(@ptr) != 0
+      native_operation('process.continue') do |error|
+        FFIBindings.lldb_process_continue(@ptr, error.to_ptr)
+      end
     end
 
-    # @rbs return: bool
+    # @rbs return: true
     def stop
       raise InvalidObjectError, 'Process is not valid' unless valid?
 
-      FFIBindings.lldb_process_stop(@ptr) != 0
+      native_operation('process.stop') { |error| FFIBindings.lldb_process_stop(@ptr, error.to_ptr) }
     end
 
-    # @rbs return: bool
+    # @rbs return: true
     def kill
       raise InvalidObjectError, 'Process is not valid' unless valid?
 
-      FFIBindings.lldb_process_kill(@ptr) != 0
+      native_operation('process.kill') { |error| FFIBindings.lldb_process_kill(@ptr, error.to_ptr) }
     end
 
-    # @rbs return: bool
+    # @rbs return: true
     def detach
       raise InvalidObjectError, 'Process is not valid' unless valid?
 
-      FFIBindings.lldb_process_detach(@ptr) != 0
+      native_operation('process.detach') { |error| FFIBindings.lldb_process_detach(@ptr, error.to_ptr) }
     end
 
     # @rbs return: Integer
@@ -151,19 +153,23 @@ module LLDB
       FFIBindings.lldb_process_get_exit_description(@ptr)
     end
 
-    # @rbs return: bool
+    # @rbs return: true
     def destroy
       raise InvalidObjectError, 'Process is not valid' unless valid?
 
-      FFIBindings.lldb_process_destroy_process(@ptr) != 0
+      native_operation('process.destroy') do |error|
+        FFIBindings.lldb_process_destroy_process(@ptr, error.to_ptr)
+      end
     end
 
     # @rbs signal: Integer
-    # @rbs return: bool
+    # @rbs return: true
     def signal(signal)
       raise InvalidObjectError, 'Process is not valid' unless valid?
 
-      FFIBindings.lldb_process_signal(@ptr, signal) != 0
+      native_operation('process.signal') do |error|
+        FFIBindings.lldb_process_signal(@ptr, signal, error.to_ptr)
+      end
     end
 
     # @rbs thread_id: Integer
@@ -208,7 +214,7 @@ module LLDB
       error = Error.new
       bytes_read = FFIBindings.lldb_process_read_memory(@ptr, address, buffer, size, error.to_ptr)
 
-      error.raise_if_error!
+      error.raise_if_error!('process.read_memory')
       buffer.get_bytes(0, bytes_read)
     end
 
@@ -224,7 +230,7 @@ module LLDB
       error = Error.new
       bytes_written = FFIBindings.lldb_process_write_memory(@ptr, address, buffer, data.bytesize, error.to_ptr)
 
-      error.raise_if_error!
+      error.raise_if_error!('process.write_memory')
       bytes_written
     end
 
@@ -237,16 +243,18 @@ module LLDB
       error = Error.new
       address = FFIBindings.lldb_process_allocate_memory(@ptr, size, permissions, error.to_ptr)
 
-      error.raise_if_error!
+      error.raise_if_error!('process.allocate_memory')
       address
     end
 
     # @rbs address: Integer
-    # @rbs return: bool
+    # @rbs return: true
     def deallocate_memory(address)
       raise InvalidObjectError, 'Process is not valid' unless valid?
 
-      FFIBindings.lldb_process_deallocate_memory(@ptr, address) != 0
+      native_operation('process.deallocate_memory') do |error|
+        FFIBindings.lldb_process_deallocate_memory(@ptr, address, error.to_ptr)
+      end
     end
 
     # @rbs address: Integer
@@ -266,7 +274,7 @@ module LLDB
         error.to_ptr
       )
 
-      error.raise_if_error!
+      error.raise_if_error!('process.read_cstring_from_memory')
       bytes = buffer.get_bytes(0, [bytes_read, max_size].min)
       bytes.delete_suffix("\0")
     end
@@ -301,19 +309,27 @@ module LLDB
       FFIBindings.lldb_process_put_stdin(@ptr, buffer, data.bytesize)
     end
 
-    # @rbs return: bool
+    # @rbs return: nil
     def send_async_interrupt
       raise InvalidObjectError, 'Process is not valid' unless valid?
 
-      FFIBindings.lldb_process_send_async_interrupt(@ptr) != 0
+      FFIBindings.lldb_process_send_async_interrupt(@ptr)
+      nil
     end
 
     # @rbs return: Integer
     def num_supported_hardware_watchpoints
       return 0 unless valid?
 
+      result = FFI::MemoryPointer.new(:uint32)
       error = Error.new
-      FFIBindings.lldb_process_get_num_supported_hardware_watchpoints(@ptr, error.to_ptr)
+      status = FFIBindings.lldb_process_get_num_supported_hardware_watchpoints(
+        @ptr,
+        result,
+        error.to_ptr
+      )
+      Native.check_status!(status, 'process.num_supported_hardware_watchpoints', error)
+      result.read_uint32
     end
 
     # @rbs return: Integer
@@ -335,7 +351,7 @@ module LLDB
       error = Error.new
       info_ptr = FFIBindings.lldb_process_get_memory_region_info(@ptr, address, error.to_ptr)
 
-      error.raise_if_error!
+      error.raise_if_error!('process.get_memory_region_info')
       return nil if info_ptr.nil? || info_ptr.null?
 
       MemoryRegionInfo.new(info_ptr)
@@ -344,6 +360,17 @@ module LLDB
     # @rbs return: FFI::Pointer
     def to_ptr
       @ptr
+    end
+
+    private
+
+    # @rbs operation: String
+    # @rbs &block: (Error) -> Integer
+    # @rbs return: true
+    def native_operation(operation, &block)
+      error = Error.new
+      Native.check_status!(yield(error), operation, error)
+      true
     end
   end
 end

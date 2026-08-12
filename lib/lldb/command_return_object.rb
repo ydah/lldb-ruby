@@ -44,11 +44,26 @@ module LLDB
       FFIBindings.lldb_command_return_object_get_error(@ptr)
     end
 
+    # @rbs return: Integer
+    # @rbs return: Integer
+    def status
+      return ReturnStatus::INVALID unless valid?
+
+      FFIBindings.lldb_command_return_object_get_status(@ptr)
+    end
+
     # @rbs return: bool
     def succeeded?
       return false unless valid?
 
       FFIBindings.lldb_command_return_object_succeeded(@ptr) != 0
+    end
+
+    # @rbs return: bool
+    def has_result?
+      return false unless valid?
+
+      FFIBindings.lldb_command_return_object_has_result(@ptr) != 0
     end
 
     # @rbs return: void

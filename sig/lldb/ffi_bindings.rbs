@@ -17,9 +17,12 @@ module LLDB
     def self.lldb_wrapper_build_lldb_version: () -> String
     def self.lldb_wrapper_runtime_lldb_version: () -> String
     def self.lldb_wrapper_has_capability: (Integer) -> Integer
+    def self.lldb_wrapper_last_error_message: () -> String?
+    def self.lldb_wrapper_last_error_code: () -> Integer
+    def self.lldb_wrapper_clear_last_error: () -> void
 
     # Initialization
-    def self.lldb_initialize: () -> void
+    def self.lldb_initialize: (FFI::Pointer) -> Integer
     def self.lldb_terminate: () -> void
 
     # SBDebugger
@@ -85,12 +88,12 @@ module LLDB
     # SBProcess
     def self.lldb_process_destroy: (FFI::Pointer) -> void
     def self.lldb_process_is_valid: (FFI::Pointer) -> Integer
-    def self.lldb_process_continue: (FFI::Pointer) -> Integer
-    def self.lldb_process_stop: (FFI::Pointer) -> Integer
-    def self.lldb_process_kill: (FFI::Pointer) -> Integer
-    def self.lldb_process_detach: (FFI::Pointer) -> Integer
-    def self.lldb_process_destroy_process: (FFI::Pointer) -> Integer
-    def self.lldb_process_signal: (FFI::Pointer, Integer) -> Integer
+    def self.lldb_process_continue: (FFI::Pointer, FFI::Pointer) -> Integer
+    def self.lldb_process_stop: (FFI::Pointer, FFI::Pointer) -> Integer
+    def self.lldb_process_kill: (FFI::Pointer, FFI::Pointer) -> Integer
+    def self.lldb_process_detach: (FFI::Pointer, FFI::Pointer) -> Integer
+    def self.lldb_process_destroy_process: (FFI::Pointer, FFI::Pointer) -> Integer
+    def self.lldb_process_signal: (FFI::Pointer, Integer, FFI::Pointer) -> Integer
     def self.lldb_process_get_state: (FFI::Pointer) -> Integer
     def self.lldb_process_get_num_threads: (FFI::Pointer) -> Integer
     def self.lldb_process_get_thread_at_index: (FFI::Pointer, Integer) -> FFI::Pointer
@@ -105,13 +108,13 @@ module LLDB
     def self.lldb_process_read_memory: (FFI::Pointer, Integer, FFI::Pointer, Integer, FFI::Pointer) -> Integer
     def self.lldb_process_write_memory: (FFI::Pointer, Integer, FFI::Pointer, Integer, FFI::Pointer) -> Integer
     def self.lldb_process_allocate_memory: (FFI::Pointer, Integer, Integer, FFI::Pointer) -> Integer
-    def self.lldb_process_deallocate_memory: (FFI::Pointer, Integer) -> Integer
+    def self.lldb_process_deallocate_memory: (FFI::Pointer, Integer, FFI::Pointer) -> Integer
     def self.lldb_process_read_cstring_from_memory: (FFI::Pointer, Integer, FFI::Pointer, Integer, FFI::Pointer) -> Integer
     def self.lldb_process_get_stdout: (FFI::Pointer, FFI::Pointer, Integer) -> Integer
     def self.lldb_process_get_stderr: (FFI::Pointer, FFI::Pointer, Integer) -> Integer
     def self.lldb_process_put_stdin: (FFI::Pointer, FFI::Pointer, Integer) -> Integer
-    def self.lldb_process_send_async_interrupt: (FFI::Pointer) -> Integer
-    def self.lldb_process_get_num_supported_hardware_watchpoints: (FFI::Pointer, FFI::Pointer) -> Integer
+    def self.lldb_process_send_async_interrupt: (FFI::Pointer) -> void
+    def self.lldb_process_get_num_supported_hardware_watchpoints: (FFI::Pointer, FFI::Pointer, FFI::Pointer) -> Integer
     def self.lldb_process_get_unique_id: (FFI::Pointer) -> Integer
     def self.lldb_process_get_memory_region_info: (FFI::Pointer, Integer, FFI::Pointer) -> FFI::Pointer
 
@@ -128,11 +131,11 @@ module LLDB
     # SBThread
     def self.lldb_thread_destroy: (FFI::Pointer) -> void
     def self.lldb_thread_is_valid: (FFI::Pointer) -> Integer
-    def self.lldb_thread_step_over: (FFI::Pointer) -> Integer
-    def self.lldb_thread_step_into: (FFI::Pointer) -> Integer
-    def self.lldb_thread_step_out: (FFI::Pointer) -> Integer
-    def self.lldb_thread_step_instruction: (FFI::Pointer, Integer) -> Integer
-    def self.lldb_thread_run_to_address: (FFI::Pointer, Integer) -> Integer
+    def self.lldb_thread_step_over: (FFI::Pointer, Integer, FFI::Pointer) -> Integer
+    def self.lldb_thread_step_into: (FFI::Pointer, String?, Integer, Integer, FFI::Pointer) -> Integer
+    def self.lldb_thread_step_out: (FFI::Pointer, FFI::Pointer) -> Integer
+    def self.lldb_thread_step_instruction: (FFI::Pointer, Integer, FFI::Pointer) -> Integer
+    def self.lldb_thread_run_to_address: (FFI::Pointer, Integer, FFI::Pointer) -> Integer
     def self.lldb_thread_get_num_frames: (FFI::Pointer) -> Integer
     def self.lldb_thread_get_frame_at_index: (FFI::Pointer, Integer) -> FFI::Pointer
     def self.lldb_thread_get_selected_frame: (FFI::Pointer) -> FFI::Pointer
@@ -226,8 +229,8 @@ module LLDB
     def self.lldb_value_get_num_children: (FFI::Pointer) -> Integer
     def self.lldb_value_get_child_at_index: (FFI::Pointer, Integer) -> FFI::Pointer
     def self.lldb_value_get_child_member_with_name: (FFI::Pointer, String) -> FFI::Pointer
-    def self.lldb_value_get_value_as_signed: (FFI::Pointer) -> Integer
-    def self.lldb_value_get_value_as_unsigned: (FFI::Pointer) -> Integer
+    def self.lldb_value_get_value_as_signed: (FFI::Pointer, FFI::Pointer, Integer) -> Integer
+    def self.lldb_value_get_value_as_unsigned: (FFI::Pointer, FFI::Pointer, Integer) -> Integer
     def self.lldb_value_get_byte_size: (FFI::Pointer) -> Integer
     def self.lldb_value_might_have_children: (FFI::Pointer) -> Integer
     def self.lldb_value_get_error: (FFI::Pointer, FFI::Pointer) -> Integer
@@ -259,6 +262,7 @@ module LLDB
     def self.lldb_error_fail: (FFI::Pointer) -> Integer
     def self.lldb_error_get_cstring: (FFI::Pointer) -> String?
     def self.lldb_error_get_error: (FFI::Pointer) -> Integer
+    def self.lldb_error_get_type: (FFI::Pointer) -> Integer
     def self.lldb_error_clear: (FFI::Pointer) -> void
     def self.lldb_error_set_error_string: (FFI::Pointer, String) -> void
 
@@ -330,7 +334,9 @@ module LLDB
     def self.lldb_command_return_object_is_valid: (FFI::Pointer) -> Integer
     def self.lldb_command_return_object_get_output: (FFI::Pointer) -> String?
     def self.lldb_command_return_object_get_error: (FFI::Pointer) -> String?
+    def self.lldb_command_return_object_get_status: (FFI::Pointer) -> Integer
     def self.lldb_command_return_object_succeeded: (FFI::Pointer) -> Integer
+    def self.lldb_command_return_object_has_result: (FFI::Pointer) -> Integer
     def self.lldb_command_return_object_clear: (FFI::Pointer) -> void
   end
 end

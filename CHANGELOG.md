@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Preserve LLDB operation status, error type, and operation context.
+- Report native wrapper exceptions as `InternalBindingError`.
+- Expose thread step modes and command return statuses.
+- Return `nil` from `Process#send_async_interrupt`.
 - Add LLDB discovery and compile/link validation for Linux and macOS builds.
 - Expose wrapper ABI and LLDB version metadata with capability-based watchpoint access checks.
 

@@ -103,11 +103,14 @@ module LLDB
     attach_function :lldb_wrapper_build_lldb_version, [], :string
     attach_function :lldb_wrapper_runtime_lldb_version, [], :string
     attach_function :lldb_wrapper_has_capability, [:uint32], :int
+    attach_function :lldb_wrapper_last_error_message, [], :string
+    attach_function :lldb_wrapper_last_error_code, [], :int
+    attach_function :lldb_wrapper_clear_last_error, [], :void
 
     # =========================================================================
     # Initialization
     # =========================================================================
-    attach_function :lldb_initialize, [], :void
+    attach_function :lldb_initialize, [:pointer], :int
     attach_function :lldb_terminate, [], :void
 
     # =========================================================================
@@ -181,12 +184,12 @@ module LLDB
     # =========================================================================
     attach_function :lldb_process_destroy, [:pointer], :void
     attach_function :lldb_process_is_valid, [:pointer], :int
-    attach_function :lldb_process_continue, [:pointer], :int
-    attach_function :lldb_process_stop, [:pointer], :int
-    attach_function :lldb_process_kill, [:pointer], :int
-    attach_function :lldb_process_detach, [:pointer], :int
-    attach_function :lldb_process_destroy_process, [:pointer], :int
-    attach_function :lldb_process_signal, %i[pointer int], :int
+    attach_function :lldb_process_continue, %i[pointer pointer], :int
+    attach_function :lldb_process_stop, %i[pointer pointer], :int
+    attach_function :lldb_process_kill, %i[pointer pointer], :int
+    attach_function :lldb_process_detach, %i[pointer pointer], :int
+    attach_function :lldb_process_destroy_process, %i[pointer pointer], :int
+    attach_function :lldb_process_signal, %i[pointer int pointer], :int
     attach_function :lldb_process_get_state, [:pointer], :int
     attach_function :lldb_process_get_num_threads, [:pointer], :uint32
     attach_function :lldb_process_get_thread_at_index, %i[pointer uint32], :pointer
@@ -201,13 +204,13 @@ module LLDB
     attach_function :lldb_process_read_memory, %i[pointer uint64 pointer size_t pointer], :size_t
     attach_function :lldb_process_write_memory, %i[pointer uint64 pointer size_t pointer], :size_t
     attach_function :lldb_process_allocate_memory, %i[pointer size_t uint32 pointer], :uint64
-    attach_function :lldb_process_deallocate_memory, %i[pointer uint64], :int
+    attach_function :lldb_process_deallocate_memory, %i[pointer uint64 pointer], :int
     attach_function :lldb_process_read_cstring_from_memory, %i[pointer uint64 pointer size_t pointer], :size_t
     attach_function :lldb_process_get_stdout, %i[pointer pointer size_t], :size_t
     attach_function :lldb_process_get_stderr, %i[pointer pointer size_t], :size_t
     attach_function :lldb_process_put_stdin, %i[pointer pointer size_t], :size_t
-    attach_function :lldb_process_send_async_interrupt, [:pointer], :int
-    attach_function :lldb_process_get_num_supported_hardware_watchpoints, %i[pointer pointer], :uint32
+    attach_function :lldb_process_send_async_interrupt, [:pointer], :void
+    attach_function :lldb_process_get_num_supported_hardware_watchpoints, %i[pointer pointer pointer], :int
     attach_function :lldb_process_get_unique_id, [:pointer], :uint32
     attach_function :lldb_process_get_memory_region_info, %i[pointer uint64 pointer], :pointer
 
@@ -228,11 +231,11 @@ module LLDB
     # =========================================================================
     attach_function :lldb_thread_destroy, [:pointer], :void
     attach_function :lldb_thread_is_valid, [:pointer], :int
-    attach_function :lldb_thread_step_over, [:pointer], :int
-    attach_function :lldb_thread_step_into, [:pointer], :int
-    attach_function :lldb_thread_step_out, [:pointer], :int
-    attach_function :lldb_thread_step_instruction, %i[pointer int], :int
-    attach_function :lldb_thread_run_to_address, %i[pointer uint64], :int
+    attach_function :lldb_thread_step_over, %i[pointer int pointer], :int
+    attach_function :lldb_thread_step_into, %i[pointer string uint32 int pointer], :int
+    attach_function :lldb_thread_step_out, %i[pointer pointer], :int
+    attach_function :lldb_thread_step_instruction, %i[pointer int pointer], :int
+    attach_function :lldb_thread_run_to_address, %i[pointer uint64 pointer], :int
     attach_function :lldb_thread_get_num_frames, [:pointer], :uint32
     attach_function :lldb_thread_get_frame_at_index, %i[pointer uint32], :pointer
     attach_function :lldb_thread_get_selected_frame, [:pointer], :pointer
@@ -334,8 +337,8 @@ module LLDB
     attach_function :lldb_value_get_num_children, [:pointer], :uint32
     attach_function :lldb_value_get_child_at_index, %i[pointer uint32], :pointer
     attach_function :lldb_value_get_child_member_with_name, %i[pointer string], :pointer
-    attach_function :lldb_value_get_value_as_signed, [:pointer], :int64
-    attach_function :lldb_value_get_value_as_unsigned, [:pointer], :uint64
+    attach_function :lldb_value_get_value_as_signed, %i[pointer pointer int64], :int64
+    attach_function :lldb_value_get_value_as_unsigned, %i[pointer pointer uint64], :uint64
     attach_function :lldb_value_get_byte_size, [:pointer], :uint64
     attach_function :lldb_value_might_have_children, [:pointer], :int
     attach_function :lldb_value_get_error, %i[pointer pointer], :int
@@ -371,6 +374,7 @@ module LLDB
     attach_function :lldb_error_fail, [:pointer], :int
     attach_function :lldb_error_get_cstring, [:pointer], :string
     attach_function :lldb_error_get_error, [:pointer], :uint32
+    attach_function :lldb_error_get_type, [:pointer], :int
     attach_function :lldb_error_clear, [:pointer], :void
     attach_function :lldb_error_set_error_string, %i[pointer string], :void
 
@@ -454,7 +458,9 @@ module LLDB
     attach_function :lldb_command_return_object_is_valid, [:pointer], :int
     attach_function :lldb_command_return_object_get_output, [:pointer], :string
     attach_function :lldb_command_return_object_get_error, [:pointer], :string
+    attach_function :lldb_command_return_object_get_status, [:pointer], :int
     attach_function :lldb_command_return_object_succeeded, [:pointer], :int
+    attach_function :lldb_command_return_object_has_result, [:pointer], :int
     attach_function :lldb_command_return_object_clear, [:pointer], :void
   end
 end

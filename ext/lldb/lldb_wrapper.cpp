@@ -4,10 +4,39 @@
 
 #include <string>
 #include <cstring>
+#include <exception>
+#include <new>
 
 // Thread-local storage for temporary strings
 static thread_local std::string g_temp_string;
 static thread_local std::string g_temp_string2;
+static thread_local int g_last_error_code = 0;
+static thread_local char g_last_error_message[1024] = {0};
+
+static void wrapper_clear_error_state() noexcept {
+    g_last_error_code = 0;
+    g_last_error_message[0] = '\0';
+}
+
+static void wrapper_set_error_state(const char* message) noexcept {
+    g_last_error_code = LLDB_RUBY_STATUS_INTERNAL_ERROR;
+    if (!message) message = "unknown native exception";
+    std::strncpy(g_last_error_message, message, sizeof(g_last_error_message) - 1);
+    g_last_error_message[sizeof(g_last_error_message) - 1] = '\0';
+}
+
+static void wrapper_set_invalid_argument(lldb::SBError* error, const char* message) noexcept {
+    if (error) error->SetErrorString(message);
+}
+
+static void wrapper_copy_error(lldb_error_t output, const lldb::SBError& error) {
+    if (output) *static_cast<lldb::SBError*>(output) = error;
+}
+
+static lldb_ruby_status_t wrapper_status(lldb::SBError& error, lldb_error_t output) {
+    wrapper_copy_error(output, error);
+    return error.Success() ? LLDB_RUBY_STATUS_OK : LLDB_RUBY_STATUS_LLDB_ERROR;
+}
 
 extern "C" {
 
@@ -36,12 +65,37 @@ int lldb_wrapper_has_capability(uint32_t capability) {
     }
 }
 
+const char* lldb_wrapper_last_error_message(void) {
+    return g_last_error_message;
+}
+
+int lldb_wrapper_last_error_code(void) {
+    return g_last_error_code;
+}
+
+void lldb_wrapper_clear_last_error(void) {
+    wrapper_clear_error_state();
+}
+
 // ============================================================================
 // Initialization
 // ============================================================================
 
-void lldb_initialize(void) {
-    lldb::SBDebugger::Initialize();
+lldb_ruby_status_t lldb_initialize(lldb_error_t error) {
+    wrapper_clear_error_state();
+    try {
+        lldb::SBError init_error = lldb::SBDebugger::InitializeWithErrorHandling();
+        return wrapper_status(init_error, error);
+    } catch (const std::bad_alloc&) {
+        wrapper_set_error_state("native allocation failed during initialization");
+        return LLDB_RUBY_STATUS_INTERNAL_ERROR;
+    } catch (const std::exception& exception) {
+        wrapper_set_error_state(exception.what());
+        return LLDB_RUBY_STATUS_INTERNAL_ERROR;
+    } catch (...) {
+        wrapper_set_error_state("unknown native exception during initialization");
+        return LLDB_RUBY_STATUS_INTERNAL_ERROR;
+    }
 }
 
 void lldb_terminate(void) {
@@ -582,40 +636,94 @@ int lldb_process_is_valid(lldb_process_t process) {
     return static_cast<lldb::SBProcess*>(process)->IsValid() ? 1 : 0;
 }
 
-int lldb_process_continue(lldb_process_t process) {
-    if (!process) return 0;
-    lldb::SBError error = static_cast<lldb::SBProcess*>(process)->Continue();
-    return error.Success() ? 1 : 0;
+lldb_ruby_status_t lldb_process_continue(lldb_process_t process, lldb_error_t output) {
+    wrapper_clear_error_state();
+    if (!process) return LLDB_RUBY_STATUS_INVALID_HANDLE;
+    try {
+        lldb::SBError error = static_cast<lldb::SBProcess*>(process)->Continue();
+        return wrapper_status(error, output);
+    } catch (const std::exception& exception) {
+        wrapper_set_error_state(exception.what());
+        return LLDB_RUBY_STATUS_INTERNAL_ERROR;
+    } catch (...) {
+        wrapper_set_error_state("unknown native exception in process continue");
+        return LLDB_RUBY_STATUS_INTERNAL_ERROR;
+    }
 }
 
-int lldb_process_stop(lldb_process_t process) {
-    if (!process) return 0;
-    lldb::SBError error = static_cast<lldb::SBProcess*>(process)->Stop();
-    return error.Success() ? 1 : 0;
+lldb_ruby_status_t lldb_process_stop(lldb_process_t process, lldb_error_t output) {
+    wrapper_clear_error_state();
+    if (!process) return LLDB_RUBY_STATUS_INVALID_HANDLE;
+    try {
+        lldb::SBError error = static_cast<lldb::SBProcess*>(process)->Stop();
+        return wrapper_status(error, output);
+    } catch (const std::exception& exception) {
+        wrapper_set_error_state(exception.what());
+        return LLDB_RUBY_STATUS_INTERNAL_ERROR;
+    } catch (...) {
+        wrapper_set_error_state("unknown native exception in process stop");
+        return LLDB_RUBY_STATUS_INTERNAL_ERROR;
+    }
 }
 
-int lldb_process_kill(lldb_process_t process) {
-    if (!process) return 0;
-    lldb::SBError error = static_cast<lldb::SBProcess*>(process)->Kill();
-    return error.Success() ? 1 : 0;
+lldb_ruby_status_t lldb_process_kill(lldb_process_t process, lldb_error_t output) {
+    wrapper_clear_error_state();
+    if (!process) return LLDB_RUBY_STATUS_INVALID_HANDLE;
+    try {
+        lldb::SBError error = static_cast<lldb::SBProcess*>(process)->Kill();
+        return wrapper_status(error, output);
+    } catch (const std::exception& exception) {
+        wrapper_set_error_state(exception.what());
+        return LLDB_RUBY_STATUS_INTERNAL_ERROR;
+    } catch (...) {
+        wrapper_set_error_state("unknown native exception in process kill");
+        return LLDB_RUBY_STATUS_INTERNAL_ERROR;
+    }
 }
 
-int lldb_process_detach(lldb_process_t process) {
-    if (!process) return 0;
-    lldb::SBError error = static_cast<lldb::SBProcess*>(process)->Detach();
-    return error.Success() ? 1 : 0;
+lldb_ruby_status_t lldb_process_detach(lldb_process_t process, lldb_error_t output) {
+    wrapper_clear_error_state();
+    if (!process) return LLDB_RUBY_STATUS_INVALID_HANDLE;
+    try {
+        lldb::SBError error = static_cast<lldb::SBProcess*>(process)->Detach();
+        return wrapper_status(error, output);
+    } catch (const std::exception& exception) {
+        wrapper_set_error_state(exception.what());
+        return LLDB_RUBY_STATUS_INTERNAL_ERROR;
+    } catch (...) {
+        wrapper_set_error_state("unknown native exception in process detach");
+        return LLDB_RUBY_STATUS_INTERNAL_ERROR;
+    }
 }
 
-int lldb_process_destroy_process(lldb_process_t process) {
-    if (!process) return 0;
-    lldb::SBError error = static_cast<lldb::SBProcess*>(process)->Destroy();
-    return error.Success() ? 1 : 0;
+lldb_ruby_status_t lldb_process_destroy_process(lldb_process_t process, lldb_error_t output) {
+    wrapper_clear_error_state();
+    if (!process) return LLDB_RUBY_STATUS_INVALID_HANDLE;
+    try {
+        lldb::SBError error = static_cast<lldb::SBProcess*>(process)->Destroy();
+        return wrapper_status(error, output);
+    } catch (const std::exception& exception) {
+        wrapper_set_error_state(exception.what());
+        return LLDB_RUBY_STATUS_INTERNAL_ERROR;
+    } catch (...) {
+        wrapper_set_error_state("unknown native exception in process destroy");
+        return LLDB_RUBY_STATUS_INTERNAL_ERROR;
+    }
 }
 
-int lldb_process_signal(lldb_process_t process, int signal) {
-    if (!process) return 0;
-    lldb::SBError error = static_cast<lldb::SBProcess*>(process)->Signal(signal);
-    return error.Success() ? 1 : 0;
+lldb_ruby_status_t lldb_process_signal(lldb_process_t process, int signal, lldb_error_t output) {
+    wrapper_clear_error_state();
+    if (!process) return LLDB_RUBY_STATUS_INVALID_HANDLE;
+    try {
+        lldb::SBError error = static_cast<lldb::SBProcess*>(process)->Signal(signal);
+        return wrapper_status(error, output);
+    } catch (const std::exception& exception) {
+        wrapper_set_error_state(exception.what());
+        return LLDB_RUBY_STATUS_INTERNAL_ERROR;
+    } catch (...) {
+        wrapper_set_error_state("unknown native exception in process signal");
+        return LLDB_RUBY_STATUS_INTERNAL_ERROR;
+    }
 }
 
 int lldb_process_get_state(lldb_process_t process) {
@@ -727,10 +835,21 @@ uint64_t lldb_process_allocate_memory(lldb_process_t process, size_t size, uint3
     return p->AllocateMemory(size, permissions, err ? *err : local_error);
 }
 
-int lldb_process_deallocate_memory(lldb_process_t process, uint64_t addr) {
-    if (!process) return 0;
-    lldb::SBError error = static_cast<lldb::SBProcess*>(process)->DeallocateMemory(addr);
-    return error.Success() ? 1 : 0;
+lldb_ruby_status_t lldb_process_deallocate_memory(lldb_process_t process,
+                                                  uint64_t addr,
+                                                  lldb_error_t output) {
+    wrapper_clear_error_state();
+    if (!process) return LLDB_RUBY_STATUS_INVALID_HANDLE;
+    try {
+        lldb::SBError error = static_cast<lldb::SBProcess*>(process)->DeallocateMemory(addr);
+        return wrapper_status(error, output);
+    } catch (const std::exception& exception) {
+        wrapper_set_error_state(exception.what());
+        return LLDB_RUBY_STATUS_INTERNAL_ERROR;
+    } catch (...) {
+        wrapper_set_error_state("unknown native exception in process deallocate");
+        return LLDB_RUBY_STATUS_INTERNAL_ERROR;
+    }
 }
 
 size_t lldb_process_read_cstring_from_memory(lldb_process_t process, uint64_t addr, void* buf, size_t size, lldb_error_t error) {
@@ -758,20 +877,28 @@ size_t lldb_process_put_stdin(lldb_process_t process, const char* buf, size_t si
     return static_cast<lldb::SBProcess*>(process)->PutSTDIN(buf, size);
 }
 
-int lldb_process_send_async_interrupt(lldb_process_t process) {
-    if (!process) return 0;
+void lldb_process_send_async_interrupt(lldb_process_t process) {
+    if (!process) return;
     static_cast<lldb::SBProcess*>(process)->SendAsyncInterrupt();
-    return 1;
 }
 
-uint32_t lldb_process_get_num_supported_hardware_watchpoints(lldb_process_t process, lldb_error_t error) {
-    if (!process) return 0;
+lldb_ruby_status_t lldb_process_get_num_supported_hardware_watchpoints(lldb_process_t process,
+                                                                        uint32_t* result,
+                                                                        lldb_error_t output) {
+    wrapper_clear_error_state();
+    if (!process || !result) return LLDB_RUBY_STATUS_INVALID_ARGUMENT;
 
-    lldb::SBProcess* p = static_cast<lldb::SBProcess*>(process);
-    lldb::SBError* err = error ? static_cast<lldb::SBError*>(error) : nullptr;
-    lldb::SBError local_error;
-
-    return p->GetNumSupportedHardwareWatchpoints(err ? *err : local_error);
+    try {
+        lldb::SBError error;
+        *result = static_cast<lldb::SBProcess*>(process)->GetNumSupportedHardwareWatchpoints(error);
+        return wrapper_status(error, output);
+    } catch (const std::exception& exception) {
+        wrapper_set_error_state(exception.what());
+        return LLDB_RUBY_STATUS_INTERNAL_ERROR;
+    } catch (...) {
+        wrapper_set_error_state("unknown native exception in hardware watchpoint query");
+        return LLDB_RUBY_STATUS_INTERNAL_ERROR;
+    }
 }
 
 uint32_t lldb_process_get_unique_id(lldb_process_t process) {
@@ -858,34 +985,97 @@ int lldb_thread_is_valid(lldb_thread_t thread) {
     return static_cast<lldb::SBThread*>(thread)->IsValid() ? 1 : 0;
 }
 
-int lldb_thread_step_over(lldb_thread_t thread) {
-    if (!thread) return 0;
-    static_cast<lldb::SBThread*>(thread)->StepOver();
-    return 1;
+lldb_ruby_status_t lldb_thread_step_over(lldb_thread_t thread, int run_mode, lldb_error_t output) {
+    wrapper_clear_error_state();
+    if (!thread) return LLDB_RUBY_STATUS_INVALID_HANDLE;
+    try {
+        lldb::SBError error;
+        static_cast<lldb::SBThread*>(thread)->StepOver(static_cast<lldb::RunMode>(run_mode), error);
+        return wrapper_status(error, output);
+    } catch (const std::exception& exception) {
+        wrapper_set_error_state(exception.what());
+        return LLDB_RUBY_STATUS_INTERNAL_ERROR;
+    } catch (...) {
+        wrapper_set_error_state("unknown native exception in thread step over");
+        return LLDB_RUBY_STATUS_INTERNAL_ERROR;
+    }
 }
 
-int lldb_thread_step_into(lldb_thread_t thread) {
-    if (!thread) return 0;
-    static_cast<lldb::SBThread*>(thread)->StepInto();
-    return 1;
+lldb_ruby_status_t lldb_thread_step_into(lldb_thread_t thread,
+                                         const char* target_name,
+                                         uint32_t end_line,
+                                         int run_mode,
+                                         lldb_error_t output) {
+    wrapper_clear_error_state();
+    if (!thread) return LLDB_RUBY_STATUS_INVALID_HANDLE;
+    try {
+        lldb::SBError error;
+        static_cast<lldb::SBThread*>(thread)->StepInto(
+            target_name,
+            end_line,
+            error,
+            static_cast<lldb::RunMode>(run_mode)
+        );
+        return wrapper_status(error, output);
+    } catch (const std::exception& exception) {
+        wrapper_set_error_state(exception.what());
+        return LLDB_RUBY_STATUS_INTERNAL_ERROR;
+    } catch (...) {
+        wrapper_set_error_state("unknown native exception in thread step into");
+        return LLDB_RUBY_STATUS_INTERNAL_ERROR;
+    }
 }
 
-int lldb_thread_step_out(lldb_thread_t thread) {
-    if (!thread) return 0;
-    static_cast<lldb::SBThread*>(thread)->StepOut();
-    return 1;
+lldb_ruby_status_t lldb_thread_step_out(lldb_thread_t thread, lldb_error_t output) {
+    wrapper_clear_error_state();
+    if (!thread) return LLDB_RUBY_STATUS_INVALID_HANDLE;
+    try {
+        lldb::SBError error;
+        static_cast<lldb::SBThread*>(thread)->StepOut(error);
+        return wrapper_status(error, output);
+    } catch (const std::exception& exception) {
+        wrapper_set_error_state(exception.what());
+        return LLDB_RUBY_STATUS_INTERNAL_ERROR;
+    } catch (...) {
+        wrapper_set_error_state("unknown native exception in thread step out");
+        return LLDB_RUBY_STATUS_INTERNAL_ERROR;
+    }
 }
 
-int lldb_thread_step_instruction(lldb_thread_t thread, int step_over) {
-    if (!thread) return 0;
-    static_cast<lldb::SBThread*>(thread)->StepInstruction(step_over != 0);
-    return 1;
+lldb_ruby_status_t lldb_thread_step_instruction(lldb_thread_t thread,
+                                                int step_over,
+                                                lldb_error_t output) {
+    wrapper_clear_error_state();
+    if (!thread) return LLDB_RUBY_STATUS_INVALID_HANDLE;
+    try {
+        lldb::SBError error;
+        static_cast<lldb::SBThread*>(thread)->StepInstruction(step_over != 0, error);
+        return wrapper_status(error, output);
+    } catch (const std::exception& exception) {
+        wrapper_set_error_state(exception.what());
+        return LLDB_RUBY_STATUS_INTERNAL_ERROR;
+    } catch (...) {
+        wrapper_set_error_state("unknown native exception in thread instruction step");
+        return LLDB_RUBY_STATUS_INTERNAL_ERROR;
+    }
 }
 
-int lldb_thread_run_to_address(lldb_thread_t thread, uint64_t addr) {
-    if (!thread) return 0;
-    static_cast<lldb::SBThread*>(thread)->RunToAddress(addr);
-    return 1;
+lldb_ruby_status_t lldb_thread_run_to_address(lldb_thread_t thread,
+                                              uint64_t addr,
+                                              lldb_error_t output) {
+    wrapper_clear_error_state();
+    if (!thread) return LLDB_RUBY_STATUS_INVALID_HANDLE;
+    try {
+        lldb::SBError error;
+        static_cast<lldb::SBThread*>(thread)->RunToAddress(addr, error);
+        return wrapper_status(error, output);
+    } catch (const std::exception& exception) {
+        wrapper_set_error_state(exception.what());
+        return LLDB_RUBY_STATUS_INTERNAL_ERROR;
+    } catch (...) {
+        wrapper_set_error_state("unknown native exception in thread run to address");
+        return LLDB_RUBY_STATUS_INTERNAL_ERROR;
+    }
 }
 
 uint32_t lldb_thread_get_num_frames(lldb_thread_t thread) {
@@ -1450,14 +1640,26 @@ lldb_value_t lldb_value_get_child_member_with_name(lldb_value_t value, const cha
     return static_cast<lldb_value_t>(new lldb::SBValue(child));
 }
 
-int64_t lldb_value_get_value_as_signed(lldb_value_t value) {
-    if (!value) return 0;
-    return static_cast<lldb::SBValue*>(value)->GetValueAsSigned();
+int64_t lldb_value_get_value_as_signed(lldb_value_t value, lldb_error_t output, int64_t fail_value) {
+    if (!value) {
+        wrapper_set_invalid_argument(output ? static_cast<lldb::SBError*>(output) : nullptr,
+                                     "invalid SBValue handle");
+        return fail_value;
+    }
+    lldb::SBError local_error;
+    lldb::SBError* error = output ? static_cast<lldb::SBError*>(output) : &local_error;
+    return static_cast<lldb::SBValue*>(value)->GetValueAsSigned(*error, fail_value);
 }
 
-uint64_t lldb_value_get_value_as_unsigned(lldb_value_t value) {
-    if (!value) return 0;
-    return static_cast<lldb::SBValue*>(value)->GetValueAsUnsigned();
+uint64_t lldb_value_get_value_as_unsigned(lldb_value_t value, lldb_error_t output, uint64_t fail_value) {
+    if (!value) {
+        wrapper_set_invalid_argument(output ? static_cast<lldb::SBError*>(output) : nullptr,
+                                     "invalid SBValue handle");
+        return fail_value;
+    }
+    lldb::SBError local_error;
+    lldb::SBError* error = output ? static_cast<lldb::SBError*>(output) : &local_error;
+    return static_cast<lldb::SBValue*>(value)->GetValueAsUnsigned(*error, fail_value);
 }
 
 uint64_t lldb_value_get_byte_size(lldb_value_t value) {
@@ -1682,6 +1884,11 @@ const char* lldb_error_get_cstring(lldb_error_t error) {
 uint32_t lldb_error_get_error(lldb_error_t error) {
     if (!error) return 0;
     return static_cast<lldb::SBError*>(error)->GetError();
+}
+
+int lldb_error_get_type(lldb_error_t error) {
+    if (!error) return static_cast<int>(lldb::eErrorTypeInvalid);
+    return static_cast<int>(static_cast<lldb::SBError*>(error)->GetType());
 }
 
 void lldb_error_clear(lldb_error_t error) {
@@ -2079,8 +2286,7 @@ int lldb_command_interpreter_handle_command(lldb_command_interpreter_t interp,
     lldb::SBCommandReturnObject local_result;
 
     lldb::ReturnStatus status = i->HandleCommand(command, r ? *r : local_result, add_to_history != 0);
-    return status == lldb::eReturnStatusSuccessFinishResult ||
-           status == lldb::eReturnStatusSuccessFinishNoResult ? 1 : 0;
+    return static_cast<int>(status);
 }
 
 int lldb_command_interpreter_command_exists(lldb_command_interpreter_t interp, const char* command) {
@@ -2122,9 +2328,19 @@ const char* lldb_command_return_object_get_error(lldb_command_return_object_t ob
     return static_cast<lldb::SBCommandReturnObject*>(obj)->GetError();
 }
 
+int lldb_command_return_object_get_status(lldb_command_return_object_t obj) {
+    if (!obj) return static_cast<int>(lldb::eReturnStatusInvalid);
+    return static_cast<int>(static_cast<lldb::SBCommandReturnObject*>(obj)->GetStatus());
+}
+
 int lldb_command_return_object_succeeded(lldb_command_return_object_t obj) {
     if (!obj) return 0;
     return static_cast<lldb::SBCommandReturnObject*>(obj)->Succeeded() ? 1 : 0;
+}
+
+int lldb_command_return_object_has_result(lldb_command_return_object_t obj) {
+    if (!obj) return 0;
+    return static_cast<lldb::SBCommandReturnObject*>(obj)->HasResult() ? 1 : 0;
 }
 
 void lldb_command_return_object_clear(lldb_command_return_object_t obj) {

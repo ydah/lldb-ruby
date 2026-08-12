@@ -6,6 +6,7 @@ require_relative 'lldb/version'
 require_relative 'lldb/error'
 require_relative 'lldb/ffi_bindings'
 require_relative 'lldb/types'
+require_relative 'lldb/native'
 require_relative 'lldb/api_support'
 require_relative 'lldb/native_string_array'
 require_relative 'lldb/debugger'
@@ -32,7 +33,9 @@ module LLDB
     def initialize
       return if @initialized
 
-      FFIBindings.lldb_initialize
+      error = Error.new
+      status = FFIBindings.lldb_initialize(error.to_ptr)
+      Native.check_status!(status, 'lldb.initialize', error)
       @initialized = true
 
       at_exit { terminate }

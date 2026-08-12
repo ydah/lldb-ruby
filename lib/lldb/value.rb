@@ -105,7 +105,10 @@ module LLDB
     def value_as_signed
       return 0 unless valid?
 
-      FFIBindings.lldb_value_get_value_as_signed(@ptr)
+      error = Error.new
+      result = FFIBindings.lldb_value_get_value_as_signed(@ptr, error.to_ptr, 0)
+      error.raise_if_error!('value.value_as_signed')
+      result
     end
 
     alias to_i value_as_signed
@@ -114,7 +117,10 @@ module LLDB
     def value_as_unsigned
       return 0 unless valid?
 
-      FFIBindings.lldb_value_get_value_as_unsigned(@ptr)
+      error = Error.new
+      result = FFIBindings.lldb_value_get_value_as_unsigned(@ptr, error.to_ptr, 0)
+      error.raise_if_error!('value.value_as_unsigned')
+      result
     end
 
     # @rbs return: Integer

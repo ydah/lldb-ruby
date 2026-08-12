@@ -26,6 +26,12 @@ RSpec.describe LLDB::CommandInterpreter do
       result = interpreter.handle_command('version')
       expect(result.output).to be_a(String)
     end
+
+    it 'preserves the native return status and result flag' do
+      result = interpreter.handle_command('version')
+      expect(result.status).to eq(LLDB::ReturnStatus::SUCCESS_FINISH_RESULT)
+      expect(result.has_result?).to be true
+    end
   end
 
   describe '#command_exists?' do

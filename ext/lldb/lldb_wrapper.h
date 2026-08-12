@@ -46,9 +46,12 @@ uint32_t lldb_wrapper_abi_version(void);
 const char* lldb_wrapper_build_lldb_version(void);
 const char* lldb_wrapper_runtime_lldb_version(void);
 int lldb_wrapper_has_capability(uint32_t capability);
+const char* lldb_wrapper_last_error_message(void);
+int lldb_wrapper_last_error_code(void);
+void lldb_wrapper_clear_last_error(void);
 
 // Initialization
-void lldb_initialize(void);
+lldb_ruby_status_t lldb_initialize(lldb_error_t error);
 void lldb_terminate(void);
 
 // SBDebugger
@@ -141,12 +144,12 @@ void lldb_launch_info_set_launch_flags(lldb_launch_info_t info, uint32_t flags);
 // SBProcess
 void lldb_process_destroy(lldb_process_t process);
 int lldb_process_is_valid(lldb_process_t process);
-int lldb_process_continue(lldb_process_t process);
-int lldb_process_stop(lldb_process_t process);
-int lldb_process_kill(lldb_process_t process);
-int lldb_process_detach(lldb_process_t process);
-int lldb_process_destroy_process(lldb_process_t process);
-int lldb_process_signal(lldb_process_t process, int signal);
+lldb_ruby_status_t lldb_process_continue(lldb_process_t process, lldb_error_t error);
+lldb_ruby_status_t lldb_process_stop(lldb_process_t process, lldb_error_t error);
+lldb_ruby_status_t lldb_process_kill(lldb_process_t process, lldb_error_t error);
+lldb_ruby_status_t lldb_process_detach(lldb_process_t process, lldb_error_t error);
+lldb_ruby_status_t lldb_process_destroy_process(lldb_process_t process, lldb_error_t error);
+lldb_ruby_status_t lldb_process_signal(lldb_process_t process, int signal, lldb_error_t error);
 int lldb_process_get_state(lldb_process_t process);
 uint32_t lldb_process_get_num_threads(lldb_process_t process);
 lldb_thread_t lldb_process_get_thread_at_index(lldb_process_t process, uint32_t index);
@@ -161,13 +164,15 @@ const char* lldb_process_get_exit_description(lldb_process_t process);
 size_t lldb_process_read_memory(lldb_process_t process, uint64_t addr, void* buf, size_t size, lldb_error_t error);
 size_t lldb_process_write_memory(lldb_process_t process, uint64_t addr, const void* buf, size_t size, lldb_error_t error);
 uint64_t lldb_process_allocate_memory(lldb_process_t process, size_t size, uint32_t permissions, lldb_error_t error);
-int lldb_process_deallocate_memory(lldb_process_t process, uint64_t addr);
+lldb_ruby_status_t lldb_process_deallocate_memory(lldb_process_t process, uint64_t addr, lldb_error_t error);
 size_t lldb_process_read_cstring_from_memory(lldb_process_t process, uint64_t addr, void* buf, size_t size, lldb_error_t error);
 size_t lldb_process_get_stdout(lldb_process_t process, char* buf, size_t size);
 size_t lldb_process_get_stderr(lldb_process_t process, char* buf, size_t size);
 size_t lldb_process_put_stdin(lldb_process_t process, const char* buf, size_t size);
-int lldb_process_send_async_interrupt(lldb_process_t process);
-uint32_t lldb_process_get_num_supported_hardware_watchpoints(lldb_process_t process, lldb_error_t error);
+void lldb_process_send_async_interrupt(lldb_process_t process);
+lldb_ruby_status_t lldb_process_get_num_supported_hardware_watchpoints(lldb_process_t process,
+                                                                        uint32_t* result,
+                                                                        lldb_error_t error);
 uint32_t lldb_process_get_unique_id(lldb_process_t process);
 lldb_memory_region_info_t lldb_process_get_memory_region_info(lldb_process_t process, uint64_t addr, lldb_error_t error);
 
@@ -184,11 +189,19 @@ const char* lldb_memory_region_info_get_name(lldb_memory_region_info_t info);
 // SBThread
 void lldb_thread_destroy(lldb_thread_t thread);
 int lldb_thread_is_valid(lldb_thread_t thread);
-int lldb_thread_step_over(lldb_thread_t thread);
-int lldb_thread_step_into(lldb_thread_t thread);
-int lldb_thread_step_out(lldb_thread_t thread);
-int lldb_thread_step_instruction(lldb_thread_t thread, int step_over);
-int lldb_thread_run_to_address(lldb_thread_t thread, uint64_t addr);
+lldb_ruby_status_t lldb_thread_step_over(lldb_thread_t thread, int run_mode, lldb_error_t error);
+lldb_ruby_status_t lldb_thread_step_into(lldb_thread_t thread,
+                                         const char* target_name,
+                                         uint32_t end_line,
+                                         int run_mode,
+                                         lldb_error_t error);
+lldb_ruby_status_t lldb_thread_step_out(lldb_thread_t thread, lldb_error_t error);
+lldb_ruby_status_t lldb_thread_step_instruction(lldb_thread_t thread,
+                                                int step_over,
+                                                lldb_error_t error);
+lldb_ruby_status_t lldb_thread_run_to_address(lldb_thread_t thread,
+                                              uint64_t addr,
+                                              lldb_error_t error);
 uint32_t lldb_thread_get_num_frames(lldb_thread_t thread);
 lldb_frame_t lldb_thread_get_frame_at_index(lldb_thread_t thread, uint32_t index);
 lldb_frame_t lldb_thread_get_selected_frame(lldb_thread_t thread);
@@ -282,8 +295,8 @@ lldb_type_t lldb_value_get_type(lldb_value_t value);
 uint32_t lldb_value_get_num_children(lldb_value_t value);
 lldb_value_t lldb_value_get_child_at_index(lldb_value_t value, uint32_t index);
 lldb_value_t lldb_value_get_child_member_with_name(lldb_value_t value, const char* name);
-int64_t lldb_value_get_value_as_signed(lldb_value_t value);
-uint64_t lldb_value_get_value_as_unsigned(lldb_value_t value);
+int64_t lldb_value_get_value_as_signed(lldb_value_t value, lldb_error_t error, int64_t fail_value);
+uint64_t lldb_value_get_value_as_unsigned(lldb_value_t value, lldb_error_t error, uint64_t fail_value);
 uint64_t lldb_value_get_byte_size(lldb_value_t value);
 int lldb_value_might_have_children(lldb_value_t value);
 int lldb_value_get_error(lldb_value_t value, lldb_error_t error);
@@ -315,6 +328,7 @@ int lldb_error_success(lldb_error_t error);
 int lldb_error_fail(lldb_error_t error);
 const char* lldb_error_get_cstring(lldb_error_t error);
 uint32_t lldb_error_get_error(lldb_error_t error);
+int lldb_error_get_type(lldb_error_t error);
 void lldb_error_clear(lldb_error_t error);
 void lldb_error_set_error_string(lldb_error_t error, const char* str);
 
@@ -389,7 +403,9 @@ void lldb_command_return_object_destroy(lldb_command_return_object_t obj);
 int lldb_command_return_object_is_valid(lldb_command_return_object_t obj);
 const char* lldb_command_return_object_get_output(lldb_command_return_object_t obj);
 const char* lldb_command_return_object_get_error(lldb_command_return_object_t obj);
+int lldb_command_return_object_get_status(lldb_command_return_object_t obj);
 int lldb_command_return_object_succeeded(lldb_command_return_object_t obj);
+int lldb_command_return_object_has_result(lldb_command_return_object_t obj);
 void lldb_command_return_object_clear(lldb_command_return_object_t obj);
 
 #ifdef __cplusplus
