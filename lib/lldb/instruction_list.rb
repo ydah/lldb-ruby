@@ -57,7 +57,7 @@ module LLDB
 
     # @rbs return: Array[Instruction]
     def to_a
-      each.to_a
+      (0...size).map { |index| self[index] }.compact
     end
 
     # @rbs return: FFI::Pointer
