@@ -5,6 +5,8 @@
 module LLDB
   class LLDBError < StandardError; end
   class InvalidObjectError < LLDBError; end
+  class ClosedObjectError < InvalidObjectError; end
+  class LifecycleError < LLDBError; end
   class LaunchError < LLDBError; end
   class AttachError < LLDBError; end
   class BreakpointError < LLDBError; end
