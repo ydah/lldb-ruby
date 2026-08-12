@@ -243,8 +243,18 @@ process = target.attach(pid: 12345)
 - `LLDB::Thread` - Represents an execution thread
 - `LLDB::Frame` - Represents a stack frame
 - `LLDB::Breakpoint` - Represents a breakpoint
+- `LLDB::BreakpointLocation` - Represents a breakpoint location
 - `LLDB::Value` - Represents a variable or expression result
+- `LLDB::Type` - Represents debug type information
+- `LLDB::TypeMember` - Represents a field or base-class member
 - `LLDB::Module` - Represents a loaded module
+- `LLDB::Symbol` - Represents a symbol
+- `LLDB::Function` - Represents a function
+- `LLDB::CompileUnit` - Represents a compilation unit
+- `LLDB::Block` - Represents a lexical block
+- `LLDB::InstructionList` / `LLDB::Instruction` - Represents structured disassembly
+- `LLDB::FileSpec` / `LLDB::Address` / `LLDB::LineEntry` - Represents source locations
+- `LLDB::Listener` / `LLDB::Event` / `LLDB::Broadcaster` - Represents LLDB events
 - `LLDB::Error` - Represents an error from LLDB
 
 ### Constants
@@ -256,6 +266,7 @@ Process states are available in `LLDB::State`:
 Stop reasons are available in `LLDB::StopReason`:
 - `INVALID`, `NONE`, `TRACE`, `BREAKPOINT`, `WATCHPOINT`
 - `SIGNAL`, `EXCEPTION`, `EXEC`, `PLAN_COMPLETE`, `THREAD_EXITING`, `INSTRUMENTATION`
+- `PROCESSOR_TRACE`, `FORK`, `VFORK`, `VFORK_DONE`
 
 ## Development
 
