@@ -33,6 +33,21 @@ RSpec.describe LLDB::StopReason do
     it "returns 'unknown' for unknown reason" do
       expect(LLDB::StopReason.name(999)).to eq('unknown')
     end
+
+    it 'includes the LLDB 14 processor and fork reasons' do
+      expect(LLDB::StopReason::PROCESSOR_TRACE).to eq(11)
+      expect(LLDB::StopReason::FORK).to eq(12)
+      expect(LLDB::StopReason::VFORK).to eq(13)
+      expect(LLDB::StopReason::VFORK_DONE).to eq(14)
+    end
+  end
+end
+
+RSpec.describe LLDB::SymbolContextItem do
+  it 'keeps EVERYTHING limited to the public context bits' do
+    expect(LLDB::SymbolContextItem::VARIABLE).to eq(1 << 7)
+    expect(LLDB::SymbolContextItem::EVERYTHING).to eq(0x7f)
+    expect(LLDB::SymbolContextItem::EVERYTHING & LLDB::SymbolContextItem::VARIABLE).to eq(0)
   end
 end
 
@@ -48,6 +63,10 @@ RSpec.describe LLDB::ValueType do
 
     it 'has REGISTER constant' do
       expect(LLDB::ValueType::REGISTER).to eq(5)
+    end
+
+    it 'has VARIABLE_THREAD_LOCAL constant' do
+      expect(LLDB::ValueType::VARIABLE_THREAD_LOCAL).to eq(8)
     end
   end
 
@@ -67,6 +86,14 @@ RSpec.describe LLDB::ValueType do
     it "returns 'unknown' for unknown value type" do
       expect(LLDB::ValueType.name(999)).to eq('unknown')
     end
+  end
+end
+
+RSpec.describe LLDB::RunMode do
+  it 'matches the LLDB public run mode values' do
+    expect(described_class::ONLY_THIS_THREAD).to eq(0)
+    expect(described_class::ALL_THREADS).to eq(1)
+    expect(described_class::ONLY_DURING_STEPPING).to eq(2)
   end
 end
 

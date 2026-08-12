@@ -619,7 +619,7 @@ int lldb_process_signal(lldb_process_t process, int signal) {
 }
 
 int lldb_process_get_state(lldb_process_t process) {
-    if (!process) return LLDB_STATE_INVALID;
+    if (!process) return static_cast<int>(lldb::eStateInvalid);
     return static_cast<int>(static_cast<lldb::SBProcess*>(process)->GetState());
 }
 
@@ -942,7 +942,7 @@ const char* lldb_thread_get_queue_name(lldb_thread_t thread) {
 }
 
 int lldb_thread_get_stop_reason(lldb_thread_t thread) {
-    if (!thread) return LLDB_STOP_REASON_INVALID;
+    if (!thread) return static_cast<int>(lldb::eStopReasonInvalid);
     return static_cast<int>(static_cast<lldb::SBThread*>(thread)->GetStopReason());
 }
 
@@ -1519,7 +1519,7 @@ uint64_t lldb_value_get_load_address(lldb_value_t value) {
 }
 
 int lldb_value_get_value_type(lldb_value_t value) {
-    if (!value) return LLDB_VALUE_TYPE_INVALID;
+    if (!value) return static_cast<int>(lldb::eValueTypeInvalid);
     return static_cast<int>(static_cast<lldb::SBValue*>(value)->GetValueType());
 }
 
@@ -1962,7 +1962,7 @@ uint32_t lldb_type_get_num_virtual_base_classes(lldb_type_t type) {
 }
 
 int lldb_type_get_basic_type(lldb_type_t type) {
-    if (!type) return LLDB_BASIC_TYPE_INVALID;
+    if (!type) return static_cast<int>(lldb::eBasicTypeInvalid);
     return static_cast<int>(static_cast<lldb::SBType*>(type)->GetBasicType());
 }
 

@@ -1,0 +1,7 @@
+module LLDB
+  class NativeStringArray
+    def initialize: (Array[String]) -> void
+    def self.validate!: (String) -> String
+    def to_ptr: () -> FFI::Pointer
+  end
+end

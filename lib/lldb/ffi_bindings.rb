@@ -205,7 +205,7 @@ module LLDB
     attach_function :lldb_process_read_cstring_from_memory, %i[pointer uint64 pointer size_t pointer], :size_t
     attach_function :lldb_process_get_stdout, %i[pointer pointer size_t], :size_t
     attach_function :lldb_process_get_stderr, %i[pointer pointer size_t], :size_t
-    attach_function :lldb_process_put_stdin, %i[pointer string size_t], :size_t
+    attach_function :lldb_process_put_stdin, %i[pointer pointer size_t], :size_t
     attach_function :lldb_process_send_async_interrupt, [:pointer], :int
     attach_function :lldb_process_get_num_supported_hardware_watchpoints, %i[pointer pointer], :uint32
     attach_function :lldb_process_get_unique_id, [:pointer], :uint32

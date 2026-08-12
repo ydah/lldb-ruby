@@ -109,7 +109,7 @@ module LLDB
     def self.lldb_process_read_cstring_from_memory: (FFI::Pointer, Integer, FFI::Pointer, Integer, FFI::Pointer) -> Integer
     def self.lldb_process_get_stdout: (FFI::Pointer, FFI::Pointer, Integer) -> Integer
     def self.lldb_process_get_stderr: (FFI::Pointer, FFI::Pointer, Integer) -> Integer
-    def self.lldb_process_put_stdin: (FFI::Pointer, String, Integer) -> Integer
+    def self.lldb_process_put_stdin: (FFI::Pointer, FFI::Pointer, Integer) -> Integer
     def self.lldb_process_send_async_interrupt: (FFI::Pointer) -> Integer
     def self.lldb_process_get_num_supported_hardware_watchpoints: (FFI::Pointer, FFI::Pointer) -> Integer
     def self.lldb_process_get_unique_id: (FFI::Pointer) -> Integer

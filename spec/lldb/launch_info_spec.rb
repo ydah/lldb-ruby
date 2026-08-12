@@ -34,5 +34,19 @@ RSpec.describe LLDB::LaunchInfo do
         info.set_environment({ 'FOO' => 'bar' }, append: true)
       end.not_to raise_error
     end
+
+    it 'distinguishes nil and an empty replacement environment' do
+      info = LLDB::LaunchInfo.new
+      expect { info.set_environment(nil) }.not_to raise_error
+      expect { info.set_environment({}, append: false) }.not_to raise_error
+    end
+
+    it 'rejects invalid native string content' do
+      info = LLDB::LaunchInfo.new
+      expect { info.set_environment({ "BAD=KEY" => 'value' }) }
+        .to raise_error(ArgumentError, /environment keys/)
+      expect { info.set_environment({ 'BAD' => "value\0" }) }
+        .to raise_error(ArgumentError, /NUL/)
+    end
   end
 end

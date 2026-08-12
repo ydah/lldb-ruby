@@ -60,6 +60,10 @@ module LLDB
     PLAN_COMPLETE = 8 # : Integer
     THREAD_EXITING = 9 # : Integer
     INSTRUMENTATION = 10 # : Integer
+    PROCESSOR_TRACE = 11 # : Integer
+    FORK = 12 # : Integer
+    VFORK = 13 # : Integer
+    VFORK_DONE = 14 # : Integer
 
     NAMES = { # : Hash[Integer, String]
       INVALID => 'invalid',
@@ -72,7 +76,11 @@ module LLDB
       EXEC => 'exec',
       PLAN_COMPLETE => 'plan complete',
       THREAD_EXITING => 'thread exiting',
-      INSTRUMENTATION => 'instrumentation'
+      INSTRUMENTATION => 'instrumentation',
+      PROCESSOR_TRACE => 'processor trace',
+      FORK => 'fork',
+      VFORK => 'vfork',
+      VFORK_DONE => 'vfork done'
     }.freeze
 
     # @rbs reason: Integer
@@ -90,7 +98,8 @@ module LLDB
     BLOCK = 1 << 4 # : Integer
     LINE_ENTRY = 1 << 5 # : Integer
     SYMBOL = 1 << 6 # : Integer
-    EVERYTHING = 0xFFFF # : Integer
+    VARIABLE = 1 << 7 # : Integer
+    EVERYTHING = 0x7F # : Integer
   end
 
   module ValueType
@@ -102,6 +111,7 @@ module LLDB
     REGISTER = 5 # : Integer
     REGISTER_SET = 6 # : Integer
     CONSTANT_RESULT = 7 # : Integer
+    VARIABLE_THREAD_LOCAL = 8 # : Integer
 
     NAMES = { # : Hash[Integer, String]
       INVALID => 'invalid',
@@ -111,7 +121,8 @@ module LLDB
       VARIABLE_LOCAL => 'local',
       REGISTER => 'register',
       REGISTER_SET => 'register set',
-      CONSTANT_RESULT => 'constant result'
+      CONSTANT_RESULT => 'constant result',
+      VARIABLE_THREAD_LOCAL => 'thread local'
     }.freeze
 
     # @rbs value_type: Integer
@@ -195,5 +206,31 @@ module LLDB
     def self.name(basic_type)
       NAMES[basic_type] || 'unknown'
     end
+  end
+
+  module ErrorType
+    INVALID = 0 # : Integer
+    GENERIC = 1 # : Integer
+    MACH_KERNEL = 2 # : Integer
+    POSIX = 3 # : Integer
+    EXPRESSION = 4 # : Integer
+    WIN32 = 5 # : Integer
+  end
+
+  module ReturnStatus
+    INVALID = 0 # : Integer
+    SUCCESS_FINISH_NO_RESULT = 1 # : Integer
+    SUCCESS_FINISH_RESULT = 2 # : Integer
+    SUCCESS_CONTINUING_NO_RESULT = 3 # : Integer
+    SUCCESS_CONTINUING_RESULT = 4 # : Integer
+    STARTED = 5 # : Integer
+    FAILED = 6 # : Integer
+    QUIT = 7 # : Integer
+  end
+
+  module RunMode
+    ONLY_THIS_THREAD = 0 # : Integer
+    ALL_THREADS = 1 # : Integer
+    ONLY_DURING_STEPPING = 2 # : Integer
   end
 end

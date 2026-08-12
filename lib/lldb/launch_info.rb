@@ -25,16 +25,11 @@ module LLDB
     # @rbs args: Array[String]?
     # @rbs return: void
     def initialize(args = nil)
-      argv = nil
-      if args && !args.empty?
-        argv = FFI::MemoryPointer.new(:pointer, args.length + 1)
-        args.each_with_index do |arg, i|
-          argv[i].put_pointer(0, FFI::MemoryPointer.from_string(arg))
-        end
-        argv[args.length].put_pointer(0, nil)
-      end
+      @arguments = if args && !args.empty?
+                     NativeStringArray.new(args)
+                   end
 
-      @ptr = FFIBindings.lldb_launch_info_create(argv) # : FFI::Pointer
+      @ptr = FFIBindings.lldb_launch_info_create(@arguments&.to_ptr) # : FFI::Pointer
       ObjectSpace.define_finalizer(self, self.class.release(@ptr))
     end
 
@@ -47,23 +42,26 @@ module LLDB
     # @rbs dir: String
     # @rbs return: void
     def working_directory=(dir)
+      NativeStringArray.validate!(dir)
       FFIBindings.lldb_launch_info_set_working_directory(@ptr, dir)
     end
 
-    # @rbs env: Hash[String, String]
+    # @rbs env: Hash[String, String]?
     # @rbs append: bool
     # @rbs return: void
     def set_environment(env, append: true)
-      return unless env && !env.empty?
+      return if env.nil?
+      raise ArgumentError, 'environment must be a Hash' unless env.is_a?(Hash)
 
-      env_strings = env.map { |k, v| "#{k}=#{v}" }
-      envp = FFI::MemoryPointer.new(:pointer, env_strings.length + 1)
-      env_strings.each_with_index do |e, i|
-        envp[i].put_pointer(0, FFI::MemoryPointer.from_string(e))
+      entries = env.map do |key, value|
+        key = NativeStringArray.validate!(key)
+        value = NativeStringArray.validate!(value)
+        raise ArgumentError, 'environment keys must not contain =' if key.include?('=')
+
+        "#{key}=#{value}"
       end
-      envp[env_strings.length].put_pointer(0, nil)
-
-      FFIBindings.lldb_launch_info_set_environment_entries(@ptr, envp, append ? 1 : 0)
+      strings = NativeStringArray.new(entries)
+      FFIBindings.lldb_launch_info_set_environment_entries(@ptr, strings.to_ptr, append ? 1 : 0)
     end
 
     # @rbs return: Integer

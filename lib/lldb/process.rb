@@ -209,7 +209,7 @@ module LLDB
       bytes_read = FFIBindings.lldb_process_read_memory(@ptr, address, buffer, size, error.to_ptr)
 
       error.raise_if_error!
-      buffer.read_string(bytes_read)
+      buffer.get_bytes(0, bytes_read)
     end
 
     # @rbs address: Integer
@@ -219,7 +219,8 @@ module LLDB
       raise InvalidObjectError, 'Process is not valid' unless valid?
       APISupport.require_method!(:lldb_process_write_memory, 'write_memory')
 
-      buffer = FFI::MemoryPointer.from_string(data)
+      buffer = FFI::MemoryPointer.new(:uint8, [data.bytesize, 1].max)
+      buffer.put_bytes(0, data)
       error = Error.new
       bytes_written = FFIBindings.lldb_process_write_memory(@ptr, address, buffer, data.bytesize, error.to_ptr)
 
@@ -253,13 +254,21 @@ module LLDB
     # @rbs return: String
     def read_cstring_from_memory(address, max_size = 1024)
       raise InvalidObjectError, 'Process is not valid' unless valid?
+      raise ArgumentError, 'max_size must be non-negative' if max_size.negative?
 
-      buffer = FFI::MemoryPointer.new(:uint8, max_size)
+      buffer = FFI::MemoryPointer.new(:uint8, [max_size, 1].max)
       error = Error.new
-      FFIBindings.lldb_process_read_cstring_from_memory(@ptr, address, buffer, max_size, error.to_ptr)
+      bytes_read = FFIBindings.lldb_process_read_cstring_from_memory(
+        @ptr,
+        address,
+        buffer,
+        max_size,
+        error.to_ptr
+      )
 
       error.raise_if_error!
-      buffer.read_string
+      bytes = buffer.get_bytes(0, [bytes_read, max_size].min)
+      bytes.delete_suffix("\0")
     end
 
     # @rbs max_size: Integer
@@ -269,7 +278,7 @@ module LLDB
 
       buffer = FFI::MemoryPointer.new(:uint8, max_size)
       bytes_read = FFIBindings.lldb_process_get_stdout(@ptr, buffer, max_size)
-      buffer.read_string(bytes_read)
+      buffer.get_bytes(0, bytes_read)
     end
 
     # @rbs max_size: Integer
@@ -279,7 +288,7 @@ module LLDB
 
       buffer = FFI::MemoryPointer.new(:uint8, max_size)
       bytes_read = FFIBindings.lldb_process_get_stderr(@ptr, buffer, max_size)
-      buffer.read_string(bytes_read)
+      buffer.get_bytes(0, bytes_read)
     end
 
     # @rbs data: String
@@ -287,7 +296,9 @@ module LLDB
     def put_stdin(data)
       raise InvalidObjectError, 'Process is not valid' unless valid?
 
-      FFIBindings.lldb_process_put_stdin(@ptr, data, data.bytesize)
+      buffer = FFI::MemoryPointer.new(:uint8, [data.bytesize, 1].max)
+      buffer.put_bytes(0, data)
+      FFIBindings.lldb_process_put_stdin(@ptr, buffer, data.bytesize)
     end
 
     # @rbs return: bool
