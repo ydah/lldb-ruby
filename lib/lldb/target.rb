@@ -38,38 +38,16 @@ module LLDB
     # @rbs args: Array[String]?
     # @rbs env: Hash[String, String]?
     # @rbs working_dir: String?
+    # @rbs launch_flags: Integer?
     # @rbs return: Process
-    def launch(args: nil, env: nil, working_dir: nil)
+    def launch(args: nil, env: nil, working_dir: nil, launch_flags: nil)
       raise InvalidObjectError, 'Target is not valid' unless valid?
 
-      # Use LaunchInfo with STOP_AT_ENTRY flag for reliable cross-platform behavior
       launch_info = LaunchInfo.new(args, context: context)
-      launch_info.launch_flags = LaunchFlags::STOP_AT_ENTRY
+      launch_info.launch_flags = launch_flags unless launch_flags.nil?
       launch_info.working_directory = working_dir if working_dir
       launch_info.set_environment(env) if env
-
-      error = Error.new
-      process_ptr = FFIBindings.lldb_target_launch(@ptr, launch_info.to_ptr, error.to_ptr)
-
-      error.raise_if_error!
-      raise LaunchError, 'Failed to launch process' if process_ptr.nil? || process_ptr.null?
-
-      @process = Process.new(process_ptr, target: self, context: context)
-
-      # Wait for process to stop when in synchronous mode
-      # On some platforms (Linux), the process may not be immediately stopped
-      unless @debugger.async?
-        wait_for_process_stop(@process)
-
-        # STOP_AT_ENTRY stops at the program entry point, not at breakpoints.
-        # If there are breakpoints set, continue to let the process run to the first breakpoint.
-        if num_breakpoints > 0 && @process.state == State::STOPPED && @process.valid?
-          @process.continue
-          wait_for_process_stop(@process)
-        end
-      end
-
-      @process
+      launch_with_info(launch_info)
     end
 
     # @rbs launch_info: LaunchInfo
@@ -81,7 +59,7 @@ module LLDB
       error = Error.new
       process_ptr = FFIBindings.lldb_target_launch(@ptr, launch_info.to_ptr, error.to_ptr)
 
-      error.raise_if_error!
+      error.raise_if_error!('target.launch')
       raise LaunchError, 'Failed to launch process' if process_ptr.nil? || process_ptr.null?
 
       @process = Process.new(process_ptr, target: self, context: context)
@@ -415,22 +393,5 @@ module LLDB
       @ptr
     end
 
-    private
-
-    # @rbs process: Process
-    # @rbs timeout: Float
-    # @rbs return: void
-    def wait_for_process_stop(process, timeout: 10.0)
-      require 'timeout'
-
-      Timeout.timeout(timeout, LaunchError, "Process failed to stop within #{timeout} seconds") do
-        loop do
-          state = process.state
-          break if state == State::STOPPED || state == State::EXITED || state == State::CRASHED
-
-          sleep(0.01)
-        end
-      end
-    end
   end
 end

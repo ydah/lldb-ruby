@@ -165,6 +165,12 @@ if var && var.valid?
 end
 ```
 
+`Target#launch` passes the launch request directly to LLDB. It does not add
+`STOP_AT_ENTRY`, wait for a state transition, or auto-continue to a breakpoint.
+Set `launch_flags: LLDB::LaunchFlags::STOP_AT_ENTRY` explicitly when that
+behavior is required; callers are responsible for waiting on asynchronous
+processes.
+
 ### Working with Threads
 
 ```ruby

@@ -20,6 +20,21 @@ RSpec.describe LLDB::LaunchInfo do
     end
   end
 
+  describe '#launch_flags' do
+    it 'does not add STOP_AT_ENTRY by default' do
+      info = LLDB::LaunchInfo.new
+
+      expect(info.launch_flags & LLDB::LaunchFlags::STOP_AT_ENTRY).to eq(0)
+    end
+
+    it 'keeps explicit launch flags' do
+      info = LLDB::LaunchInfo.new
+      info.launch_flags = LLDB::LaunchFlags::STOP_AT_ENTRY
+
+      expect(info.launch_flags & LLDB::LaunchFlags::STOP_AT_ENTRY).to be > 0
+    end
+  end
+
   describe '#set_environment' do
     it 'sets environment variables' do
       info = LLDB::LaunchInfo.new
