@@ -95,6 +95,19 @@ RSpec.describe LLDB::Frame do
       expect(entry.start_address).to be_a(LLDB::Address)
       expect(entry.start_address.file_address).to be > 0
     end
+
+    it 'exposes structured symbol context objects' do
+      expect(frame.function).to be_a(LLDB::Function)
+      expect(frame.function.name).to eq('lldb_test_add')
+
+      compile_unit = frame.compile_unit
+      expect(compile_unit).to be_a(LLDB::CompileUnit)
+      expect(compile_unit.file_spec).to be_a(LLDB::FileSpec)
+      expect(compile_unit.num_line_entries).to be > 0
+
+      expect(frame.symbol).to be_nil.or(be_a(LLDB::Symbol))
+      expect(frame.block).to be_a(LLDB::Block)
+    end
   end
 
   describe '#to_s' do

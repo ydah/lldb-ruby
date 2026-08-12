@@ -2533,7 +2533,347 @@ entries:
       kind: reviewed_no_throw
       reason: The export is tracked explicitly until its native error boundary is upgraded.
 
+  lldb_block_destroy:
+    classification: public
+    reason: This LLDB C ABI function exposes structured symbol and debug-scope objects.
+    exception_guard:
+      kind: reviewed_no_throw
+      reason: The export is tracked explicitly until its native error boundary is upgraded.
+  lldb_block_get_first_child:
+    classification: public
+    reason: This LLDB C ABI function exposes structured symbol and debug-scope objects.
+    exception_guard:
+      kind: reviewed_no_throw
+      reason: The export is tracked explicitly until its native error boundary is upgraded.
+  lldb_block_get_inlined_call_site_column:
+    classification: public
+    reason: This LLDB C ABI function exposes structured symbol and debug-scope objects.
+    exception_guard:
+      kind: reviewed_no_throw
+      reason: The export is tracked explicitly until its native error boundary is upgraded.
+  lldb_block_get_inlined_call_site_file:
+    classification: public
+    reason: This LLDB C ABI function exposes structured symbol and debug-scope objects.
+    exception_guard:
+      kind: reviewed_no_throw
+      reason: The export is tracked explicitly until its native error boundary is upgraded.
+  lldb_block_get_inlined_call_site_line:
+    classification: public
+    reason: This LLDB C ABI function exposes structured symbol and debug-scope objects.
+    exception_guard:
+      kind: reviewed_no_throw
+      reason: The export is tracked explicitly until its native error boundary is upgraded.
+  lldb_block_get_inlined_name:
+    classification: public
+    reason: This LLDB C ABI function exposes structured symbol and debug-scope objects.
+    exception_guard:
+      kind: reviewed_no_throw
+      reason: The export is tracked explicitly until its native error boundary is upgraded.
+  lldb_block_get_num_ranges:
+    classification: public
+    reason: This LLDB C ABI function exposes structured symbol and debug-scope objects.
+    exception_guard:
+      kind: reviewed_no_throw
+      reason: The export is tracked explicitly until its native error boundary is upgraded.
+  lldb_block_get_parent:
+    classification: public
+    reason: This LLDB C ABI function exposes structured symbol and debug-scope objects.
+    exception_guard:
+      kind: reviewed_no_throw
+      reason: The export is tracked explicitly until its native error boundary is upgraded.
+  lldb_block_get_range_end_address:
+    classification: public
+    reason: This LLDB C ABI function exposes structured symbol and debug-scope objects.
+    exception_guard:
+      kind: reviewed_no_throw
+      reason: The export is tracked explicitly until its native error boundary is upgraded.
+  lldb_block_get_range_start_address:
+    classification: public
+    reason: This LLDB C ABI function exposes structured symbol and debug-scope objects.
+    exception_guard:
+      kind: reviewed_no_throw
+      reason: The export is tracked explicitly until its native error boundary is upgraded.
+  lldb_block_get_sibling:
+    classification: public
+    reason: This LLDB C ABI function exposes structured symbol and debug-scope objects.
+    exception_guard:
+      kind: reviewed_no_throw
+      reason: The export is tracked explicitly until its native error boundary is upgraded.
+  lldb_block_is_valid:
+    classification: public
+    reason: This LLDB C ABI function exposes structured symbol and debug-scope objects.
+    exception_guard:
+      kind: reviewed_no_throw
+      reason: The export is tracked explicitly until its native error boundary is upgraded.
+  lldb_compile_unit_destroy:
+    classification: public
+    reason: This LLDB C ABI function exposes structured symbol and debug-scope objects.
+    exception_guard:
+      kind: reviewed_no_throw
+      reason: The export is tracked explicitly until its native error boundary is upgraded.
+  lldb_compile_unit_get_file_spec:
+    classification: public
+    reason: This LLDB C ABI function exposes structured symbol and debug-scope objects.
+    exception_guard:
+      kind: reviewed_no_throw
+      reason: The export is tracked explicitly until its native error boundary is upgraded.
+  lldb_compile_unit_get_line_entry_at_index:
+    classification: public
+    reason: This LLDB C ABI function exposes structured symbol and debug-scope objects.
+    exception_guard:
+      kind: reviewed_no_throw
+      reason: The export is tracked explicitly until its native error boundary is upgraded.
+  lldb_compile_unit_get_num_line_entries:
+    classification: public
+    reason: This LLDB C ABI function exposes structured symbol and debug-scope objects.
+    exception_guard:
+      kind: reviewed_no_throw
+      reason: The export is tracked explicitly until its native error boundary is upgraded.
+  lldb_compile_unit_is_valid:
+    classification: public
+    reason: This LLDB C ABI function exposes structured symbol and debug-scope objects.
+    exception_guard:
+      kind: reviewed_no_throw
+      reason: The export is tracked explicitly until its native error boundary is upgraded.
+  lldb_frame_get_block:
+    classification: public
+    reason: This LLDB C ABI function exposes structured symbol and debug-scope objects.
+    exception_guard:
+      kind: reviewed_no_throw
+      reason: The export is tracked explicitly until its native error boundary is upgraded.
+  lldb_frame_get_compile_unit:
+    classification: public
+    reason: This LLDB C ABI function exposes structured symbol and debug-scope objects.
+    exception_guard:
+      kind: reviewed_no_throw
+      reason: The export is tracked explicitly until its native error boundary is upgraded.
+  lldb_frame_get_function:
+    classification: public
+    reason: This LLDB C ABI function exposes structured symbol and debug-scope objects.
+    exception_guard:
+      kind: reviewed_no_throw
+      reason: The export is tracked explicitly until its native error boundary is upgraded.
+  lldb_frame_get_symbol:
+    classification: public
+    reason: This LLDB C ABI function exposes structured symbol and debug-scope objects.
+    exception_guard:
+      kind: reviewed_no_throw
+      reason: The export is tracked explicitly until its native error boundary is upgraded.
+  lldb_function_destroy:
+    classification: public
+    reason: This LLDB C ABI function exposes structured symbol and debug-scope objects.
+    exception_guard:
+      kind: reviewed_no_throw
+      reason: The export is tracked explicitly until its native error boundary is upgraded.
+  lldb_function_get_base_name:
+    classification: public
+    reason: This LLDB C ABI function exposes structured symbol and debug-scope objects.
+    exception_guard:
+      kind: reviewed_no_throw
+      reason: The export is tracked explicitly until its native error boundary is upgraded.
+  lldb_function_get_block:
+    classification: public
+    reason: This LLDB C ABI function exposes structured symbol and debug-scope objects.
+    exception_guard:
+      kind: reviewed_no_throw
+      reason: The export is tracked explicitly until its native error boundary is upgraded.
+  lldb_function_get_display_name:
+    classification: public
+    reason: This LLDB C ABI function exposes structured symbol and debug-scope objects.
+    exception_guard:
+      kind: reviewed_no_throw
+      reason: The export is tracked explicitly until its native error boundary is upgraded.
+  lldb_function_get_end_address:
+    classification: public
+    reason: This LLDB C ABI function exposes structured symbol and debug-scope objects.
+    exception_guard:
+      kind: reviewed_no_throw
+      reason: The export is tracked explicitly until its native error boundary is upgraded.
+  lldb_function_get_language:
+    classification: public
+    reason: This LLDB C ABI function exposes structured symbol and debug-scope objects.
+    exception_guard:
+      kind: reviewed_no_throw
+      reason: The export is tracked explicitly until its native error boundary is upgraded.
+  lldb_function_get_mangled_name:
+    classification: public
+    reason: This LLDB C ABI function exposes structured symbol and debug-scope objects.
+    exception_guard:
+      kind: reviewed_no_throw
+      reason: The export is tracked explicitly until its native error boundary is upgraded.
+  lldb_function_get_name:
+    classification: public
+    reason: This LLDB C ABI function exposes structured symbol and debug-scope objects.
+    exception_guard:
+      kind: reviewed_no_throw
+      reason: The export is tracked explicitly until its native error boundary is upgraded.
+  lldb_function_get_prologue_byte_size:
+    classification: public
+    reason: This LLDB C ABI function exposes structured symbol and debug-scope objects.
+    exception_guard:
+      kind: reviewed_no_throw
+      reason: The export is tracked explicitly until its native error boundary is upgraded.
+  lldb_function_get_start_address:
+    classification: public
+    reason: This LLDB C ABI function exposes structured symbol and debug-scope objects.
+    exception_guard:
+      kind: reviewed_no_throw
+      reason: The export is tracked explicitly until its native error boundary is upgraded.
+  lldb_function_get_type:
+    classification: public
+    reason: This LLDB C ABI function exposes structured symbol and debug-scope objects.
+    exception_guard:
+      kind: reviewed_no_throw
+      reason: The export is tracked explicitly until its native error boundary is upgraded.
+  lldb_function_is_optimized:
+    classification: public
+    reason: This LLDB C ABI function exposes structured symbol and debug-scope objects.
+    exception_guard:
+      kind: reviewed_no_throw
+      reason: The export is tracked explicitly until its native error boundary is upgraded.
+  lldb_function_is_valid:
+    classification: public
+    reason: This LLDB C ABI function exposes structured symbol and debug-scope objects.
+    exception_guard:
+      kind: reviewed_no_throw
+      reason: The export is tracked explicitly until its native error boundary is upgraded.
+  lldb_module_get_symbol_at_index:
+    classification: public
+    reason: This LLDB C ABI function exposes structured symbol and debug-scope objects.
+    exception_guard:
+      kind: reviewed_no_throw
+      reason: The export is tracked explicitly until its native error boundary is upgraded.
+  lldb_symbol_destroy:
+    classification: public
+    reason: This LLDB C ABI function exposes structured symbol and debug-scope objects.
+    exception_guard:
+      kind: reviewed_no_throw
+      reason: The export is tracked explicitly until its native error boundary is upgraded.
+  lldb_symbol_get_base_name:
+    classification: public
+    reason: This LLDB C ABI function exposes structured symbol and debug-scope objects.
+    exception_guard:
+      kind: reviewed_no_throw
+      reason: The export is tracked explicitly until its native error boundary is upgraded.
+  lldb_symbol_get_display_name:
+    classification: public
+    reason: This LLDB C ABI function exposes structured symbol and debug-scope objects.
+    exception_guard:
+      kind: reviewed_no_throw
+      reason: The export is tracked explicitly until its native error boundary is upgraded.
+  lldb_symbol_get_end_address:
+    classification: public
+    reason: This LLDB C ABI function exposes structured symbol and debug-scope objects.
+    exception_guard:
+      kind: reviewed_no_throw
+      reason: The export is tracked explicitly until its native error boundary is upgraded.
+  lldb_symbol_get_id:
+    classification: public
+    reason: This LLDB C ABI function exposes structured symbol and debug-scope objects.
+    exception_guard:
+      kind: reviewed_no_throw
+      reason: The export is tracked explicitly until its native error boundary is upgraded.
+  lldb_symbol_get_mangled_name:
+    classification: public
+    reason: This LLDB C ABI function exposes structured symbol and debug-scope objects.
+    exception_guard:
+      kind: reviewed_no_throw
+      reason: The export is tracked explicitly until its native error boundary is upgraded.
+  lldb_symbol_get_name:
+    classification: public
+    reason: This LLDB C ABI function exposes structured symbol and debug-scope objects.
+    exception_guard:
+      kind: reviewed_no_throw
+      reason: The export is tracked explicitly until its native error boundary is upgraded.
+  lldb_symbol_get_prologue_byte_size:
+    classification: public
+    reason: This LLDB C ABI function exposes structured symbol and debug-scope objects.
+    exception_guard:
+      kind: reviewed_no_throw
+      reason: The export is tracked explicitly until its native error boundary is upgraded.
+  lldb_symbol_get_size:
+    classification: public
+    reason: This LLDB C ABI function exposes structured symbol and debug-scope objects.
+    exception_guard:
+      kind: reviewed_no_throw
+      reason: The export is tracked explicitly until its native error boundary is upgraded.
+  lldb_symbol_get_start_address:
+    classification: public
+    reason: This LLDB C ABI function exposes structured symbol and debug-scope objects.
+    exception_guard:
+      kind: reviewed_no_throw
+      reason: The export is tracked explicitly until its native error boundary is upgraded.
+  lldb_symbol_get_type:
+    classification: public
+    reason: This LLDB C ABI function exposes structured symbol and debug-scope objects.
+    exception_guard:
+      kind: reviewed_no_throw
+      reason: The export is tracked explicitly until its native error boundary is upgraded.
+  lldb_symbol_get_value:
+    classification: public
+    reason: This LLDB C ABI function exposes structured symbol and debug-scope objects.
+    exception_guard:
+      kind: reviewed_no_throw
+      reason: The export is tracked explicitly until its native error boundary is upgraded.
+  lldb_symbol_is_valid:
+    classification: public
+    reason: This LLDB C ABI function exposes structured symbol and debug-scope objects.
+    exception_guard:
+      kind: reviewed_no_throw
+      reason: The export is tracked explicitly until its native error boundary is upgraded.
+
 ruby_methods:
+  - function: lldb_module_get_symbol_at_index
+    file: lib/lldb/module.rb
+    method: symbol_at_index
+  - function: lldb_frame_get_function
+    file: lib/lldb/frame.rb
+    method: function
+  - function: lldb_frame_get_symbol
+    file: lib/lldb/frame.rb
+    method: symbol
+  - function: lldb_frame_get_compile_unit
+    file: lib/lldb/frame.rb
+    method: compile_unit
+  - function: lldb_frame_get_block
+    file: lib/lldb/frame.rb
+    method: block
+  - function: lldb_symbol_get_name
+    file: lib/lldb/symbol.rb
+    method: name
+  - function: lldb_symbol_get_start_address
+    file: lib/lldb/symbol.rb
+    method: start_address
+  - function: lldb_symbol_get_end_address
+    file: lib/lldb/symbol.rb
+    method: end_address
+  - function: lldb_function_get_name
+    file: lib/lldb/function.rb
+    method: name
+  - function: lldb_function_get_start_address
+    file: lib/lldb/function.rb
+    method: start_address
+  - function: lldb_function_get_end_address
+    file: lib/lldb/function.rb
+    method: end_address
+  - function: lldb_function_get_block
+    file: lib/lldb/function.rb
+    method: block
+  - function: lldb_compile_unit_get_file_spec
+    file: lib/lldb/compile_unit.rb
+    method: file_spec
+  - function: lldb_compile_unit_get_line_entry_at_index
+    file: lib/lldb/compile_unit.rb
+    method: line_entry_at_index
+  - function: lldb_block_get_inlined_name
+    file: lib/lldb/block.rb
+    method: inlined_name
+  - function: lldb_block_get_parent
+    file: lib/lldb/block.rb
+    method: parent
+  - function: lldb_block_get_first_child
+    file: lib/lldb/block.rb
+    method: first_child
   - function: lldb_type_get_field_at_index
     file: lib/lldb/type.rb
     method: field_at_index

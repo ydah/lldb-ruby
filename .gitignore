@@ -24,6 +24,8 @@
 /spec/fixtures/loop
 /spec/fixtures/blocking
 /spec/fixtures/blocking.dSYM/
+/spec/fixtures/type_members
+/spec/fixtures/type_members.dSYM/
 /examples/test_program
 
 # RBS generated files

@@ -198,6 +198,11 @@ Type inspection also preserves member metadata. Use `Type#field_at_index`,
 `#direct_base_class_at_index`, or `#virtual_base_class_at_index` to obtain a
 `TypeMember` with its name, type, byte/bit offset, and bitfield width.
 
+Modules and frames expose structured debug objects as well: use
+`Module#symbol_at_index`, `Frame#function`, `Frame#symbol`,
+`Frame#compile_unit`, and `Frame#block` to retain symbol, function, source
+unit, and lexical block metadata.
+
 Debugger and launch choices are explicit option objects. For example,
 `LLDB::Debugger.create(source_init_files: true)` opts into LLDB init files,
 while `LLDB::ExpressionOptions` can be passed to expression evaluation without

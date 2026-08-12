@@ -238,7 +238,7 @@ module LLDB
     private
 
     # @rbs index: Integer
-    # @rbs method_name: Symbol
+    # @rbs method_name: ::Symbol
     # @rbs return: TypeMember?
     def member_at(index, method_name)
       raise InvalidObjectError, 'Type is not valid' unless valid?

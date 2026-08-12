@@ -24,6 +24,10 @@ typedef void* lldb_symbol_context_t;
 typedef void* lldb_launch_info_t;
 typedef void* lldb_type_t;
 typedef void* lldb_type_member_t;
+typedef void* lldb_symbol_t;
+typedef void* lldb_function_t;
+typedef void* lldb_compile_unit_t;
+typedef void* lldb_block_t;
 typedef void* lldb_watchpoint_t;
 typedef void* lldb_command_interpreter_t;
 typedef void* lldb_command_return_object_t;
@@ -415,6 +419,10 @@ lldb_value_t lldb_frame_evaluate_expression_with_options(lldb_frame_t frame,
 lldb_value_t lldb_frame_get_value_for_variable_path(lldb_frame_t frame, const char* path);
 uint32_t lldb_frame_get_frame_id(lldb_frame_t frame);
 lldb_thread_t lldb_frame_get_thread(lldb_frame_t frame);
+lldb_function_t lldb_frame_get_function(lldb_frame_t frame);
+lldb_symbol_t lldb_frame_get_symbol(lldb_frame_t frame);
+lldb_compile_unit_t lldb_frame_get_compile_unit(lldb_frame_t frame);
+lldb_block_t lldb_frame_get_block(lldb_frame_t frame);
 lldb_symbol_context_t lldb_frame_get_symbol_context(lldb_frame_t frame, uint32_t scope);
 lldb_value_list_t lldb_frame_get_variables(lldb_frame_t frame, int arguments, int locals, int statics, int in_scope_only);
 lldb_value_list_t lldb_frame_get_registers(lldb_frame_t frame);
@@ -519,6 +527,59 @@ const char* lldb_module_get_platform_file_path(lldb_module_t module);
 lldb_file_spec_t lldb_module_get_file(lldb_module_t module);
 lldb_file_spec_t lldb_module_get_platform_file(lldb_module_t module);
 uint32_t lldb_module_get_num_symbols(lldb_module_t module);
+lldb_symbol_t lldb_module_get_symbol_at_index(lldb_module_t module, uint32_t index);
+
+// SBSymbol
+void lldb_symbol_destroy(lldb_symbol_t symbol);
+int lldb_symbol_is_valid(lldb_symbol_t symbol);
+const char* lldb_symbol_get_name(lldb_symbol_t symbol);
+const char* lldb_symbol_get_display_name(lldb_symbol_t symbol);
+const char* lldb_symbol_get_mangled_name(lldb_symbol_t symbol);
+const char* lldb_symbol_get_base_name(lldb_symbol_t symbol);
+lldb_address_t lldb_symbol_get_start_address(lldb_symbol_t symbol);
+lldb_address_t lldb_symbol_get_end_address(lldb_symbol_t symbol);
+uint64_t lldb_symbol_get_value(lldb_symbol_t symbol);
+uint64_t lldb_symbol_get_size(lldb_symbol_t symbol);
+uint32_t lldb_symbol_get_prologue_byte_size(lldb_symbol_t symbol);
+int lldb_symbol_get_type(lldb_symbol_t symbol);
+uint32_t lldb_symbol_get_id(lldb_symbol_t symbol);
+
+// SBFunction
+void lldb_function_destroy(lldb_function_t function);
+int lldb_function_is_valid(lldb_function_t function);
+const char* lldb_function_get_name(lldb_function_t function);
+const char* lldb_function_get_display_name(lldb_function_t function);
+const char* lldb_function_get_mangled_name(lldb_function_t function);
+const char* lldb_function_get_base_name(lldb_function_t function);
+lldb_address_t lldb_function_get_start_address(lldb_function_t function);
+lldb_address_t lldb_function_get_end_address(lldb_function_t function);
+uint32_t lldb_function_get_prologue_byte_size(lldb_function_t function);
+lldb_type_t lldb_function_get_type(lldb_function_t function);
+lldb_block_t lldb_function_get_block(lldb_function_t function);
+int lldb_function_is_optimized(lldb_function_t function);
+int lldb_function_get_language(lldb_function_t function);
+
+// SBCompileUnit
+void lldb_compile_unit_destroy(lldb_compile_unit_t unit);
+int lldb_compile_unit_is_valid(lldb_compile_unit_t unit);
+lldb_file_spec_t lldb_compile_unit_get_file_spec(lldb_compile_unit_t unit);
+uint32_t lldb_compile_unit_get_num_line_entries(lldb_compile_unit_t unit);
+lldb_line_entry_t lldb_compile_unit_get_line_entry_at_index(lldb_compile_unit_t unit,
+                                                             uint32_t index);
+
+// SBBlock
+void lldb_block_destroy(lldb_block_t block);
+int lldb_block_is_valid(lldb_block_t block);
+const char* lldb_block_get_inlined_name(lldb_block_t block);
+lldb_file_spec_t lldb_block_get_inlined_call_site_file(lldb_block_t block);
+uint32_t lldb_block_get_inlined_call_site_line(lldb_block_t block);
+uint32_t lldb_block_get_inlined_call_site_column(lldb_block_t block);
+lldb_block_t lldb_block_get_parent(lldb_block_t block);
+lldb_block_t lldb_block_get_sibling(lldb_block_t block);
+lldb_block_t lldb_block_get_first_child(lldb_block_t block);
+uint32_t lldb_block_get_num_ranges(lldb_block_t block);
+lldb_address_t lldb_block_get_range_start_address(lldb_block_t block, uint32_t index);
+lldb_address_t lldb_block_get_range_end_address(lldb_block_t block, uint32_t index);
 
 // SBSymbolContext
 void lldb_symbol_context_destroy(lldb_symbol_context_t ctx);

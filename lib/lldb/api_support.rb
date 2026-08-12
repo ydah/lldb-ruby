@@ -31,7 +31,7 @@ module LLDB
     class << self
       # Check if a specific FFI method is available
       #
-      # @rbs method_name: Symbol
+    # @rbs method_name: ::Symbol
       # @rbs return: bool
       def method_available?(method_name)
         FFIBindings.respond_to?(method_name)
@@ -39,7 +39,7 @@ module LLDB
 
       # Raise UnsupportedAPIError if the required method is not available
       #
-      # @rbs method_name: Symbol
+    # @rbs method_name: ::Symbol
       # @rbs feature_name: String?
       # @rbs return: void
       def require_method!(method_name, feature_name = nil)
@@ -50,7 +50,7 @@ module LLDB
               "API '#{feature}' is not supported in this LLDB version or binding"
       end
 
-      # @rbs feature: Symbol
+    # @rbs feature: ::Symbol
       # @rbs return: void
       def require_feature!(feature)
         return if feature_supported?(feature)
@@ -61,7 +61,7 @@ module LLDB
 
       # Check if a feature is supported
       #
-      # @rbs feature: Symbol
+    # @rbs feature: ::Symbol
       # @rbs return: bool
       def feature_supported?(feature)
         capability = CAPABILITIES[feature]
@@ -75,14 +75,14 @@ module LLDB
 
       # Get list of all supported features
       #
-      # @rbs return: Array[Symbol]
+    # @rbs return: Array[::Symbol]
       def supported_features
         FEATURES.keys.select { |f| feature_supported?(f) }
       end
 
       # Get list of all unsupported features
       #
-      # @rbs return: Array[Symbol]
+    # @rbs return: Array[::Symbol]
       def unsupported_features
         FEATURES.keys.reject { |f| feature_supported?(f) }
       end

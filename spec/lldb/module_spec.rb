@@ -27,6 +27,15 @@ RSpec.describe LLDB::Module do
     it 'returns the number of symbols' do
       expect(mod.num_symbols).to be >= 0
     end
+
+    it 'returns structured symbols' do
+      skip 'No symbols found' if mod.num_symbols.zero?
+
+      symbol = mod.symbol_at_index(0)
+      expect(symbol).to be_a(LLDB::Symbol)
+      expect(symbol).to be_valid
+      expect(symbol.name || symbol.display_name).to be_a(String)
+    end
   end
 
   describe '#to_s' do

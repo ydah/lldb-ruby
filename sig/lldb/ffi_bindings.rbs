@@ -302,6 +302,10 @@ module LLDB
     def self.lldb_frame_get_value_for_variable_path: (FFI::Pointer, String) -> FFI::Pointer
     def self.lldb_frame_get_frame_id: (FFI::Pointer) -> Integer
     def self.lldb_frame_get_thread: (FFI::Pointer) -> FFI::Pointer
+    def self.lldb_frame_get_function: (FFI::Pointer) -> FFI::Pointer
+    def self.lldb_frame_get_symbol: (FFI::Pointer) -> FFI::Pointer
+    def self.lldb_frame_get_compile_unit: (FFI::Pointer) -> FFI::Pointer
+    def self.lldb_frame_get_block: (FFI::Pointer) -> FFI::Pointer
     def self.lldb_frame_get_symbol_context: (FFI::Pointer, Integer) -> FFI::Pointer
     def self.lldb_frame_get_variables: (FFI::Pointer, Integer, Integer, Integer, Integer) -> FFI::Pointer
     def self.lldb_frame_get_registers: (FFI::Pointer) -> FFI::Pointer
@@ -406,6 +410,52 @@ module LLDB
     def self.lldb_module_get_file: (FFI::Pointer) -> FFI::Pointer
     def self.lldb_module_get_platform_file: (FFI::Pointer) -> FFI::Pointer
     def self.lldb_module_get_num_symbols: (FFI::Pointer) -> Integer
+    def self.lldb_module_get_symbol_at_index: (FFI::Pointer, Integer) -> FFI::Pointer
+
+    # SBSymbol, SBFunction, SBCompileUnit, and SBBlock
+    def self.lldb_symbol_destroy: (FFI::Pointer) -> void
+    def self.lldb_symbol_is_valid: (FFI::Pointer) -> Integer
+    def self.lldb_symbol_get_name: (FFI::Pointer) -> String?
+    def self.lldb_symbol_get_display_name: (FFI::Pointer) -> String?
+    def self.lldb_symbol_get_mangled_name: (FFI::Pointer) -> String?
+    def self.lldb_symbol_get_base_name: (FFI::Pointer) -> String?
+    def self.lldb_symbol_get_start_address: (FFI::Pointer) -> FFI::Pointer
+    def self.lldb_symbol_get_end_address: (FFI::Pointer) -> FFI::Pointer
+    def self.lldb_symbol_get_value: (FFI::Pointer) -> Integer
+    def self.lldb_symbol_get_size: (FFI::Pointer) -> Integer
+    def self.lldb_symbol_get_prologue_byte_size: (FFI::Pointer) -> Integer
+    def self.lldb_symbol_get_type: (FFI::Pointer) -> Integer
+    def self.lldb_symbol_get_id: (FFI::Pointer) -> Integer
+    def self.lldb_function_destroy: (FFI::Pointer) -> void
+    def self.lldb_function_is_valid: (FFI::Pointer) -> Integer
+    def self.lldb_function_get_name: (FFI::Pointer) -> String?
+    def self.lldb_function_get_display_name: (FFI::Pointer) -> String?
+    def self.lldb_function_get_mangled_name: (FFI::Pointer) -> String?
+    def self.lldb_function_get_base_name: (FFI::Pointer) -> String?
+    def self.lldb_function_get_start_address: (FFI::Pointer) -> FFI::Pointer
+    def self.lldb_function_get_end_address: (FFI::Pointer) -> FFI::Pointer
+    def self.lldb_function_get_prologue_byte_size: (FFI::Pointer) -> Integer
+    def self.lldb_function_get_type: (FFI::Pointer) -> FFI::Pointer
+    def self.lldb_function_get_block: (FFI::Pointer) -> FFI::Pointer
+    def self.lldb_function_is_optimized: (FFI::Pointer) -> Integer
+    def self.lldb_function_get_language: (FFI::Pointer) -> Integer
+    def self.lldb_compile_unit_destroy: (FFI::Pointer) -> void
+    def self.lldb_compile_unit_is_valid: (FFI::Pointer) -> Integer
+    def self.lldb_compile_unit_get_file_spec: (FFI::Pointer) -> FFI::Pointer
+    def self.lldb_compile_unit_get_num_line_entries: (FFI::Pointer) -> Integer
+    def self.lldb_compile_unit_get_line_entry_at_index: (FFI::Pointer, Integer) -> FFI::Pointer
+    def self.lldb_block_destroy: (FFI::Pointer) -> void
+    def self.lldb_block_is_valid: (FFI::Pointer) -> Integer
+    def self.lldb_block_get_inlined_name: (FFI::Pointer) -> String?
+    def self.lldb_block_get_inlined_call_site_file: (FFI::Pointer) -> FFI::Pointer
+    def self.lldb_block_get_inlined_call_site_line: (FFI::Pointer) -> Integer
+    def self.lldb_block_get_inlined_call_site_column: (FFI::Pointer) -> Integer
+    def self.lldb_block_get_parent: (FFI::Pointer) -> FFI::Pointer
+    def self.lldb_block_get_sibling: (FFI::Pointer) -> FFI::Pointer
+    def self.lldb_block_get_first_child: (FFI::Pointer) -> FFI::Pointer
+    def self.lldb_block_get_num_ranges: (FFI::Pointer) -> Integer
+    def self.lldb_block_get_range_start_address: (FFI::Pointer, Integer) -> FFI::Pointer
+    def self.lldb_block_get_range_end_address: (FFI::Pointer, Integer) -> FFI::Pointer
 
     # SBSymbolContext
     def self.lldb_symbol_context_destroy: (FFI::Pointer) -> void

@@ -2050,6 +2050,34 @@ lldb_thread_t lldb_frame_get_thread(lldb_frame_t frame) {
     return static_cast<lldb_thread_t>(new lldb::SBThread(thread));
 }
 
+lldb_function_t lldb_frame_get_function(lldb_frame_t frame) {
+    if (!frame) return nullptr;
+    lldb::SBFunction function = static_cast<lldb::SBFrame*>(frame)->GetFunction();
+    if (!function.IsValid()) return nullptr;
+    return static_cast<lldb_function_t>(new lldb::SBFunction(function));
+}
+
+lldb_symbol_t lldb_frame_get_symbol(lldb_frame_t frame) {
+    if (!frame) return nullptr;
+    lldb::SBSymbol symbol = static_cast<lldb::SBFrame*>(frame)->GetSymbol();
+    if (!symbol.IsValid()) return nullptr;
+    return static_cast<lldb_symbol_t>(new lldb::SBSymbol(symbol));
+}
+
+lldb_compile_unit_t lldb_frame_get_compile_unit(lldb_frame_t frame) {
+    if (!frame) return nullptr;
+    lldb::SBCompileUnit unit = static_cast<lldb::SBFrame*>(frame)->GetCompileUnit();
+    if (!unit.IsValid()) return nullptr;
+    return static_cast<lldb_compile_unit_t>(new lldb::SBCompileUnit(unit));
+}
+
+lldb_block_t lldb_frame_get_block(lldb_frame_t frame) {
+    if (!frame) return nullptr;
+    lldb::SBBlock block = static_cast<lldb::SBFrame*>(frame)->GetBlock();
+    if (!block.IsValid()) return nullptr;
+    return static_cast<lldb_block_t>(new lldb::SBBlock(block));
+}
+
 lldb_symbol_context_t lldb_frame_get_symbol_context(lldb_frame_t frame, uint32_t scope) {
     if (!frame) return nullptr;
 
@@ -2715,6 +2743,269 @@ lldb_file_spec_t lldb_module_get_platform_file(lldb_module_t module) {
 uint32_t lldb_module_get_num_symbols(lldb_module_t module) {
     if (!module) return 0;
     return static_cast<lldb::SBModule*>(module)->GetNumSymbols();
+}
+
+lldb_symbol_t lldb_module_get_symbol_at_index(lldb_module_t module, uint32_t index) {
+    if (!module) return nullptr;
+    lldb::SBSymbol symbol = static_cast<lldb::SBModule*>(module)->GetSymbolAtIndex(index);
+    if (!symbol.IsValid()) return nullptr;
+    return static_cast<lldb_symbol_t>(new lldb::SBSymbol(symbol));
+}
+
+// ============================================================================
+// SBSymbol
+// ============================================================================
+
+void lldb_symbol_destroy(lldb_symbol_t symbol) {
+    if (symbol) delete static_cast<lldb::SBSymbol*>(symbol);
+}
+
+int lldb_symbol_is_valid(lldb_symbol_t symbol) {
+    if (!symbol) return 0;
+    return static_cast<lldb::SBSymbol*>(symbol)->IsValid() ? 1 : 0;
+}
+
+const char* lldb_symbol_get_name(lldb_symbol_t symbol) {
+    if (!symbol) return nullptr;
+    return static_cast<lldb::SBSymbol*>(symbol)->GetName();
+}
+
+const char* lldb_symbol_get_display_name(lldb_symbol_t symbol) {
+    if (!symbol) return nullptr;
+    return static_cast<lldb::SBSymbol*>(symbol)->GetDisplayName();
+}
+
+const char* lldb_symbol_get_mangled_name(lldb_symbol_t symbol) {
+    if (!symbol) return nullptr;
+    return static_cast<lldb::SBSymbol*>(symbol)->GetMangledName();
+}
+
+const char* lldb_symbol_get_base_name(lldb_symbol_t symbol) {
+    if (!symbol) return nullptr;
+    return static_cast<lldb::SBSymbol*>(symbol)->GetBaseName();
+}
+
+lldb_address_t lldb_symbol_get_start_address(lldb_symbol_t symbol) {
+    if (!symbol) return nullptr;
+    lldb::SBAddress address = static_cast<lldb::SBSymbol*>(symbol)->GetStartAddress();
+    if (!address.IsValid()) return nullptr;
+    return static_cast<lldb_address_t>(new lldb::SBAddress(address));
+}
+
+lldb_address_t lldb_symbol_get_end_address(lldb_symbol_t symbol) {
+    if (!symbol) return nullptr;
+    lldb::SBAddress address = static_cast<lldb::SBSymbol*>(symbol)->GetEndAddress();
+    if (!address.IsValid()) return nullptr;
+    return static_cast<lldb_address_t>(new lldb::SBAddress(address));
+}
+
+uint64_t lldb_symbol_get_value(lldb_symbol_t symbol) {
+    if (!symbol) return LLDB_INVALID_ADDRESS;
+    return static_cast<lldb::SBSymbol*>(symbol)->GetValue();
+}
+
+uint64_t lldb_symbol_get_size(lldb_symbol_t symbol) {
+    if (!symbol) return 0;
+    return static_cast<lldb::SBSymbol*>(symbol)->GetSize();
+}
+
+uint32_t lldb_symbol_get_prologue_byte_size(lldb_symbol_t symbol) {
+    if (!symbol) return 0;
+    return static_cast<lldb::SBSymbol*>(symbol)->GetPrologueByteSize();
+}
+
+int lldb_symbol_get_type(lldb_symbol_t symbol) {
+    if (!symbol) return static_cast<int>(lldb::eSymbolTypeInvalid);
+    return static_cast<int>(static_cast<lldb::SBSymbol*>(symbol)->GetType());
+}
+
+uint32_t lldb_symbol_get_id(lldb_symbol_t symbol) {
+    if (!symbol) return 0;
+    return static_cast<lldb::SBSymbol*>(symbol)->GetID();
+}
+
+// ============================================================================
+// SBFunction
+// ============================================================================
+
+void lldb_function_destroy(lldb_function_t function) {
+    if (function) delete static_cast<lldb::SBFunction*>(function);
+}
+
+int lldb_function_is_valid(lldb_function_t function) {
+    if (!function) return 0;
+    return static_cast<lldb::SBFunction*>(function)->IsValid() ? 1 : 0;
+}
+
+const char* lldb_function_get_name(lldb_function_t function) {
+    if (!function) return nullptr;
+    return static_cast<lldb::SBFunction*>(function)->GetName();
+}
+
+const char* lldb_function_get_display_name(lldb_function_t function) {
+    if (!function) return nullptr;
+    return static_cast<lldb::SBFunction*>(function)->GetDisplayName();
+}
+
+const char* lldb_function_get_mangled_name(lldb_function_t function) {
+    if (!function) return nullptr;
+    return static_cast<lldb::SBFunction*>(function)->GetMangledName();
+}
+
+const char* lldb_function_get_base_name(lldb_function_t function) {
+    if (!function) return nullptr;
+    return static_cast<lldb::SBFunction*>(function)->GetBaseName();
+}
+
+lldb_address_t lldb_function_get_start_address(lldb_function_t function) {
+    if (!function) return nullptr;
+    lldb::SBAddress address = static_cast<lldb::SBFunction*>(function)->GetStartAddress();
+    if (!address.IsValid()) return nullptr;
+    return static_cast<lldb_address_t>(new lldb::SBAddress(address));
+}
+
+lldb_address_t lldb_function_get_end_address(lldb_function_t function) {
+    if (!function) return nullptr;
+    lldb::SBAddress address = static_cast<lldb::SBFunction*>(function)->GetEndAddress();
+    if (!address.IsValid()) return nullptr;
+    return static_cast<lldb_address_t>(new lldb::SBAddress(address));
+}
+
+uint32_t lldb_function_get_prologue_byte_size(lldb_function_t function) {
+    if (!function) return 0;
+    return static_cast<lldb::SBFunction*>(function)->GetPrologueByteSize();
+}
+
+lldb_type_t lldb_function_get_type(lldb_function_t function) {
+    if (!function) return nullptr;
+    lldb::SBType type = static_cast<lldb::SBFunction*>(function)->GetType();
+    if (!type.IsValid()) return nullptr;
+    return static_cast<lldb_type_t>(new lldb::SBType(type));
+}
+
+lldb_block_t lldb_function_get_block(lldb_function_t function) {
+    if (!function) return nullptr;
+    lldb::SBBlock block = static_cast<lldb::SBFunction*>(function)->GetBlock();
+    if (!block.IsValid()) return nullptr;
+    return static_cast<lldb_block_t>(new lldb::SBBlock(block));
+}
+
+int lldb_function_is_optimized(lldb_function_t function) {
+    if (!function) return 0;
+    return static_cast<lldb::SBFunction*>(function)->GetIsOptimized() ? 1 : 0;
+}
+
+int lldb_function_get_language(lldb_function_t function) {
+    if (!function) return static_cast<int>(lldb::eLanguageTypeUnknown);
+    return static_cast<int>(static_cast<lldb::SBFunction*>(function)->GetLanguage());
+}
+
+// ============================================================================
+// SBCompileUnit
+// ============================================================================
+
+void lldb_compile_unit_destroy(lldb_compile_unit_t unit) {
+    if (unit) delete static_cast<lldb::SBCompileUnit*>(unit);
+}
+
+int lldb_compile_unit_is_valid(lldb_compile_unit_t unit) {
+    if (!unit) return 0;
+    return static_cast<lldb::SBCompileUnit*>(unit)->IsValid() ? 1 : 0;
+}
+
+lldb_file_spec_t lldb_compile_unit_get_file_spec(lldb_compile_unit_t unit) {
+    if (!unit) return nullptr;
+    lldb::SBFileSpec file_spec = static_cast<lldb::SBCompileUnit*>(unit)->GetFileSpec();
+    if (!file_spec.IsValid()) return nullptr;
+    return static_cast<lldb_file_spec_t>(new lldb::SBFileSpec(file_spec));
+}
+
+uint32_t lldb_compile_unit_get_num_line_entries(lldb_compile_unit_t unit) {
+    if (!unit) return 0;
+    return static_cast<lldb::SBCompileUnit*>(unit)->GetNumLineEntries();
+}
+
+lldb_line_entry_t lldb_compile_unit_get_line_entry_at_index(lldb_compile_unit_t unit,
+                                                             uint32_t index) {
+    if (!unit) return nullptr;
+    lldb::SBLineEntry entry = static_cast<lldb::SBCompileUnit*>(unit)->GetLineEntryAtIndex(index);
+    if (!entry.IsValid()) return nullptr;
+    return static_cast<lldb_line_entry_t>(new lldb::SBLineEntry(entry));
+}
+
+// ============================================================================
+// SBBlock
+// ============================================================================
+
+void lldb_block_destroy(lldb_block_t block) {
+    if (block) delete static_cast<lldb::SBBlock*>(block);
+}
+
+int lldb_block_is_valid(lldb_block_t block) {
+    if (!block) return 0;
+    return static_cast<lldb::SBBlock*>(block)->IsValid() ? 1 : 0;
+}
+
+const char* lldb_block_get_inlined_name(lldb_block_t block) {
+    if (!block) return nullptr;
+    return static_cast<lldb::SBBlock*>(block)->GetInlinedName();
+}
+
+lldb_file_spec_t lldb_block_get_inlined_call_site_file(lldb_block_t block) {
+    if (!block) return nullptr;
+    lldb::SBFileSpec file_spec = static_cast<lldb::SBBlock*>(block)->GetInlinedCallSiteFile();
+    if (!file_spec.IsValid()) return nullptr;
+    return static_cast<lldb_file_spec_t>(new lldb::SBFileSpec(file_spec));
+}
+
+uint32_t lldb_block_get_inlined_call_site_line(lldb_block_t block) {
+    if (!block) return LLDB_INVALID_LINE_NUMBER;
+    return static_cast<lldb::SBBlock*>(block)->GetInlinedCallSiteLine();
+}
+
+uint32_t lldb_block_get_inlined_call_site_column(lldb_block_t block) {
+    if (!block) return 0;
+    return static_cast<lldb::SBBlock*>(block)->GetInlinedCallSiteColumn();
+}
+
+lldb_block_t lldb_block_get_parent(lldb_block_t block) {
+    if (!block) return nullptr;
+    lldb::SBBlock parent = static_cast<lldb::SBBlock*>(block)->GetParent();
+    if (!parent.IsValid()) return nullptr;
+    return static_cast<lldb_block_t>(new lldb::SBBlock(parent));
+}
+
+lldb_block_t lldb_block_get_sibling(lldb_block_t block) {
+    if (!block) return nullptr;
+    lldb::SBBlock sibling = static_cast<lldb::SBBlock*>(block)->GetSibling();
+    if (!sibling.IsValid()) return nullptr;
+    return static_cast<lldb_block_t>(new lldb::SBBlock(sibling));
+}
+
+lldb_block_t lldb_block_get_first_child(lldb_block_t block) {
+    if (!block) return nullptr;
+    lldb::SBBlock child = static_cast<lldb::SBBlock*>(block)->GetFirstChild();
+    if (!child.IsValid()) return nullptr;
+    return static_cast<lldb_block_t>(new lldb::SBBlock(child));
+}
+
+uint32_t lldb_block_get_num_ranges(lldb_block_t block) {
+    if (!block) return 0;
+    return static_cast<lldb::SBBlock*>(block)->GetNumRanges();
+}
+
+lldb_address_t lldb_block_get_range_start_address(lldb_block_t block, uint32_t index) {
+    if (!block) return nullptr;
+    lldb::SBAddress address = static_cast<lldb::SBBlock*>(block)->GetRangeStartAddress(index);
+    if (!address.IsValid()) return nullptr;
+    return static_cast<lldb_address_t>(new lldb::SBAddress(address));
+}
+
+lldb_address_t lldb_block_get_range_end_address(lldb_block_t block, uint32_t index) {
+    if (!block) return nullptr;
+    lldb::SBAddress address = static_cast<lldb::SBBlock*>(block)->GetRangeEndAddress(index);
+    if (!address.IsValid()) return nullptr;
+    return static_cast<lldb_address_t>(new lldb::SBAddress(address));
 }
 
 // ============================================================================

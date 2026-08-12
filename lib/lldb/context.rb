@@ -28,7 +28,7 @@ module LLDB
       handle
     end
 
-    # @rbs return: Symbol
+    # @rbs return: ::Symbol
     def state
       @mutex.synchronize { @state }
     end

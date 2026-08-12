@@ -81,6 +81,46 @@ module LLDB
       LineEntry.new(line_ptr, target: target, context: context)
     end
 
+    # @rbs return: Function?
+    def function
+      raise InvalidObjectError, 'Frame is not valid' unless valid?
+
+      function_ptr = FFIBindings.lldb_frame_get_function(@ptr)
+      return nil if function_ptr.nil? || function_ptr.null?
+
+      Function.new(function_ptr, target: @thread.process.target, context: context)
+    end
+
+    # @rbs return: Symbol?
+    def symbol
+      raise InvalidObjectError, 'Frame is not valid' unless valid?
+
+      symbol_ptr = FFIBindings.lldb_frame_get_symbol(@ptr)
+      return nil if symbol_ptr.nil? || symbol_ptr.null?
+
+      Symbol.new(symbol_ptr, target: @thread.process.target, context: context)
+    end
+
+    # @rbs return: CompileUnit?
+    def compile_unit
+      raise InvalidObjectError, 'Frame is not valid' unless valid?
+
+      unit_ptr = FFIBindings.lldb_frame_get_compile_unit(@ptr)
+      return nil if unit_ptr.nil? || unit_ptr.null?
+
+      CompileUnit.new(unit_ptr, target: @thread.process.target, context: context)
+    end
+
+    # @rbs return: Block?
+    def block
+      raise InvalidObjectError, 'Frame is not valid' unless valid?
+
+      block_ptr = FFIBindings.lldb_frame_get_block(@ptr)
+      return nil if block_ptr.nil? || block_ptr.null?
+
+      Block.new(block_ptr, target: @thread.process.target, context: context)
+    end
+
     # @rbs return: Integer
     def column
       return 0 unless valid?

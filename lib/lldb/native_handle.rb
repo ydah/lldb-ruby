@@ -45,7 +45,7 @@ module LLDB
       true
     end
 
-    # @rbs state: Hash[Symbol, untyped]
+    # @rbs state: Hash[::Symbol, untyped]
     # @rbs return: ^(Integer) -> void
     def self.finalizer(state)
       ->(_object_id) do

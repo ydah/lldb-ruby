@@ -73,6 +73,22 @@ module LLDB
       FFIBindings.lldb_module_get_num_symbols(@ptr)
     end
 
+    # @rbs index: Integer
+    # @rbs return: Symbol?
+    def symbol_at_index(index)
+      raise InvalidObjectError, 'Module is not valid' unless valid?
+
+      symbol_ptr = FFIBindings.lldb_module_get_symbol_at_index(@ptr, index)
+      return nil if symbol_ptr.nil? || symbol_ptr.null?
+
+      Symbol.new(symbol_ptr, target: @target, context: context)
+    end
+
+    # @rbs return: Array[Symbol]
+    def symbols
+      (0...num_symbols).map { |index| symbol_at_index(index) }.compact
+    end
+
     # @rbs return: String
     def to_s
       file_path || '(unknown module)'

@@ -67,7 +67,7 @@ module LLDB
         lldb_wrapper_runtime_lldb_version
       end
 
-      # @rbs feature: Symbol
+      # @rbs feature: ::Symbol
       # @rbs return: bool
       def capability_supported?(feature)
         capability = CAPABILITIES[feature]
@@ -414,6 +414,10 @@ module LLDB
     attach_function :lldb_frame_get_value_for_variable_path, %i[pointer string], :pointer
     attach_function :lldb_frame_get_frame_id, [:pointer], :uint32
     attach_function :lldb_frame_get_thread, [:pointer], :pointer
+    attach_function :lldb_frame_get_function, [:pointer], :pointer
+    attach_function :lldb_frame_get_symbol, [:pointer], :pointer
+    attach_function :lldb_frame_get_compile_unit, [:pointer], :pointer
+    attach_function :lldb_frame_get_block, [:pointer], :pointer
     attach_function :lldb_frame_get_symbol_context, %i[pointer uint32], :pointer
     attach_function :lldb_frame_get_variables, %i[pointer int int int int], :pointer
     attach_function :lldb_frame_get_registers, [:pointer], :pointer
@@ -530,6 +534,54 @@ module LLDB
     attach_function :lldb_module_get_file, [:pointer], :pointer
     attach_function :lldb_module_get_platform_file, [:pointer], :pointer
     attach_function :lldb_module_get_num_symbols, [:pointer], :uint32
+    attach_function :lldb_module_get_symbol_at_index, %i[pointer uint32], :pointer
+
+    # =========================================================================
+    # SBSymbol, SBFunction, SBCompileUnit, and SBBlock
+    # =========================================================================
+    attach_function :lldb_symbol_destroy, [:pointer], :void
+    attach_function :lldb_symbol_is_valid, [:pointer], :int
+    attach_function :lldb_symbol_get_name, [:pointer], :string
+    attach_function :lldb_symbol_get_display_name, [:pointer], :string
+    attach_function :lldb_symbol_get_mangled_name, [:pointer], :string
+    attach_function :lldb_symbol_get_base_name, [:pointer], :string
+    attach_function :lldb_symbol_get_start_address, [:pointer], :pointer
+    attach_function :lldb_symbol_get_end_address, [:pointer], :pointer
+    attach_function :lldb_symbol_get_value, [:pointer], :uint64
+    attach_function :lldb_symbol_get_size, [:pointer], :uint64
+    attach_function :lldb_symbol_get_prologue_byte_size, [:pointer], :uint32
+    attach_function :lldb_symbol_get_type, [:pointer], :int
+    attach_function :lldb_symbol_get_id, [:pointer], :uint32
+    attach_function :lldb_function_destroy, [:pointer], :void
+    attach_function :lldb_function_is_valid, [:pointer], :int
+    attach_function :lldb_function_get_name, [:pointer], :string
+    attach_function :lldb_function_get_display_name, [:pointer], :string
+    attach_function :lldb_function_get_mangled_name, [:pointer], :string
+    attach_function :lldb_function_get_base_name, [:pointer], :string
+    attach_function :lldb_function_get_start_address, [:pointer], :pointer
+    attach_function :lldb_function_get_end_address, [:pointer], :pointer
+    attach_function :lldb_function_get_prologue_byte_size, [:pointer], :uint32
+    attach_function :lldb_function_get_type, [:pointer], :pointer
+    attach_function :lldb_function_get_block, [:pointer], :pointer
+    attach_function :lldb_function_is_optimized, [:pointer], :int
+    attach_function :lldb_function_get_language, [:pointer], :int
+    attach_function :lldb_compile_unit_destroy, [:pointer], :void
+    attach_function :lldb_compile_unit_is_valid, [:pointer], :int
+    attach_function :lldb_compile_unit_get_file_spec, [:pointer], :pointer
+    attach_function :lldb_compile_unit_get_num_line_entries, [:pointer], :uint32
+    attach_function :lldb_compile_unit_get_line_entry_at_index, %i[pointer uint32], :pointer
+    attach_function :lldb_block_destroy, [:pointer], :void
+    attach_function :lldb_block_is_valid, [:pointer], :int
+    attach_function :lldb_block_get_inlined_name, [:pointer], :string
+    attach_function :lldb_block_get_inlined_call_site_file, [:pointer], :pointer
+    attach_function :lldb_block_get_inlined_call_site_line, [:pointer], :uint32
+    attach_function :lldb_block_get_inlined_call_site_column, [:pointer], :uint32
+    attach_function :lldb_block_get_parent, [:pointer], :pointer
+    attach_function :lldb_block_get_sibling, [:pointer], :pointer
+    attach_function :lldb_block_get_first_child, [:pointer], :pointer
+    attach_function :lldb_block_get_num_ranges, [:pointer], :uint32
+    attach_function :lldb_block_get_range_start_address, %i[pointer uint32], :pointer
+    attach_function :lldb_block_get_range_end_address, %i[pointer uint32], :pointer
 
     # =========================================================================
     # SBSymbolContext
