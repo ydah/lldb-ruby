@@ -70,7 +70,7 @@ jobs:
           brew install llvm
           echo "$(brew --prefix llvm)/bin" >> "$GITHUB_PATH"
       - name: Set up Ruby
-        uses: ruby/setup-ruby@95ef2b042f9d7a56d8268cba8559e2842e2ad01b # v1
+        uses: ruby/setup-ruby@824c0e29fdfc7d689c191c27acc969d2d04b7dd8 # v1
         with:
           ruby-version: ${{ matrix.ruby }}
           bundler-cache: true
@@ -204,7 +204,7 @@ jobs:
         run: echo 0 | sudo tee /proc/sys/kernel/yama/ptrace_scope
 
       - name: Set up Ruby
-        uses: ruby/setup-ruby@95ef2b042f9d7a56d8268cba8559e2842e2ad01b # v1
+        uses: ruby/setup-ruby@824c0e29fdfc7d689c191c27acc969d2d04b7dd8 # v1
         with:
           ruby-version: ${{ matrix.ruby }}
           bundler-cache: true
@@ -232,7 +232,7 @@ jobs:
           sudo apt-get install -y llvm lldb liblldb-dev
 
       - name: Set up Ruby
-        uses: ruby/setup-ruby@95ef2b042f9d7a56d8268cba8559e2842e2ad01b # v1
+        uses: ruby/setup-ruby@824c0e29fdfc7d689c191c27acc969d2d04b7dd8 # v1
         with:
           ruby-version: ruby
 
@@ -284,7 +284,7 @@ jobs:
         with:
           persist-credentials: false
       - name: Set up Ruby
-        uses: ruby/setup-ruby@95ef2b042f9d7a56d8268cba8559e2842e2ad01b # v1
+        uses: ruby/setup-ruby@824c0e29fdfc7d689c191c27acc969d2d04b7dd8 # v1
         with:
           ruby-version: '3.3'
           bundler-cache: true
@@ -328,7 +328,7 @@ jobs:
           fi
           echo "LLDB_DEBUGSERVER_PATH=$versioned_server" >> "$GITHUB_ENV"
       - name: Set up Ruby
-        uses: ruby/setup-ruby@95ef2b042f9d7a56d8268cba8559e2842e2ad01b # v1
+        uses: ruby/setup-ruby@824c0e29fdfc7d689c191c27acc969d2d04b7dd8 # v1
         with:
           ruby-version: '3.4'
           bundler-cache: true
@@ -378,7 +378,7 @@ jobs:
           fi
           echo "LLDB_DEBUGSERVER_PATH=$versioned_server" >> "$GITHUB_ENV"
       - name: Set up Ruby
-        uses: ruby/setup-ruby@95ef2b042f9d7a56d8268cba8559e2842e2ad01b # v1
+        uses: ruby/setup-ruby@824c0e29fdfc7d689c191c27acc969d2d04b7dd8 # v1
         with:
           ruby-version: '3.4'
           bundler-cache: true
