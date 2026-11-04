@@ -169,9 +169,11 @@ jobs:
           LLVM_PREFIX="$(brew --prefix llvm)"
           echo "$LLVM_PREFIX/bin" >> "$GITHUB_PATH"
           echo "$(brew --prefix lldb)/bin" >> "$GITHUB_PATH"
-          echo "LLDB_DIR=$(brew --prefix lldb)" >> "$GITHUB_ENV"
-          echo "LLDB_INCLUDE=$(brew --prefix lldb)/include" >> "$GITHUB_ENV"
-          echo "LLVM_CONFIG=$LLVM_PREFIX/bin/llvm-config" >> "$GITHUB_ENV"
+          {
+            echo "LLDB_DIR=$(brew --prefix lldb)"
+            echo "LLDB_INCLUDE=$(brew --prefix lldb)/include"
+            echo "LLVM_CONFIG=$LLVM_PREFIX/bin/llvm-config"
+          } >> "$GITHUB_ENV"
 
       - name: Show selected LLDB
         run: |
